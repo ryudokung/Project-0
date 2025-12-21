@@ -17,6 +17,7 @@ Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mecha
 - **Blockchain:** Base L2, Solidity (ERC-721), Privy/Dynamic (Auth).
 - **AI:** FLUX.1 via Fal.ai/Replicate, Structured Output (JSON Schema).
 - **Database:** PostgreSQL (ACID compliant for Saga).
+- **Infrastructure:** Docker & Docker Compose.
 
 ## 📂 Project Structure
 
@@ -29,6 +30,22 @@ Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mecha
 
 - [Product Requirements Document (PRD)](_bmad-output/prd.md)
 - [Architecture Decisions](_bmad-output/architecture.md)
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker & Docker Compose installed.
+
+### Running the Project
+1. Clone the repository.
+2. Run the following command:
+   ```bash
+   docker-compose up --build
+   ```
+3. Access the services:
+   - Frontend: `http://localhost:3000`
+   - Backend API: `http://localhost:8080`
+   - Database: `localhost:5432`
 
 ---
 *Developed using the BMad Method.*

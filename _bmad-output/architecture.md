@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3]
+stepsCompleted: [1, 2, 3, 4, 5]
 inputDocuments:
   - "_bmad-output/prd.md"
   - "_bmad-output/analysis/research/technical-Project-0-research-2025-12-21.md"
@@ -9,7 +9,7 @@ documentCounts:
   research: 1
   briefs: 1
 workflowType: 'architecture'
-lastStep: 3
+lastStep: 5
 project_name: 'Project-0'
 user_name: 'Vatcharin'
 date: '2025-12-21'
@@ -111,7 +111,22 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 ### 4.3 Database Strategy
 - **Database-per-Service:** แต่ละ Service มี DB ของตัวเอง (เช่น AI Service ใช้ PostgreSQL เก็บ Prompt, Game Service ใช้ Redis เก็บ Real-time State).
 
-## 5. Data Schema & API Contracts (Step 4)
+## 5. Infrastructure & Deployment (Step 5)
+
+เราจะใช้ **Docker** และ **Docker Compose** ในการจัดการสภาพแวดล้อมการพัฒนาและการ Deploy เพื่อให้มั่นใจว่าระบบทำงานได้เหมือนกันในทุก Environment.
+
+### 5.1 Container Strategy
+- **Backend Container:** รัน Go API Server (Port 8080).
+- **Frontend Container:** รัน Next.js App (Port 3000).
+- **Database Container:** รัน PostgreSQL 16 (Port 5432).
+
+### 5.2 Environment Variables
+- `DB_URL`: Connection string สำหรับ PostgreSQL.
+- `NEXT_PUBLIC_API_URL`: URL ของ Backend API สำหรับ Frontend.
+- `AI_API_KEY`: (Pending) สำหรับเชื่อมต่อ Fal.ai/Replicate.
+- `BLOCKCHAIN_RPC_URL`: (Pending) สำหรับเชื่อมต่อ Base L2.
+
+## 6. Data Schema & API Contracts (Step 4)
 
 เพื่อให้ระบบทำงานร่วมกันได้แบบไร้รอยต่อ เราจะใช้ **PostgreSQL** เป็นฐานข้อมูลหลัก (เนื่องจากรองรับ ACID Transactions ที่จำเป็นสำหรับ Saga Pattern) โดยมี Schema เบื้องต้นดังนี้:
 
@@ -145,6 +160,13 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 *   `payload`: JSONB (เก็บ Context เช่น `ship_id`, `mech_id`, `target_star_id`)
 *   `idempotency_key`: string (Unique)
 
+#### 4. Star (Universe) Entity
+*   `id`: UUID (Primary Key)
+*   `name`: string
+*   `difficulty_level`: int (Bitcoin-style adjustment)
+*   `discovered_by`: UUID (FK to User)
+*   `is_active`: boolean
+
 #### 5. Combat Log & Battle Record
 *   `id`: UUID (Primary Key)
 *   `user_id`: UUID (FK to User)
@@ -155,26 +177,36 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 *   `expires_at`: timestamp (Housekeeping: e.g., 7 days)
 *   `saved_at`: timestamp (Null if not paid to save)
 
-## 6. AI Reliability & Guardrails (Anti-Hallucination)
+### 5.2 API Endpoints (v1)
 
-เพื่อให้ AI (FLUX.1 และ LLM ที่คุม Prompt) ทำงานได้แม่นยำและไม่เกิด Hallucination เราจะใช้แนวทาง **Structured Prompting & Validation Framework**:
+เราจะใช้ RESTful API สำหรับการสื่อสารระหว่าง Frontend และ Backend:
 
-### 6.1 Pydantic / JSON Schema Enforcement
-- ใช้ **Pydantic** (ใน Python side) หรือ **JSON Schema** ในการบังคับ Output จาก AI ให้เป็นโครงสร้างที่แน่นอน
-- ระบบจะไม่รับข้อมูลที่เป็น Free-text ที่ไม่มีโครงสร้าง เพื่อป้องกัน AI มโน Stats หรือข้อมูลที่ไม่ได้กำหนดไว้
+#### 1. Assembly (Engineering)
+- `POST /api/v1/assembly/start`: เริ่มกระบวนการสร้าง Mech/Ship (ใช้ Credits/USDT)
+- `GET /api/v1/assembly/:id/status`: เช็คสถานะการสร้างและคิว AI
 
-### 6.2 RAG (Retrieval-Augmented Generation) for Lore
-- ใช้ **Vector Database** เก็บข้อมูล Lore, Stats ของ Mech, และกฎของจักรวาล
-- ก่อน AI จะ Gen คำบรรยายหรือภาพ จะต้องดึงข้อมูลจาก DB ไปเป็น Context เสมอ เพื่อให้ข้อมูล "จริง" ตามสถานะในเกม
+#### 2. Exploration & Combat
+- `POST /api/v1/exploration/start`: ส่งทีมออกสำรวจ (ต้องระบุ `ship_id` และ `mech_id`)
+- `GET /api/v1/exploration/:id/events`: ดึงเหตุการณ์ที่เกิดขึ้นระหว่างสำรวจ (Real-time updates)
+- `POST /api/v1/combat/:id/save`: จ่าย USDT เพื่อบันทึก Battle Log ถาวร
 
-### 6.3 Multi-Stage Verification
-1.  **Input Validation:** ตรวจสอบ Stats จาก Go Backend ก่อนส่งให้ AI
-2.  **Output Parsing:** ใช้ Regex หรือ Parser บังคับรูปแบบ
-3.  **HITL (Human-in-the-loop):** สำหรับภาพระดับ Premium จะมี Admin ตรวจสอบความถูกต้องอีกชั้นหนึ่ง
+#### 3. Universe & Marketplace
+- `GET /api/v1/universe/stars`: ดึงข้อมูลดวงดาวและระดับความยากปัจจุบัน
+- `GET /api/v1/marketplace/listings`: ดึงรายการขาย NFT (Keys)
 
-#### 4. Star (Universe) Entity
-*   `id`: UUID (Primary Key)
-*   `name`: string
-*   `difficulty_level`: int (Bitcoin-style adjustment)
-*   `discovered_by`: UUID (FK to User)
-*   `is_active`: boolean
+### 5.3 Saga Flow Definitions
+
+#### Flow A: Mech Assembly (Premium)
+1.  **User:** กดปุ่ม "Assemble Premium Mech" -> จ่าย USDT.
+2.  **Orchestrator:** สร้าง Saga Record (Status: `STARTED`) -> ล็อคทรัพยากร.
+3.  **AI Service:** รับ Job -> Gen ภาพด้วย FLUX.1 -> ส่งเข้า HITL Queue.
+4.  **Admin:** ตรวจสอบภาพ -> กด Approve.
+5.  **Blockchain Service:** Mint NFT บน Base L2 -> อัปเดต Metadata.
+6.  **Orchestrator:** อัปเดต Saga (Status: `COMPLETED`) -> แจ้งเตือนผู้เล่น.
+
+#### Flow B: Exploration & Combat
+1.  **User:** เลือกพิกัดและยาน -> กด "Launch Mission".
+2.  **Game Engine:** คำนวณระยะทางและสุ่มเหตุการณ์ (Events).
+3.  **Game Engine:** หากเจอศัตรู -> คำนวณผลการต่อสู้ (Stat-based).
+4.  **AI Service:** Gen ภาพ "Action Shot" ของการปะทะ.
+5.  **Orchestrator:** บันทึก Combat Log (Status: `TEMP`) -> ตั้งเวลา Housekeeping (7 วัน).
