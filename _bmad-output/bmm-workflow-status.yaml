@@ -1,0 +1,21 @@
+generated: "2025-12-21T13:00:00Z"
+project: "Project-0"
+project_type: "Crypto Web Game"
+selected_track: "bmad-method"
+field_type: "greenfield"
+workflow_path: "_bmad/bmm/workflows/workflow-status/paths/method-greenfield.yaml"
+workflow_status:
+  phase_0_discovery:
+    brainstorm-project: "optional"
+    research: "_bmad-output/analysis/research/technical-research-Project-0-2025-12-21.md"
+    product-brief: "_bmad-output/analysis/product-brief-Project-0-2025-12-21.md"
+  phase_1_planning:
+    prd: "_bmad-output/prd.md"
+    create-ux-design: "conditional"
+  phase_2_solutioning:
+    create-architecture: "_bmad-output/architecture.md"
+    create-epics-and-stories: "_bmad-output/epics-stories.md"
+    test-design: "recommended"
+    implementation-readiness: "required"
+  phase_3_implementation:
+    sprint-planning: "required"
