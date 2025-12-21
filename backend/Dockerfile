@@ -1,11 +1,10 @@
 # Use official Golang image as builder
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-# Copy go.mod and go.sum (if exists)
-COPY go.mod ./
-# COPY go.sum ./
+# Copy go.mod and go.sum
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy source code

@@ -18,6 +18,13 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 - **AI Guardrails:** Use Structured Output (JSON Schema) and RAG to prevent hallucinations.
 - **Housekeeping:** Temporary logs (Combat Logs) must be deleted after 7 days unless paid to save.
 
+## Current Progress (Epic 1: User Identity)
+- [x] Backend Auth Module (Clean Architecture)
+- [x] Privy SDK Integration (Frontend)
+- [x] Backend-Frontend Auth Sync (JWT Exchange)
+- [x] Dockerized Environment (Build & Run verified)
+- [x] Database Schema Initialization
+
 ## Directory Structure
 - `/backend`: Go source code.
 - `/frontend`: Next.js source code.

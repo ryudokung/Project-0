@@ -2,7 +2,7 @@
 
 import {usePrivy} from '@privy-io/react-auth';
 
-export default function LoginButton() {
+export function LoginButton() {
   const {login, logout, authenticated, user} = usePrivy();
 
   if (authenticated) {

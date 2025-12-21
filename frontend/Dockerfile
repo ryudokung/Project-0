@@ -1,6 +1,9 @@
 # Use official Node image
 FROM node:20-alpine AS builder
 
+# Install build dependencies for native modules
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
 # Copy package files
@@ -19,7 +22,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy built assets and dependencies
-COPY --from=builder /app/next.config.mjs ./
+COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules

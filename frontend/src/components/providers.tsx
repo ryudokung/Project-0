@@ -6,10 +6,21 @@ import {ReactNode, useState} from 'react';
 
 export default function Providers({children}: {children: ReactNode}) {
   const [queryClient] = useState(() => new QueryClient());
+  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+
+  // During build time, if appId is missing, we skip rendering PrivyProvider
+  // to avoid build errors, but this should be provided in production.
+  if (!appId && typeof window === 'undefined') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <PrivyProvider
-      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'insert-your-privy-app-id-here'}
+      appId={appId || 'cl...'} // Fallback for client-side if needed
       config={{
         // Customize Privy's appearance and login methods
         appearance: {
@@ -19,7 +30,9 @@ export default function Providers({children}: {children: ReactNode}) {
         },
         // Create embedded wallets for users who don't have a wallet
         embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
+          ethereum: {
+            createOnLogin: 'users-without-wallets',
+          },
         },
         loginMethods: ['email', 'wallet', 'google', 'twitter'],
       }}
