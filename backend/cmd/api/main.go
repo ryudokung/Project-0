@@ -9,6 +9,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/ryudokung/Project-0/backend/internal/auth"
+	"github.com/ryudokung/Project-0/backend/internal/mech"
 )
 
 func main() {
@@ -31,12 +32,19 @@ func main() {
 	authUseCase := auth.NewUseCase(authRepo, "your-very-secret-key") // In production, use env var
 	authHandler := auth.NewHandler(authUseCase)
 
+	// Initialize Mech Module
+	mechRepo := mech.NewRepository(db)
+	mechUseCase := mech.NewUseCase(mechRepo)
+	mechHandler := mech.NewHandler(mechUseCase)
+
 	// Routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "OK")
 	})
 	mux.HandleFunc("/api/v1/auth/login", authHandler.Login)
+	mux.HandleFunc("/api/v1/mechs/mint-starter", mechHandler.MintStarter)
+	mux.HandleFunc("/api/v1/mechs", mechHandler.ListMechs)
 
 	// Simple CORS Middleware
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
