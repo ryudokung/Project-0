@@ -25,6 +25,12 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Also check Authorization header for Privy Token
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "" && len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		req.PrivyToken = authHeader[7:]
+	}
+
 	resp, err := h.useCase.Login(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -25,13 +25,22 @@ func NewUseCase(repo Repository, jwtSecret string) UseCase {
 }
 
 func (u *authUseCase) Login(req LoginRequest) (*LoginResponse, error) {
-	// TODO: Implement actual Web3 signature verification here
-	// For now, we assume the signature is valid if it's not empty
-	if req.Signature == "" {
-		return nil, fmt.Errorf("invalid signature")
+	// TODO: Verify Privy Token
+	// 1. Fetch JWKS from https://auth.privy.io/api/v1/apps/<app-id>/.well-known/jwks.json
+	// 2. Verify req.PrivyToken signature and claims (iss, aud, exp)
+	
+	if req.PrivyToken == "" && req.WalletAddress == "" {
+		return nil, fmt.Errorf("invalid request: missing token or wallet")
 	}
 
-	user, err := u.repo.GetByWalletAddress(req.WalletAddress)
+	// For now, we use the wallet address provided or extract it from token (placeholder)
+	walletAddress := req.WalletAddress
+	if walletAddress == "" {
+		// Placeholder: In reality, extract from verified token
+		walletAddress = "0x0000000000000000000000000000000000000000" 
+	}
+
+	user, err := u.repo.GetByWalletAddress(walletAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -40,8 +49,8 @@ func (u *authUseCase) Login(req LoginRequest) (*LoginResponse, error) {
 		// Create new user if not exists
 		user = &User{
 			ID:            uuid.New(),
-			WalletAddress: req.WalletAddress,
-			Username:      "Pilot-" + req.WalletAddress[2:6],
+			WalletAddress: walletAddress,
+			Username:      "Pilot-" + walletAddress[2:6],
 			Credits:       0,
 		}
 		if err := u.repo.Create(user); err != nil {

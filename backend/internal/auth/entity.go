@@ -16,8 +16,8 @@ type User struct {
 }
 
 type LoginRequest struct {
-	WalletAddress string `json:"wallet_address" validate:"required"`
-	Signature     string `json:"signature" validate:"required"`
+	WalletAddress string `json:"wallet_address"`
+	PrivyToken    string `json:"privy_token"`
 }
 
 type LoginResponse struct {
