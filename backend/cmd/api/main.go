@@ -28,8 +28,12 @@ func main() {
 	defer db.Close()
 
 	// Initialize Auth Module
+	jwtSecret := os.Getenv("PRIVY_APP_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "default-secret-change-me"
+	}
 	authRepo := auth.NewRepository(db)
-	authUseCase := auth.NewUseCase(authRepo, "your-very-secret-key") // In production, use env var
+	authUseCase := auth.NewUseCase(authRepo, jwtSecret)
 	authHandler := auth.NewHandler(authUseCase)
 
 	// Initialize Mech Module
