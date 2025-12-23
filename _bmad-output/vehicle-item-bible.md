@@ -3,36 +3,36 @@
 **Goal:** Define the specific modular parts, rarity tiers, and "Visual DNA" traits for all vehicle types (Mechs, Tanks, Ships) to ensure a consistent asset ecosystem.
 
 ## 1. Modular Vehicle Anatomy (Functional Hardpoints)
-All vehicles are composed of 4 core NFT slots, but their visual and functional roles are specific to their archetype and mission profile:
+All vehicles are composed of 4 core NFT slots. The Hangar serves as a central **Asset Inventory** where players can view their collection. Actual vehicle selection occurs at the **Deployment Phase** based on mission requirements.
 
 ### 1.1 Mech (Bipedal/Multipedal)
 - **Role:** Heavy Combat, Extraction, All-terrain.
-- **Loot Focus:** Enemy Parts, Combat Data.
+- **Deployment:** Surface missions, high-gravity zones.
 - **Hardpoints:** Chassis, Left Arm, Right Arm, Legs.
 
 ### 1.2 Tank (Treaded/Wheeled)
 - **Role:** Siege, Defensive Escort, High-threat Zones.
-- **Loot Focus:** Raw Ores, Heavy Plating.
+- **Deployment:** Open surface combat, defensive missions.
 - **Hardpoints:** Hull, Turret, Sponson, Drive System.
 
 ### 1.3 Ship (Atmospheric/Space)
 - **Role:** Interception, Long-range Scouting, Mothership Defense.
-- **Loot Focus:** Navigation Data, Fuel Cells.
+- **Deployment:** Space combat, atmospheric entry escort.
 - **Hardpoints:** Fuselage, Wing/Pylon, Engine, Avionics.
 
 ### 1.4 Speeder (Hoverbike/Swoop)
 - **Role:** High-speed Scouting, Time-sensitive Salvage, Stealth.
-- **Loot Focus:** Rare Minerals (Hard-to-reach), Data Cores.
+- **Deployment:** Recon, low-threat salvage, stealth infiltration.
 - **Hardpoints:** Frame, High-output Engine, Handlebar/Sensors, Side-mount (Light Weapon).
 
 ### 1.5 Exosuit (Power Armor)
 - **Role:** Indoor Salvage, Boarding Actions, Close-quarters Combat (CQC).
-- **Loot Focus:** Ancient Tech, Fixed Blueprints, Pilot Gear.
+- **Deployment:** Derelict ship interiors, bunkers, narrow caves.
 - **Hardpoints:** Core, Arms (Melee/Small arms), Back-pack (O2/Thrusters), Boots.
 
 ### 1.6 Heavy Hauler (Industrial)
 - **Role:** Resource Transport, Salvaging Massive Wrecks, Base Building.
-- **Loot Focus:** Bulk Scrap, Raw Ores, Mothership Upgrade Parts.
+- **Deployment:** Bulk resource extraction, wreck towing.
 - **Hardpoints:** Hull, Crane/Grapple, Cargo Bay, Defense Turrets.
 
 ## 2. Item Rarity & "Options" (Sub-stats)

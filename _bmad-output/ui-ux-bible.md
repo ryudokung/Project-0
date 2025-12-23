@@ -21,12 +21,28 @@ The Hangar is the primary social space:
 - **Photo Mode:** A dedicated UI to take high-res snapshots of the vehicle with custom filters.
 - **Social Sharing:** One-click sharing to X (Twitter) or Discord with the vehicle's stats and rarity.
 
-## 4. User Journey: The "Click-to-Explore" Loop
-1. **Login:** Terminal-style boot sequence.
-2. **Hangar:** View current fleet, repair, and customize.
-3. **Radar Interface:** A node-based map where new locations appear as "Blips". Click a blip to view mission details.
-4. **Action Scene:** A high-fidelity 3D view of the mission. Interaction is click-based (e.g., clicking a door to enter, clicking a crate to salvage).
-5. **Debrief:** Summary of loot and narrative progress.
+## 4. The Narrative Timeline: "Thread and Beads" UX
+The exploration interface is designed around the "Thread and Beads" model, focusing on the feeling of a journey unfolding in real-time:
+
+### 4.1 The Timeline String (The Thread)
+- **Visual:** A glowing, data-driven line that runs across the top or side of the HUD.
+- **Beads:** As the player clicks "Advance," new nodes (Beads) appear on the string.
+- **Color Coding:** 
+    - **Red Beads:** Combat encounters.
+    - **Blue Beads:** Resource/Salvage points.
+    - **White Beads:** Narrative/Lore fragments.
+    - **Gold Beads:** Major Anchors (Fixed plot points).
+
+### 4.2 The Visual Reveal (AI Image Display)
+- **Presentation:** The AI-generated image (based on Visual DNA) appears as a "Main Viewport" or a "Tactical Feed" in the center of the cockpit.
+- **Transition:** When a new Bead is generated, the image "glitches" or "scans" into view, emphasizing the AI-generated nature of the world.
+- **Metadata Overlay:** Small, monospaced text at the corner of the image showing the "DNA Keywords" used to generate it (e.g., `FACTION: IRON_SYNDICATE | STYLE: BRUTALIST`).
+
+### 4.3 Resource-Driven Interaction
+- **The "Advance" Button:** The primary interaction. It displays the O2/Fuel cost for the next step.
+- **Dynamic Warnings:** If O2 is low, the HUD turns red, and the "Advance" button text changes to "DESPERATE MOVE," signaling that the AI is now more likely to generate high-stakes or resource-focused Beads.
+
+## 5. User Journey: The "Click-to-Explore" Loop
 
 ## 5. Interaction Model: "Tactical Clicks"
 - **Node Discovery:** Clicking the "Scan" button reveals new clickable nodes on the Radar.

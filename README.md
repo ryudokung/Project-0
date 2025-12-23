@@ -8,17 +8,18 @@ Project-0 is not just a game; it's an evolving universe. Players take on the rol
 ## 🚀 Core Gameplay Loop (MVP1 Focus)
 1.  **The Cold Start:** Wake up in the void, float to your derelict Mothership, and repair the Radar using salvaged Scrap.
 2.  **The Radar (Discovery):** Scan for "Blips" (Nodes) and click to explore new locations in the star system.
-3.  **The Hangar (Flex):** Customize and showcase your unique vehicles (Mechs, Speeders, Exosuits) in a high-fidelity 3D environment.
-4.  **The Action (Click-to-Explore):** Engage in tactical missions where every click consumes O2 or Fuel.
+3.  **The Hangar (Inventory):** View and manage your unique vehicles (Mechs, Speeders, Exosuits, Tanks, Ships, Haulers).
+4.  **The Action (Deployment):** Select the best-fit vehicle for each mission's specific requirements (Atmosphere, Stealth, Heavy Combat).
 5.  **The Salvage (Economy):** Refine scrap, research blueprints, and choose when to **Mint to Chain (V2O)**.
 
 ## 🚜 Vehicle Archetypes
-- **Mechs:** Balanced bipedal combat units.
-- **Tanks:** Heavy-armored siege units with 360-degree turrets.
-- **Ships:** High-speed aerial scouts and interceptors.
+- **Mechs:** Balanced bipedal combat units. All-terrain capability.
+- **Tanks:** Heavy-armored siege units. High defense, low speed.
+- **Ships:** High-speed aerial scouts. Required for space-to-surface interception.
 - **Speeders:** Hoverbikes for high-velocity scouting and stealth.
-- **Exosuits:** Power armor for indoor salvage and the initial "Awakening" mission.
+- **Exosuits:** Power armor for indoor salvage and boarding actions.
 - **Heavy Haulers:** Industrial units for bulk transport and massive salvage.
+- **Pilot (EVA):** The operative themselves. High risk, but required for precision salvage in tight spaces.
 
 ## ✨ Unique Selling Points
 - **AI-Generated Visual DNA:** Vehicles are synthesized by AI (FLUX.1) based on their specific NFT parts and stats.

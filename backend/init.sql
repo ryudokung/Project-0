@@ -78,6 +78,51 @@ CREATE TABLE IF NOT EXISTS stars (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Nodes (Beads on a Thread)
+CREATE TYPE node_type AS ENUM ('COMBAT', 'RESOURCE', 'NARRATIVE', 'REST', 'BOSS');
+
+CREATE TABLE IF NOT EXISTS threads (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    goal VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS beads (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    thread_id UUID REFERENCES threads(id),
+    type node_type NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    visual_prompt TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS nodes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    star_id UUID REFERENCES stars(id),
+    name VARCHAR(100) NOT NULL,
+    type node_type NOT NULL,
+    environment_description TEXT, -- e.g., "Acid Rain Desert", "Neon Slums"
+    difficulty_multiplier DECIMAL(3, 2) DEFAULT 1.0,
+    position_index INTEGER NOT NULL, -- Order on the "Thread"
+    metadata JSONB DEFAULT '{}', -- Enemy types, loot tables, etc.
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Exploration Sessions
+CREATE TABLE IF NOT EXISTS exploration_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id),
+    mech_id UUID REFERENCES mechs(id),
+    current_node_id UUID REFERENCES nodes(id),
+    status VARCHAR(20) DEFAULT 'ACTIVE', -- ACTIVE, COMPLETED, FAILED
+    logs JSONB DEFAULT '[]',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Saga Transactions (Orchestration Log)
 CREATE TABLE IF NOT EXISTS saga_transactions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -110,3 +155,12 @@ CREATE INDEX IF NOT EXISTS idx_saga_user ON saga_transactions(user_id);
 CREATE INDEX IF NOT EXISTS idx_saga_idempotency ON saga_transactions(idempotency_key);
 CREATE INDEX IF NOT EXISTS idx_combat_user ON combat_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_combat_expires ON combat_logs(expires_at) WHERE is_permanent = FALSE;
+
+-- Sample Data for Narrative Timeline
+INSERT INTO threads (id, title, description, goal) VALUES 
+('00000000-0000-0000-0000-000000000001', 'The Silent Signal', 'A mysterious signal is emanating from the Iron Nebula.', 'Locate the source of the signal and decrypt it.')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO beads (id, thread_id, type, title, description, visual_prompt) VALUES 
+('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'NARRATIVE', 'The Awakening', 'You wake up in the cold silence of your cockpit. The radar is flickering.', 'Tactical Noir style, a pilot waking up in a dark cockpit, flickering neon lights, high detail')
+ON CONFLICT (id) DO NOTHING;

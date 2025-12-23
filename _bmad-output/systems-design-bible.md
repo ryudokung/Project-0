@@ -2,8 +2,17 @@
 
 **Goal:** Define the core gameplay systems, including materials, items, skills, and the research tree to ensure deep progression and clear utility.
 
-## 1. Materials & Resource Economy
-Materials are the building blocks of your empire. They are found during exploration and used for everything from survival to god-tier upgrades.
+## 1. Exploration Mechanics: The "Thread and Beads" System
+Exploration is governed by the interaction between the Pilot's resources and the AI-generated narrative timeline:
+
+1.  **The Thread (Narrative Spine):** A sequence of fixed goals (e.g., "Locate the Signal Source").
+2.  **The Beads (Procedural Events):** Each "Click" or "Move" on the timeline generates a Bead.
+    *   **Generation Logic:** The AI checks the Pilot's current **O2** and **Fuel**.
+    *   **Low Resources:** Triggers "Resource Beads" (e.g., finding an O2 tank) or "High-Stakes Narrative Beads" (e.g., a desperate gamble).
+    *   **High Resources:** Triggers "Combat Beads" or "Lore Beads" to progress the story.
+3.  **Visual DNA Synthesis:** Every Bead generates a unique visual prompt combining the Mech's parts and the current environment, providing a "Visual Reveal" for the player.
+
+## 2. Materials & Resource Economy
 
 | Material | Rarity | Primary Source | Primary Use |
 | :--- | :--- | :--- | :--- |
