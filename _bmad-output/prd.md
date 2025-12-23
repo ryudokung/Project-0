@@ -23,16 +23,16 @@ date: '2025-12-21'
 ## 1. Executive Summary
 
 ### 1.1 Product Vision
-Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles and high entry barriers, utilizing AI to generate unique, seasonal NFT assets (Mechs, Tanks, Ships) with genuine aesthetic and functional rarity.
+Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles and high entry barriers, utilizing AI to generate unique, seasonal NFT assets (Mechs, Tanks, Ships) with genuine aesthetic and functional rarity. The game is an **Evolving Live-Service Universe** where the creator gradually releases new lore, star systems, and context-driven patches to keep the exploration loop fresh and meaningful.
 
 ### 1.2 Project Classification
 - **Project Type:** Blockchain/Web3 & Web Application
 - **Domain:** Gaming & Fintech (Hybrid)
 - **Complexity:** High
-- **Key Differentiator:** AI-Powered Seasonal Rarity & Direct-to-System Hybrid Economy
+- **Key Differentiator:** AI-Powered Seasonal Rarity, Direct-to-System Hybrid Economy, and **Creator-Driven Narrative Evolution**.
 
 ### 1.3 Strategic Alignment
-The project aligns with the goal of creating a long-term, sustainable ecosystem where players can enter for free, progress through effort (Grinding), and participate in a high-value collector's market driven by AI-generated scarcity.
+The project aligns with the goal of creating a long-term, sustainable ecosystem where players can enter for free, progress through effort (Grinding), and participate in a high-value collector's market driven by AI-generated scarcity and **continuous world expansion**.
 
 ## 2. Success Criteria
 
@@ -40,6 +40,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 - **The "Aha!" Moment:** Players receive a high-quality AI-generated Mech or Item for the first time, experiencing the thrill of unique visual ownership and social prestige.
 - **Emotional Outcome:** A deep sense of "True Ownership" and "Collection Pride," especially for rare seasonal assets that will never be generated again.
 - **Immersion:** Players feel like "Engineers" and "Commanders" through the story-driven assembly process, rather than just clicking a button.
+- **Visual Pride:** Players feel a "Gasp" moment when they see their unique, high-fidelity AI-generated Mech for the first time—a design that is uniquely theirs and visually stunning.
 
 ### 2.2 Business Success
 - **Aggressive Early Revenue:** Maximizing revenue through a tiered Season Pass model (Standard and Season Pass+).
@@ -48,18 +49,22 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 
 ### 2.3 Technical Success
 - **AI Generation Efficiency:** Implementing a "Time-Gated Assembly" system to manage GPU load and prevent spamming.
-- **Tiered Quality Control:** Delivering High-Fidelity AI assets for USDT transactions while maintaining theme consistency for in-game currency builds.
+- **Hybrid 2D/3D Immersion:** Delivering High-Fidelity AI assets (2D) for visual storytelling while using **WebGPU + React Three Fiber** for an immersive 3D Cockpit and Hangar experience.
+- **Design Intelligence:** Utilizing [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/) standards to ensure professional-grade aesthetics, including Glassmorphism, Bento Grids, and industry-specific color palettes for a premium feel.
+- **Modular NFT Ownership:** Utilizing **ERC-6551 (Token Bound Accounts)** to allow Mechs to "own" their equipment, simplifying marketplace trading and inventory management.
+- **Hybrid State Management (V2O):** Implementing a "Virtual-to-On-chain" model where gameplay and asset creation are off-chain by default (Server-side), with on-chain minting required only for trading or permanent storage.
 - **System Resilience:** Using Saga patterns and distributed tracing to ensure 100% consistency between Web2 (AI/DB) and Web3 (On-chain) states.
+- **AI Contextual Intelligence:** Implementing **Model Context Protocol (MCP)** to provide the AI Narrative Engine with real-time game state for dynamic event generation.
 
 ## 3. Product Scope
 
 ### 3.1 MVP - Minimum Viable Product
-- **Multi-Vehicle System:** Mechs, Tanks, and Ships with distinct gameplay roles.
+- **Multi-Vehicle System:** Motherships, Mechs, Aircraft, and Pilot Gear with distinct gameplay roles.
 - **Engineering & Assembly System:** A story-driven crafting system where asset generation requires resources, time, and engineers.
 - **Tiered AI Assets:** 
     - **Premium (USDT):** High-fidelity, complex AI designs.
     - **Standard (In-game):** Theme-consistent but simpler AI designs.
-- **Complex Combat Engine:** Stat-based battle system integrating vehicle attributes and AI-generated item "Options."
+- **Complex Combat Engine:** Stat-based battle system integrating vehicle attributes (Mothership, Mech, Aircraft, Pilot) and AI-generated item "Options."
 - **Monetization Engine:** Season Pass and Season Pass+ with exploration buffs and social prestige items.
 - **Discord Integration:** Real-time alerts for star discoveries and achievement broadcasting.
 
@@ -204,63 +209,133 @@ Project-0 operates as a "Closed-Loop Premium Economy." USDT flows into the syste
 - **FR4:** ระบบสามารถผูกบัญชี Discord เข้ากับบัญชีผู้เล่นเพื่อรับการแจ้งเตือนได้
 
 ### 9.2 Exploration & Discovery
-- **FR5:** ผู้เล่นสามารถส่งยาน/หุ่นยนต์ออกไปสำรวจ (Explore) ในพิกัดต่างๆ ได้
-- **FR6:** ระบบสามารถสุ่มเหตุการณ์ (Events) ระหว่างการสำรวจ เช่น การเจอทรัพยากร หรือการเจอศัตรู
-- **FR7:** ระบบสามารถคำนวณระยะเวลาการสำรวจตามระยะทางและบัฟของผู้เล่น
+- **FR5:** ระบบ Multi-Stage Exploration (Mothership -> Mech -> Pilot EVA) ที่บังคับใช้ประเภท Vehicle และอุปกรณ์ต่างกันตามระยะทางและสภาพแวดล้อม
+- **FR6:** ระบบสุ่มเหตุการณ์ (Events) และอุบัติเหตุ (Accidents) ระหว่างการสำรวจ โดยใช้ AI สร้างเนื้อเรื่องตามบริบท (Context-aware AI Narrative) ผ่าน **Model Context Protocol (MCP)**
+- **FR7:** ระบบสามารถคำนวณระยะเวลาการสำรวจและโอกาสสำเร็จ (Success Probability %) ตาม Stat ของอุปกรณ์ที่สวมใส่
 - **FR8:** ผู้เล่นที่มี Season Pass+ สามารถรับบัฟความเร็ว/ประสิทธิภาพการสำรวจเพิ่มขึ้น 2 เท่า (ภายใต้ Daily Cap)
-- **FR9:** ระบบสามารถสุ่มปล่อยพิกัดดาวดวงใหม่ (Star Discovery) โดยอัตโนมัติตามเงื่อนไขที่กำหนด (เช่น เวลา หรือความคืบหน้าของชุมชน)
+- **FR9:** ระบบ Radar Scan & Fog of War: ผู้เล่นสามารถสแกนหาพิกัดดาวเพื่อดูระดับความอันตราย (Threat Level) เบื้องต้น โดยใช้ **Web2 Backend Fog of War** (Server-side validation) เพื่อความรวดเร็วและป้องกันการโกง
+- **FR27:** ระบบ Pre-flight Briefing: แสดงความเสี่ยงและคำเตือนก่อน Launch (เช่น ขาดเกราะกันความร้อน หรือ O2 ไม่พอ) โดยผู้เล่นสามารถเลือก "เสี่ยง" (Proceed at Own Risk) ได้
+- **FR33:** ระบบ Pilot Death & Penalty: หากนักบินเสียชีวิตระหว่าง EVA จะสูญเสียไอเทมที่เก็บได้ในรอบนั้นทั้งหมด และหุ่น Mech จะได้รับความเสียหายหนัก (Critical Damage)
+- **FR34:** ระบบ Evolving Universe: ระบบรองรับการอัปเดต "Context Patches" จากผู้สร้าง (Creator) เพื่อเพิ่มดาวเคราะห์ใหม่, ศัตรูใหม่ และเนื้อเรื่องใหม่ตามฤดูกาล
 
-### 9.3 Combat System (MVP - Stat-based)
-- **FR10:** ระบบสามารถเริ่มการต่อสู้ (Combat) เมื่อผู้เล่นพบศัตรูระหว่างการสำรวจ
-- **FR11:** ระบบสามารถคำนวณผลการแพ้/ชนะ โดยใช้ค่าพลัง (Stats) ของยาน/หุ่นยนต์และไอเทมที่สวมใส่
-- **FR12:** ระบบสามารถมอบทรัพยากรที่แตกต่างกัน (Resource Differentiation) ตามผลการต่อสู้ (เช่น ชนะได้ Rare Parts, แพ้ได้ Scrap)
+### 9.3 Combat System (MVP - Immersive 1:1)
+- **FR10:** ระบบการต่อสู้แบบ 1:1 (One Pilot, One Mech) เน้นความสมจริงและผลกระทบส่วนบุคคล (Personal Stakes)
+- **FR11:** ระบบสามารถคำนวณผลการแพ้/ชนะ โดยใช้ค่าพลัง (Stats) ของ Mothership, Mech และ Pilot Gear
+- **FR12:** ระบบสามารถมอบทรัพยากรและชิ้นส่วน NFT (Modular Salvage) ตามผลการต่อสู้
+- **FR25:** ระบบ Combat Log & 3D Visualization: แสดงผลการต่อสู้ผ่านหน้าจอ Cockpit HUD (Three.js) พร้อมเอฟเฟกต์สั่นสะเทือนและ Glitch ตามความเสียหายจริง
+- **FR35:** ระบบ Hangar & Maintenance: ผู้เล่นต้องทำการซ่อมแซม (Repair) และเติมทรัพยากร (Refuel/O2) ที่ยานแม่หลังจบภารกิจ โดยใช้ทรัพยากรที่ได้จากการ Salvage (Scrap Metal) มาแปรรูป (Refine) เป็นวัสดุซ่อมแซม
 
-### 9.4 Engineering & Assembly (AI Generation)
-- **FR13:** ผู้เล่นสามารถเริ่มกระบวนการประกอบร่าง (Assembly) โดยใช้ทรัพยากรที่สะสมมา
-- **FR14:** ระบบสามารถสร้างภาพ Mechs/Tanks/Ships ด้วย AI (FLUX.1) ตามเกรดที่เลือก (Standard/Premium)
-- **FR15:** ระบบสามารถจัดการคิวการประกอบร่างแบบรอเวลา (Time-gated)
-- **FR16:** ผู้เล่นสามารถแชร์สถานะการประกอบร่าง (Assembly Status) ไปยัง Discord ได้
+### 9.4 Engineering & Assembly (Modular AI Generation)
+- **FR13:** ระบบ Modular NFT Assembly: ผู้เล่นสามารถประกอบร่างหุ่นและยานจากชิ้นส่วน NFT แยกชิ้น (Chassis, Weapons, Shields) โดยใช้มาตรฐาน **ERC-6551 (Token Bound Accounts)** เพื่อให้ NFT หลักเป็นเจ้าของชิ้นส่วนอุปกรณ์
+- **FR14:** ระบบ AI Visual Synthesis: AI (FLUX.1) สามารถ "อ่าน" ชิ้นส่วน NFT ที่สวมใส่และสร้างภาพ Master Image ที่รวมทุกชิ้นส่วนเข้าด้วยกันตามบริบทของภารกิจ
+- **FR15:** ระบบจัดการคิวการประกอบร่างและอัปเกรดชิ้นส่วนแบบรอเวลา (Time-gated)
+- **FR16:** ระบบ Visual Wear & Tear: AI สร้างภาพที่สะท้อนความเสียหายจริง (รอยไหม้, รอยกระสุน) ลงใน NFT Metadata
+- **FR30:** ระบบ Pilot Gear & Progression: ผู้เล่นสามารถอัปเกรดชุดนักบิน (Nomad Style), อาวุธ (Swords/Guns) และถัง O2 เพื่อใช้ในการสำรวจช่วง EVA
 
 ### 9.5 Economy & Marketplace
 - **FR17:** ผู้เล่นสามารถซื้อ Season Pass และ Season Pass+ ด้วย USDT
-- **FR18:** ผู้เล่นสามารถลงขาย "Key" (NFT) ใน Marketplace แบบ P2P ได้
+- **FR18:** ผู้เล่นสามารถลงขายชิ้นส่วน NFT (Modular Parts) ใน Marketplace แบบ P2P ได้ (ต้องทำการ Mint ขึ้น Chain ก่อน)
 - **FR19:** ระบบสามารถหักค่าธรรมเนียม (Marketplace Fee) จากการซื้อขายระหว่างผู้เล่น
 - **FR20:** ระบบสามารถแสดงข้อมูลความยาก (Difficulty) และอัตราการดรอป (Rarity) บน Transparency Dashboard
+- **FR31:** ระบบ Hybrid Energy: 
+    - **Standard Energy (Off-chain):** รีเฟรชฟรีทุกวัน ใช้สำหรับการสำรวจและต่อสู้ทั่วไป
+    - **Premium Energy / Overclock (On-chain):** ผู้เล่นสามารถจ่าย USDT/Token เพื่อซื้อพลังงานเพิ่มสำหรับการสำรวจที่เกินขีดจำกัดรายวัน (Exploration Boost)
+- **FR32:** ระบบ Virtual-to-On-chain (V2O): สินค้าและหุ่นที่สร้างขึ้นใหม่จะเป็น "Virtual Assets" บน Server โดยอัตโนมัติ และผู้เล่นสามารถเลือก "Mint to Chain" เมื่อต้องการขายหรือโอนย้ายออกภายนอกเท่านั้น
+
+### 9.7 Social & Engagement
+- **FR37:** ระบบ Customizable Pilot Profile: ผู้เล่นสามารถปรับแต่งหน้า Profile, เลือกโชว์หุ่น Mech (Showcase), และแสดงรายการ NFT/Achievements ที่ภาคภูมิใจได้
+- **FR38:** ระบบ Social Interaction: รองรับการเพิ่มเพื่อน (Friend System), การดู Profile ผู้เล่นอื่น, และการแชร์ความสำเร็จไปยัง Social Media (X, Discord)
+- **FR39:** ระบบ Multi-Channel Notifications: แจ้งเตือนข่าวสาร, Patch ใหม่, และการค้นพบดาวผ่าน Web Push, Discord Webhook, และ Telegram Bot
 
 ### 9.6 Admin & Quality Control (HITL)
-- **FR21:** Admin สามารถตรวจสอบและอนุมัติภาพที่ AI สร้างขึ้น (HITL) ก่อนที่จะทำการ Mint เป็น NFT
+- **FR21:** Admin สามารถตรวจสอบและอนุมัติภาพที่ AI สังเคราะห์ขึ้น (HITL) ก่อนที่จะทำการ Mint หรืออัปเดต Metadata
 - **FR22:** ระบบสามารถปรับระดับความยาก (Difficulty Adjustment) ของทรัพยากรและอัตราการดรอปได้โดยอัตโนมัติ
 - **FR23:** ระบบสามารถส่งการแจ้งเตือน Star Discovery ไปยัง Discord Channel ที่กำหนดได้ทันทีเมื่อมีการค้นพบใหม่
-- **FR24:** ระบบ Multi-Stage Exploration (Space -> Orbital -> Surface) ที่บังคับใช้ประเภท Vehicle ต่างกัน (Ship/Mech)
-- **FR25:** ระบบ Combat Log ที่บันทึกผลการต่อสู้และภาพ Action Shot แบบชั่วคราว (Housekeeping 7 วัน)
-- **FR26:** ผู้เล่นสามารถจ่าย USDT เพื่อบันทึก Combat Log แบบถาวร (Permanent Save) ลงใน Profile/Lore
+- **FR26:** ผู้เล่นสามารถจ่าย USDT เพื่อบันทึก Combat Log และภาพ Snapshot การสำรวจแบบถาวร (Permanent Save) ลงใน Profile/Lore
+- **FR36:** ระบบ Creator Studio (The God Mode Engine):
+    - **Style Guide Management:** ผู้สร้างสามารถกำหนด "Visual DNA" (เช่น Hoyoverse Style, Artistic Painterly) ผ่าน AI Prompts และ LoRA
+    - **Comprehensive Templates:** ระบบกำหนดแม่แบบครอบคลุมทุกองค์ประกอบ (Character, Vehicle, Environment, UI, VFX)
+    - **Context Patching & Staging:** ระบบจัดการการปล่อย Patch แบบลากวาง พร้อมพื้นที่ทดสอบ (Sandbox/Staging) ก่อนปล่อยจริง
+    - **Universe Analytics & Heatmaps:** ระบบมอนิเตอร์ความเคลื่อนไหวของผู้เล่น, จุดที่ตายบ่อย, และอัตราการ Salvage แบบ Real-time
+    - **Safety & Automation:** ระบบ One-Click Rollback สำหรับกู้คืนสถานะจักรวาล และระบบ Procedural Auto-Pilot สำหรับสร้างเหตุการณ์ย่อยอัตโนมัติ
+    - **Live Universe Control:** เครื่องมือสำหรับปรับแต่ง Event สดในเกมและคุมทิศทาง Narrative ทั้งหมดแบบ Real-time
 
-## 10. Non-Functional Requirements
+## 10. Progression & Growth (Measuring Strength)
 
-### 10.1 Performance
+เพื่อให้ผู้เล่นรู้สึกถึงความ "เก่งขึ้น" และมีเป้าหมายในระยะยาว Project-0 จึงมีระบบวัดความก้าวหน้าหลายระดับ:
+
+### 10.1 Pilot Rank & Mastery (XP)
+- **Experience Points (XP):** ได้รับจากการทำภารกิจสำเร็จ, การ Salvage ซากหุ่น, และการค้นพบดวงดาวใหม่ๆ
+- **Pilot Rank:** การเลื่อนระดับจะปลดล็อก "Advanced Licenses" เพื่อให้สามารถขับ Mech, Aircraft หรือ Mothership ในระดับที่สูงขึ้นได้
+- **Skill Points:** ทุกครั้งที่ Rank อัป จะได้รับแต้มเพื่ออัปเกรดความสามารถเฉพาะตัวของนักบิน (เช่น Agility, O2 Efficiency, Melee/Sidearm Mastery)
+
+### 10.2 Modular Gear & "Options" (The Loot Loop)
+- **AI-Generated Stats:** ชิ้นส่วน NFT แต่ละชิ้น (Arm, Chassis, Weapon) จะมีค่าพลังสุ่ม (Options) ที่สร้างโดย AI (เช่น +5% Kinetic Resistance, +10% Scanner Range)
+- **Rarity Tiers:** แบ่งระดับความหายากเป็น Standard, Rare, Epic, Legendary และ Seasonal
+- **Visual DNA:** ไอเทมระดับสูงจะมี Visual Traits ที่ซับซ้อนและสวยงามกว่า ซึ่งแสดงถึงความเก่งกาจที่มองเห็นได้ชัดเจนในสังคม
+
+### 10.3 Mech Sync Rate (Synergy)
+- **Familiarity:** การใช้ Mech หรือชิ้นส่วนเดิมซ้ำๆ จะเพิ่มค่า "Sync Rate"
+- **Bonuses:** ค่า Sync Rate ที่สูงจะมอบ Buff พิเศษ เช่น +Evasion, +Accuracy หรือลดการใช้ Energy ซึ่งเป็นการตอบแทนผู้เล่นที่ดูแลและซ่อมแซมอุปกรณ์คู่ใจแทนการเปลี่ยนใหม่ตลอดเวลา
+
+### 10.4 Mothership Tech Tree (Base Progression)
+- **Facility Upgrades:** ผู้เล่นต้องลงทุนทรัพยากรเพื่ออัปเกรด Hangar (ความเร็วในการซ่อม), Lab (คุณภาพการคราฟต์) และ Scanner (ระยะการค้นหา)
+- **Deep Space Access:** การอัปเกรดเครื่องยนต์และเกราะกันความร้อนของ Mothership เป็นวิธีเดียวที่จะเข้าถึงระบบดาวระดับสูงที่มี Loot ระดับตำนาน
+
+### 10.5 Seasonal Achievements & Hall of Fame
+- **Legacy Status:** ผู้เล่นที่ทำ Milestone สำคัญได้ (เช่น "First to Discover Star-X") จะถูกบันทึกชื่อไว้ใน Metadata ของจักรวาลถาวร
+- **Seasonal Prestige:** กรอบโปรไฟล์และฉายาพิเศษที่แสดงถึงความสำเร็จในแต่ละ Season
+
+## 11. Visual Allure & The "Cool" Factor (The Hook)
+
+เพื่อให้เกมมีแรงดึงดูดมหาศาล (Mass Appeal) แม้ผู้เล่นจะยังไม่รู้ระบบการเล่น Project-0 จะเน้นความ "เท่" และ "ความภูมิใจในการครอบครอง" เป็นอันดับหนึ่ง:
+
+### 11.1 Visual DNA & Seasonal Masterpieces
+- **Creator-Defined Aesthetics:** ในแต่ละ Season ผู้สร้างจะกำหนด "Visual DNA" ที่เป็นเอกลักษณ์ (เช่น Season 1: Cyber-Samurai, Season 2: Bio-Mechanical Horror) ทำให้ไอเทมในแต่ละช่วงเวลามีคุณค่าทางศิลปะที่หาจากที่อื่นไม่ได้
+- **Legendary Visual Traits:** ไอเทมระดับตำนาน (Legendary) จะมีเอฟเฟกต์พิเศษที่มองเห็นได้ชัดเจน เช่น เกราะโปร่งแสง (Translucent Armor), ปีกพลังงาน (Energy Wings), หรือพื้นผิวที่มีอนิเมชั่น (Animated Textures)
+- **One-of-a-Kind Generation:** AI จะถูกโปรแกรมให้สร้าง "Masterpiece" ที่มีโอกาสเกิดน้อยมาก (เช่น 0.01%) ซึ่งจะมีดีไซน์ที่หลุดกรอบจากไอเทมทั่วไปอย่างสิ้นเชิง
+
+### 11.2 The 3D Hangar Showcase
+- **High-Fidelity 3D Preview:** ผู้เล่นสามารถดูหุ่นและยานของตัวเองใน Hangar แบบ 3D ที่รันด้วย WebGPU พร้อมแสงเงาและเงาสะท้อนระดับ AAA
+- **Photo Mode & Social Sharing:** ระบบกล้องที่ปรับแต่งได้เพื่อถ่ายภาพ "Mech Snapshot" ที่สวยงามที่สุด พร้อมปุ่มแชร์ลง X/Discord/Telegram ได้ทันที
+- **Public Profiles:** ผู้เล่นคนอื่นสามารถเข้ามา "เยี่ยมชม" Hangar ของเราเพื่อดูคอลเลกชันหุ่นเท่ๆ ได้ สร้างแรงบันดาลใจให้อยากได้ของแบบเดียวกัน
+
+### 11.3 Pilot Identity & Customization
+- **Pilot Gear Aesthetics:** ไม่ใช่แค่หุ่นที่เท่ แต่นักบิน (Pilot) ก็มีชุดเกราะและอาวุธ (Swords/Guns) ที่ดีไซน์มาอย่างประณีต
+- **Dynamic Posing:** ในหน้าโปรไฟล์ นักบินจะยืนโพสต์ท่าคู่กับ Mech คู่ใจในสภาพแวดล้อมที่ AI เจนให้ตามดาวที่ผู้เล่นไปสำรวจล่าสุด
+
+## 12. Non-Functional Requirements
+
+### 10.1 Performance & Experience
 - **NFR1 (Response Time):** หน้า Dashboard และการตอบสนองทั่วไปต้องโหลดเสร็จภายใน < 2 วินาที
+- **NFR13 (Seamless Multi-Vehicle Transition):** การเปลี่ยนผ่านมุมมองระหว่างยานพาหนะ (Mothership -> Mech -> Pilot EVA) ต้องเป็นแบบไร้รอยต่อ (Seamless) โดยไม่มี Loading Screen:
+    - **Mothership to Mech:** กล้องพุ่ง (Zoom-in) จากห้องควบคุมยานแม่เข้าสู่ Cockpit ของ Mech
+    - **Mech to Pilot:** กล้องแพนออกจาก Cockpit เข้าสู่มุมมองบุคคลที่สาม (Third-person) ของนักบินขณะออกจากหุ่น
+    - **Atmospheric Entry:** การเปลี่ยนผ่านจากอวกาศเข้าสู่ชั้นบรรยากาศต้องรันด้วย Real-time 3D Rendering (**WebGPU + React Three Fiber**) ตลอดกระบวนการ
 - **NFR2 (AI Generation & Delivery):**
-    - **Technical Latency:** ระบบต้องประมวลผลภาพ AI ให้เสร็จสิ้นก่อนเวลาที่กำหนดส่งมอบ (Reveal Time) ในเนื้อเรื่อง
-    - **Load-Adaptive Assembly:** ระบบสามารถปรับเปลี่ยนระยะเวลาการรอในเนื้อเรื่อง (Assembly Time) ได้โดยอัตโนมัติตามปริมาณ Load ของระบบ เพื่อรักษาความเสถียรและคุมต้นทุน GPU โดยไม่กระทบต่อประสบการณ์ผู้เล่น (Immersive Load Balancing)
-- **NFR3 (Blockchain Sync):** ข้อมูล On-chain ต้องสะท้อนบนหน้าเว็บภายใน < 5 วินาทีหลังจาก Transaction ได้รับการยืนยัน
+    - **Technical Latency:** ระบบต้องประมวลผลภาพ AI ให้เสร็จสิ้นก่อนเวลาที่กำหนดส่งมอบ (Reveal Time)
+    - **Load-Adaptive Assembly:** ระบบสามารถปรับเปลี่ยนระยะเวลาการรอได้ตามปริมาณ Load ของ GPU
+- **NFR3 (Blockchain Sync):** ข้อมูล On-chain ของชิ้นส่วน NFT ต้องสะท้อนบนหน้าเว็บภายใน < 5 วินาที
+- **NFR15 (Fog of War Security):** ใช้ Web2 Backend Validation สำหรับ Fog of War เพื่อป้องกันการเปิดแมพจากฝั่ง Client โดยไม่ต้องใช้ ZKP ในช่วง MVP เพื่อลดความซับซ้อนและ Latency
+- **NFR16 (AI Context Efficiency):** ใช้ **MCP (Model Context Protocol)** เพื่อให้ AI เข้าถึงข้อมูล Game State ในเครื่อง Server ได้โดยตรง ลดการส่งข้อมูลผ่าน Cloud และเพิ่มความเร็วในการสร้าง Narrative Event
 
 ### 10.2 Security & Anti-Bot
 - **NFR4 (Anti-Bot Strategy):** 
     - ใช้ Captcha ในจุดที่มีการทำธุรกรรมสำคัญ
-    - ใช้ Behavioral Analysis และ Client-side PoW สำหรับการกระทำทั่วไป (Explore/Combat) เพื่อป้องกัน Bot สายฟรี
-    - บังคับ Social Verification (Discord/X) เพื่อป้องกันการปั๊มบัญชี
-- **NFR5 (Smart Contract Security):** Smart Contract ต้องผ่านการ Audit และมีระบบ Emergency Stop (Circuit Breaker)
-- **NFR6 (Data Protection):** ข้อมูลส่วนบุคคลและ Wallet Address ต้องถูกเข้ารหัสและจัดเก็บตามมาตรฐานความปลอดภัยสูงสุด
+    - ใช้ Behavioral Analysis สำหรับการกระทำทั่วไป (Explore/Combat)
+    - บังคับ Social Verification (Discord/X)
+- **NFR5 (Smart Contract Security):** Smart Contract สำหรับ Modular NFTs ต้องผ่านการ Audit และมีระบบ Circuit Breaker
+- **NFR6 (Data Protection):** ข้อมูลส่วนบุคคลและ Wallet Address ต้องถูกเข้ารหัสตามมาตรฐานสูงสุด
 
 ### 10.3 Scalability & AI Load Handling
-- **NFR7 (Concurrency):** ระบบต้องรองรับผู้เล่นพร้อมกัน (Concurrent Users) ได้อย่างน้อย 10,000 คน
+- **NFR7 (Concurrency):** ระบบต้องรองรับผู้เล่นพร้อมกันได้อย่างน้อย 10,000 คน
 - **NFR8 (AI Reliability/Backtrack):** 
-    - ระบบต้องมีกลไก Idempotency เพื่อป้องกันการจ่ายเงินซ้ำซ้อน
-    - หากกระบวนการ AI Generation ล้มเหลว ระบบต้องมีกลไก Auto-Retry หรือคืนสิทธิ์ (Credit) ให้ผู้เล่นโดยอัตโนมัติ
-    - มีระบบ Audit Log ที่ละเอียดเพื่อตรวจสอบย้อนหลังได้ทุกธุรกรรม
+    - ระบบต้องมีกลไก Idempotency สำหรับการสังเคราะห์ภาพ AI จากหลายชิ้นส่วน NFT
+    - หากกระบวนการ AI Synthesis ล้มเหลว ต้องมีระบบ Auto-Retry หรือคืนสิทธิ์ให้ผู้เล่น
+- **NFR14 (Visual Consistency):** ภาพที่ AI สังเคราะห์ต้องมีความถูกต้องตาม Metadata ของชิ้นส่วน NFT ที่สวมใส่จริง 100%
 
 ### 10.4 Reliability (ความเสถียร)
-- **NFR9 (Uptime):** ระบบต้องมี Uptime ไม่ต่ำกว่า 99.9% (High Availability)
-- **NFR10 (Data Consistency):** ใช้ Saga Pattern เพื่อรักษาความถูกต้องของข้อมูลระหว่าง Web2 (Database) และ Web3 (Blockchain) 100%
-- **NFR11 (AI Guardrails):** ใช้ Structured Output (JSON Schema) และ RAG เพื่อป้องกัน AI Hallucination และรักษาความถูกต้องของ Lore
+- **NFR9 (Uptime):** ระบบต้องมี Uptime ไม่ต่ำกว่า 99.9%
+- **NFR10 (Data Consistency):** ใช้ Saga Pattern เพื่อรักษาความถูกต้องของข้อมูลระหว่าง Web2 และ Web3 100% (โดยเฉพาะการประกอบชิ้นส่วน NFT)
+- **NFR11 (AI Guardrails):** ใช้ Structured Output และ RAG เพื่อป้องกัน AI Hallucination ในการสร้างเนื้อเรื่องอุบัติเหตุ
 - **NFR12 (Housekeeping):** ระบบลบข้อมูลชั่วคราว (Temporary Logs) อัตโนมัติเพื่อรักษาประสิทธิภาพของฐานข้อมูล

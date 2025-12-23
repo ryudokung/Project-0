@@ -3,6 +3,17 @@
 ## Project Overview
 Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tanks, Ships) on Base L2, with a hybrid economy and a "No USDT Out" revenue model.
 
+### Core Gameplay Pillars
+- **Adaptive Universe:** AI-driven ecosystem with evolving narratives and combat logs.
+- **Modular NFT Assembly:** Every part (Railgun, Shield, Pilot Suit) is an individual NFT. AI dynamically synthesizes these parts into a single visual representation based on the player's loadout and mission context.
+- **Colony Management:** Upgradeable home bases that can move between star systems.
+- **Multi-Stage Exploration:** 
+    - **Mothership:** Space travel & atmospheric entry.
+    - **Mech:** Heavy combat & planetary surface operations.
+    - **Pilot EVA:** Precision salvage in tight spaces (requires O2, Swords, Guns).
+- **Salvage & Research:** Capture enemy units to sell, research tech, or scrap for parts.
+- **Story Mode:** Structured narrative providing fixed foundation items and tutorials.
+
 ## Technical Stack & Infrastructure
 - **Frontend:** Next.js 14+ (App Router), Tailwind CSS, Zustand.
 - **Backend:** Go (Modular Monolith), Clean Architecture, Saga Pattern.
@@ -10,6 +21,12 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 - **AI:** FLUX.1 via Fal.ai/Replicate.
 - **Database:** PostgreSQL 16.
 - **Infrastructure:** Docker & Docker Compose.
+
+## Technical Bible
+- [PRD.md](_bmad-output/PRD.md): Product Requirements Document.
+- [architecture.md](_bmad-output/architecture.md): Technical Architecture & ADRs.
+- [gameplay-architecture.md](_bmad-output/gameplay-architecture.md): Gameplay System Mapping.
+- [combat-design.md](_bmad-output/combat-design.md): Combat Mechanics & Visual Wear & Tear.
 
 ## Critical Implementation Rules
 - **Saga Pattern:** All multi-step transactions (Assembly, Discovery) must use the Saga Pattern with idempotency keys.

@@ -48,6 +48,12 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
     - Centralized Orchestrator in Go to manage the "Mech Assembly" state machine.
     - Mandatory **Idempotency Keys** for all external service calls to prevent duplicate transactions.
     - Compensating transactions (e.g., credit refunds) for failed steps in the assembly pipeline.
+    - **New Sagas:**
+        - `ColonyUpgradeSaga`: Resource deduction, timer management, and facility state update.
+        - `ExplorationMissionSaga`: Fuel consumption, encounter resolution, and loot/durability updates.
+        - `SalvageOperationSaga`: Unit capture processing (Sell/Research/Scrap) and inventory sync.
+        - `StoryProgressionSaga`: Narrative milestone validation and fixed reward distribution.
+        - `CombatSimulationSaga`: Turn-based simulation, durability deduction, and AI narrative trigger.
 
 #### ADR 002: Backend Architecture Pattern
 - **Decision:** Use **Modular Monolith** with **Clean Architecture**.
@@ -68,34 +74,112 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 - **Logic:** ประสานงานระหว่าง AI Service และ Blockchain Service เพื่อให้มั่นใจว่าถ้า AI Gen สำเร็จ ต้องมีการ Mint NFT ตามมา หรือถ้า Mint พลาดต้องมีการ Rollback/Refund.
 
 ### 3.2 AI Integration Service
-- **หน้าที่:** เชื่อมต่อกับ FLUX.1 (via Fal.ai/Replicate).
+- **หน้าที่:** เชื่อมต่อกับ FLUX.1 (via Fal.ai/Replicate) และจัดการบริบทของ AI.
 - **Logic:** 
-    - จัดการ Prompt Engineering, Queue การ Generate, และระบบ **HITL (Human-in-the-loop)**.
-    - **Combat Visualization:** สร้างภาพการปะทะกัน (e.g., Mech vs Mech) เพื่อเพิ่มความตื่นเต้นในรายงานผลการต่อสู้.
+    - **Modular NFT Synthesis:** อ่าน Metadata และ Visual Traits จาก NFT แต่ละชิ้น (Railgun, Shield, Pilot Suit) เพื่อนำมาสังเคราะห์เป็นภาพเดียวที่สมบูรณ์.
+    - **Model Context Protocol (MCP):** ใช้ MCP เพื่อให้ AI Narrative Engine สามารถเข้าถึงข้อมูล Game State (เช่น HP, O2, Location) จาก Backend ได้โดยตรงแบบ Real-time เพื่อสร้างเนื้อเรื่องที่แม่นยำโดยไม่ต้องส่ง Data ผ่าน Cloud ทั้งหมด.
+    - **Context-Aware Prompting:** สร้าง Prompt ที่รวมทั้งไอเทมที่สวมใส่, สถานะความเสียหาย, และบริบทของเหตุการณ์.
 
 ### 3.3 Blockchain Service
 - **หน้าที่:** สื่อสารกับ Base L2 Smart Contracts.
-- **Logic:** จัดการการ Mint NFT, การโอน USDT, และคำนวณ **Difficulty Adjustment** (Bitcoin-style) สำหรับการค้นพบ Star ใหม่.
+- **Logic:** 
+    - **Virtual-to-On-chain (V2O) Bridge:** จัดการกระบวนการเปลี่ยนสถานะจาก Virtual Asset (Server-side) เป็น On-chain NFT เมื่อผู้เล่นกด Mint หรือต้องการขาย.
+    - **ERC-6551 (Token Bound Accounts):** ใช้มาตรฐาน ERC-6551 เพื่อให้ NFT หลัก (เช่น Mech Chassis) มี Wallet ของตัวเองสำหรับเก็บชิ้นส่วนอุปกรณ์ (Weapons, Shields) ทำให้การซื้อขายใน Marketplace ทำได้แบบยกชุด (Bundled Assets).
+    - **Modular NFT Management:** จัดการการ Mint และโอน NFT แยกตามชิ้นส่วน.
+    - **Metadata Sync:** อัปเดต Metadata ของ NFT แต่ละชิ้นตามสถานะความเสียหาย (Durability) ที่เกิดขึ้นจริง.
 
 ### 3.4 Game Engine Service
 - **หน้าที่:** ประมวลผล Logic ของเกมที่ไม่ต้องอยู่บน Chain ทั้งหมด.
 - **Logic:** 
+    - **Hybrid Energy Management:** คำนวณการใช้ Standard Energy (Free) และ Premium Energy (Paid) สำหรับการสำรวจ.
+    - **Web2 Backend Fog of War:** ใช้ Server-side Validation ในการจัดการ Fog of War โดย Backend จะส่งข้อมูลเฉพาะสิ่งที่ผู้เล่น "มองเห็น" (ตามระยะ Scan) ไปยัง Client เท่านั้น เพื่อป้องกันการโกง (Map Hack) โดยไม่ต้องใช้ ZKP ในช่วงแรก.
+    - **Radar & Risk Assessment Logic:** คำนวณโอกาสรอดชีวิตและระดับความอันตราย (Threat Level) ตาม Scanner ของ Mothership.
+    - **AI Event Trigger:** หากเกิดอุบัติเหตุ ระบบจะส่งบริบท (Context) ผ่าน MCP ไปให้ AI Service เพื่อสร้างเหตุการณ์สุ่มที่สมจริง.
     - **Multi-Stage Exploration:** 
-        - **Space Travel:** บังคับใช้ `Ship`.
-        - **Orbital Approach:** ต้องใช้ `Ship` + `Mech` ทำงานร่วมกัน.
+        - **Space Travel:** บังคับใช้ `Ship` (Mothership).
+        - **Orbital Approach & Atmospheric Entry:** ตรวจสอบเงื่อนไขการลงจอด (Atmospheric Shielding).
+
+### 3.5 Frontend Design System ([UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/))
+- **หน้าที่:** จัดการความสวยงามและการใช้งานของผู้ใช้งาน (User Experience).
+- **Logic:**
+    - **UI Styles:** ใช้ Glassmorphism สำหรับ HUD/Cockpit และ Bento Grid สำหรับ Dashboard ข้อมูล.
+    - **Color Systems:** ใช้ Industry-specific palettes (Fintech/SaaS) สำหรับ Marketplace และ Cyberpunk/Neon สำหรับ Gameplay.
+    - **Animation:** ใช้ Framer Motion และ React Three Fiber สำหรับการเปลี่ยนผ่านที่ลื่นไหล (Seamless Transitions).
         - **Planetary Surface:** บังคับใช้ `Mech` ในการสำรวจและทำภารกิจ.
-    - **Combat Mode:** คำนวณผลการต่อสู้ตาม Stats และประเภทของ Vehicle (e.g., Mech ปะทะ Mech บนพื้นผิว).
+        - **Interior/Precision Salvage:** บังคับใช้ `Pilot` (Character) ในการลงจากหุ่นเพื่อเก็บไอเทมหายาก.
+    - **Combat Mode:** คำนวณผลการต่อสู้ตาม Stats ของ Mothership, Mech, และ Pilot.
     - **Star Discovery:** ระบบ Trigger สำหรับการขยายจักรวาลตามเงื่อนไขที่กำหนด.
 
 ### 3.5 Economy & Revenue Service
 - **หน้าที่:** จัดการระบบการเงินและ Monetization.
-- **Logic:** ระบบ Season Pass, การขายไอเทม, และการตรวจสอบ Revenue Flow (No USDT Out policy).
+- **Logic:** ระบบ Season Pass, การขายไอเทม (รวมถึง Pilot Gear), และการตรวจสอบ Revenue Flow (No USDT Out policy).
 
 ### 3.6 Auth & User Service
 - **หน้าที่:** จัดการ Identity และ Profile.
+- **Logic:** 
+    - **Customizable Profile:** จัดการข้อมูลการปรับแต่งหน้า Profile และการเลือกโชว์ไอเทม (Showcase).
+    - **Social Graph:** ระบบเพื่อน (Friendship) และการติดตาม (Following).
+    - **Web3 Auth:** เชื่อมต่อกับ Privy/Dynamic สำหรับ Web3 Auth และเก็บข้อมูล Metadata ของผู้เล่น.
+
+### 3.11 Notification & Bot Service
+- **หน้าที่:** จัดการการสื่อสารภายนอกและระบบแจ้งเตือน.
+- **Logic:** 
+    - **Multi-Channel Dispatcher:** ส่งการแจ้งเตือนผ่าน Web Push, Discord Webhooks, และ X API.
+    - **Telegram Bot:** บอทโต้ตอบสำหรับเช็คสถานะการสำรวจและรับข่าวสาร Patch ใหม่.
+    - **Social Sharing:** ระบบสร้างภาพ/ลิงก์สำหรับแชร์ความสำเร็จไปยัง Social Media.
+
+### 3.7 Pilot Service
+- **หน้าที่:** จัดการข้อมูลตัวละครและอุปกรณ์สวมใส่ (Gear).
+- **Logic:** จัดการค่า O2, ความทนทานของชุด, และการอัปเกรดอาวุธ (Swords/Guns).
 - **Logic:** เชื่อมต่อกับ Privy/Dynamic สำหรับ Web3 Auth และเก็บข้อมูล Metadata ของผู้เล่น.
 
-## 4. Microservices Architecture (Alternative/Evolution)
+### 3.7 Colony & Exploration Service
+- **หน้าที่:** จัดการระบบฐานที่มั่นและการสำรวจ.
+- **Logic:** 
+    - **Colony Management:** การอัปเกรดสิ่งอำนวยความสะดวกและการเคลื่อนย้าย Colony.
+    - **Exploration Logic:** การคำนวณการใช้เชื้อเพลิง (Fuel) และการสุ่มพบเจอเหตุการณ์ (Encounters) ในแต่ละ Stage.
+
+### 3.8 Salvage & Research Service
+- **หน้าที่:** จัดการระบบการกู้ซากและการวิจัยเทคโนโลยี.
+- **Logic:** 
+    - **Salvage Processing:** การตัดสินใจจัดการกับยูนิตที่จับได้ (Sell/Research/Scrap).
+    - **Resource Refining:** ระบบแปรรูป Scrap Metal ให้เป็นวัสดุซ่อมแซม (Repair Kits) หรือเชื้อเพลิง.
+    - **Tech Tree:** การปลดล็อกความสามารถใหม่จากการวิจัยซากศัตรู.
+
+### 3.9 Hangar & Maintenance Service
+- **หน้าที่:** จัดการการซ่อมบำรุงหุ่นและยานพาหนะ.
+- **Logic:** 
+    - **Repair Logic:** การคำนวณทรัพยากรและเวลาที่ใช้ในการซ่อมแซมตามระดับความเสียหาย (Durability).
+    - **Refuel & O2 Management:** การเติมเชื้อเพลิงยานแม่และออกซิเจนให้นักบิน.
+    - **Visual Restoration:** การอัปเดต Metadata เพื่อลบรอย Wear & Tear เมื่อมีการซ่อมแซมเต็มรูปแบบ.
+
+### 3.10 Story & Narrative Service
+- **หน้าที่:** ควบคุมเนื้อเรื่องและภารกิจหลัก.
+- **Logic:** 
+    - **Creator Studio Engine:** ระบบจัดการ "Style Guides" และ "Comprehensive Templates" (Character, Vehicle, Environment, UI, VFX).
+    - **Staging & Sandbox Logic:** ระบบจำลอง Game State สำหรับการทดสอบ Patch ก่อน Deploy จริง.
+    - **Universe Analytics Engine:** ระบบรวบรวมและวิเคราะห์ข้อมูลพฤติกรรมผู้เล่น (Heatmaps, Death Rates, Salvage Trends).
+    - **Rollback & Automation:** ระบบจัดการ Versioning ของจักรวาล และ Procedural Logic สำหรับเหตุการณ์ย่อยอัตโนมัติ.
+    - **Context Patch Integration:** ระบบรองรับการโหลดข้อมูล Lore และ Event ใหม่ ๆ จาก Creator เพื่อเปลี่ยน Game State ของทั้งจักรวาล.
+    - **Story Progression:** การตรวจสอบเงื่อนไขการผ่านด่านและมอบรางวัลแบบ Fixed.
+    - **AI Combat Logs:** การส่งข้อมูลการต่อสู้ให้ AI เพื่อสร้าง Narrative Log ที่เป็นเอกลักษณ์.
+
+## 4. Frontend Architecture (Next.js & 3D Engine)
+
+เพื่อให้ได้ประสบการณ์แบบ Seamless และ High-Fidelity เราจะใช้ Stack ดังนี้:
+
+### 4.1 Core Stack
+- **Framework:** Next.js 15+ (App Router)
+- **3D Engine:** **React Three Fiber (R3F)** + Three.js
+- **Renderer:** **WebGPU** (Fallback to WebGL 2) เพื่อประสิทธิภาพสูงสุดในการเรนเดอร์ Cockpit และ Atmospheric Entry.
+- **State Management:** Zustand (สำหรับ Game State ที่รวดเร็ว) และ React Query (สำหรับ Server State).
+
+### 4.2 Seamless Transition Logic
+- **Single Canvas Architecture:** ใช้ Canvas เดียวกันทั้งแอปเพื่อหลีกเลี่ยงการ Re-mount 3D Scene เมื่อเปลี่ยนหน้า.
+- **Camera Interpolation:** ใช้การคำนวณพิกัดกล้องเพื่อทำ Smooth Zoom/Pan ระหว่าง Mothership -> Mech -> Pilot EVA.
+- **Asset Preloading:** ใช้ระบบ Background Loading สำหรับโมเดล 3D และพื้นผิวดาวเคราะห์ขณะที่ผู้เล่นกำลังดูหน้าจอ Radar.
+
+## 5. Microservices Architecture (Alternative/Evolution)
 
 หากต้องการขยายเป็น Microservices เต็มรูปแบบ โครงสร้างจะเปลี่ยนจากการเรียก Function ภายใน (In-process) เป็นการสื่อสารผ่าน Network (RPC/Events) ดังนี้:
 
@@ -149,7 +233,13 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 *   `stats`: JSONB (HP, Attack, Defense, Speed, Energy) - ใช้ JSONB เพื่อความยืดหยุ่น
 *   `rarity`: enum (COMMON, RARE, LEGENDARY)
 *   `season`: string (e.g., "Season 1: Iron Age")
-*   `status`: enum (PENDING, MINTED, BURNED)
+*   `status`: enum (VIRTUAL, MINTING, ON_CHAIN, BURNED) - รองรับระบบ Hybrid State
+
+#### 6. Energy & Resource Entity
+*   `user_id`: UUID (FK to User)
+*   `standard_energy`: int (Off-chain, daily refresh)
+*   `premium_energy`: int (On-chain/Paid)
+*   `last_refresh`: timestamp
 
 #### 3. Saga Transaction (Orchestration Log)
 *   `id`: UUID (Primary Key)
@@ -206,7 +296,15 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 
 #### Flow B: Exploration & Combat
 1.  **User:** เลือกพิกัดและยาน -> กด "Launch Mission".
-2.  **Game Engine:** คำนวณระยะทางและสุ่มเหตุการณ์ (Events).
-3.  **Game Engine:** หากเจอศัตรู -> คำนวณผลการต่อสู้ (Stat-based).
-4.  **AI Service:** Gen ภาพ "Action Shot" ของการปะทะ.
-5.  **Orchestrator:** บันทึก Combat Log (Status: `TEMP`) -> ตั้งเวลา Housekeeping (7 วัน).
+2.  **Game Engine:** ตรวจสอบ Energy (Standard/Premium) -> หักแต้มพลังงาน.
+3.  **Game Engine:** คำนวณระยะทางและสุ่มเหตุการณ์ (Events).
+4.  **Game Engine:** หากเจอศัตรู -> คำนวณผลการต่อสู้ (Stat-based).
+5.  **AI Service:** Gen ภาพ "Action Shot" ของการปะทะ.
+6.  **Orchestrator:** บันทึก Combat Log (Status: `TEMP`) -> ตั้งเวลา Housekeeping (7 วัน).
+
+#### Flow C: Virtual-to-On-chain (V2O) Promotion
+1.  **User:** เลือก Virtual Mech -> กด "Mint to Chain" (จ่าย Gas/USDT).
+2.  **Orchestrator:** เปลี่ยนสถานะ Mech เป็น `MINTING` -> ล็อคการใช้งานชั่วคราว.
+3.  **Blockchain Service:** ส่ง Transaction ไปยัง Base L2 (Mint ERC-721 + Setup ERC-6551).
+4.  **Blockchain Service:** รอการ Confirm จาก Chain.
+5.  **Orchestrator:** อัปเดตสถานะเป็น `ON_CHAIN` -> ปลดล็อคให้ใช้งานหรือลงขายใน Marketplace ได้.
