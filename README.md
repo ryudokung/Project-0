@@ -1,52 +1,49 @@
-# Project-0: AI-Powered Seasonal NFT Web Game
+# Project-0: Tactical Noir AI-Powered Web Game
 
-Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles, utilizing AI to generate unique, seasonal NFT assets (Mechs, Tanks, Ships) with genuine aesthetic and functional rarity.
+Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game on **Base L2**. It features a hybrid economy and AI-driven innovation, where players operate modular vehicles in an intense, evolving universe.
 
-## 🚀 Core Features
+## 🌌 The Vision: "Tactical Noir"
+Project-0 is not just a game; it's an evolving universe. Players take on the role of **Operatives** in a dark, industrial future where every mission is a chapter in a gripping narrative. The core focus is on **Social Prestige**, **Collection Pride**, and **High-Stakes Survival**.
 
-- **Modular NFT Assembly:** Every part (Railgun, Shield, Pilot Suit) is an individual NFT using **ERC-6551 (Token Bound Accounts)**. AI dynamically synthesizes these parts into a single visual representation.
-- **Multi-Stage Exploration:** Seamless 3D transitions (Mothership -> Mech/Aircraft -> Pilot EVA) using **WebGPU + React Three Fiber**.
-- **Risk-Based Gameplay:** Radar Scan & Risk Assessment with **Web2 Backend Fog of War** and AI-generated accidents via **Model Context Protocol (MCP)**.
-- **Personal Scale (1:1):** Focus on the bond between one Pilot and their unique Mech/Aircraft.
-- **Closed-Loop Economy:** Sustainable USDT-in model with Bitcoin-style difficulty adjustment.
-- **Web3 Integration:** Base L2 blockchain, Social Login, and Embedded Wallets for seamless onboarding.
+## 🚀 Core Gameplay Loop (MVP1 Focus)
+1.  **The Cold Start:** Wake up in the void, float to your derelict Mothership, and repair the Radar using salvaged Scrap.
+2.  **The Radar (Discovery):** Scan for "Blips" (Nodes) and click to explore new locations in the star system.
+3.  **The Hangar (Flex):** Customize and showcase your unique vehicles (Mechs, Speeders, Exosuits) in a high-fidelity 3D environment.
+4.  **The Action (Click-to-Explore):** Engage in tactical missions where every click consumes O2 or Fuel.
+5.  **The Salvage (Economy):** Refine scrap, research blueprints, and choose when to **Mint to Chain (V2O)**.
+
+## 🚜 Vehicle Archetypes
+- **Mechs:** Balanced bipedal combat units.
+- **Tanks:** Heavy-armored siege units with 360-degree turrets.
+- **Ships:** High-speed aerial scouts and interceptors.
+- **Speeders:** Hoverbikes for high-velocity scouting and stealth.
+- **Exosuits:** Power armor for indoor salvage and the initial "Awakening" mission.
+- **Heavy Haulers:** Industrial units for bulk transport and massive salvage.
+
+## ✨ Unique Selling Points
+- **AI-Generated Visual DNA:** Vehicles are synthesized by AI (FLUX.1) based on their specific NFT parts and stats.
+- **Hybrid Narrative Architecture:** A unique blend of Director-fixed plot points ("Narrative Anchors") and AI-generated dynamic content, ensuring every player has a unique but cohesive story.
+- **Node-Based Exploration:** A "Tactical Noir" radar interface where you click to discover the universe.
+- **Showcase Engine:** A high-fidelity 3D hangar for "flexing" your unique assets to the community.
+- **V2O Bridge (Virtual-to-On-chain):** Play for free, find rare items, and choose to bridge them to the blockchain.
+- **Captain's Log:** A personal, AI-narrated history of your greatest victories and "First Discoveries."
 
 ## 🛠 Tech Stack
+- **Frontend:** Next.js 15+, **WebGPU**, **React Three Fiber (R3F)**, Tailwind CSS.
+- **Backend:** Go (Modular Monolith), Clean Architecture, Saga Pattern, **MCP**.
+- **Blockchain:** Base L2, **ERC-6551 (Token Bound Accounts)**, ERC-721.
+- **AI:** FLUX.1 via Fal.ai/Replicate, Structured Output.
 
-- **Frontend:** Next.js 15+ (App Router), **WebGPU**, **React Three Fiber**, Tailwind CSS, Zustand, [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/).
-- **Backend:** Go (Modular Monolith), Clean Architecture, Saga Pattern, **MCP (Model Context Protocol)**.
-- **Blockchain:** Base L2, Solidity (**ERC-6551**, ERC-721), Privy/Dynamic (Auth).
-- **AI:** FLUX.1 via Fal.ai/Replicate, Structured Output (JSON Schema).
-- **Database:** PostgreSQL (ACID compliant for Saga).
-- **Infrastructure:** Docker & Docker Compose.
-
-## 📂 Project Structure
-
-- `_bmad/`: BMad Method configuration and agent manifests.
-- `_bmad-output/`: Project documentation (PRD, Architecture, Research).
-- `backend/`: (Pending) Go backend source code.
-- `frontend/`: (Pending) Next.js frontend source code.
-
-## 📖 Documentation
-
-- [Product Requirements Document (PRD)](_bmad-output/prd.md)
-- [Architecture Decisions](_bmad-output/architecture.md)
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose installed.
-
-### Running the Project
-1. Clone the repository.
-2. Run the following command:
-   ```bash
-   docker-compose up --build
-   ```
-3. Access the services:
-   - Frontend: `http://localhost:3000`
-   - Backend API: `http://localhost:8080`
-   - Database: `localhost:5432`
+## 📖 The Technical Bibles
+The project is governed by 8 core design documents:
+1.  [Level Design Bible](_bmad-output/level-design-bible.md): Sectors, Hazards, and Zones.
+2.  [Vehicle & Item Bible](_bmad-output/vehicle-item-bible.md): Modular Parts and Visual DNA.
+3.  [Combat Design Bible](_bmad-output/combat-design-bible.md): Formulas, Status Effects, and Logic.
+4.  [Mothership Bible](_bmad-output/mothership-bible.md): Facilities and Teleportation.
+5.  [Narrative & Lore Bible](_bmad-output/narrative-lore-bible.md): History, Factions, and Hooks.
+6.  [Economy Bible](_bmad-output/economy-bible.md): Dual-Currency and V2O Bridge.
+7.  [UI/UX Bible](_bmad-output/ui-ux-bible.md): Tactical Noir HUD and User Journey.
+8.  [Creator Studio Bible](_bmad-output/creator-studio-bible.md): God Mode and Context Patching.
 
 ---
-*Developed using the BMad Method.*
+*Developed using the BMad Method with specialized Game Dev Agents.*

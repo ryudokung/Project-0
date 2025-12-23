@@ -10,6 +10,8 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/ryudokung/Project-0/backend/internal/auth"
 	"github.com/ryudokung/Project-0/backend/internal/mech"
+	"github.com/ryudokung/Project-0/backend/internal/game"
+	"github.com/ryudokung/Project-0/backend/internal/combat"
 )
 
 func main() {
@@ -36,10 +38,18 @@ func main() {
 	authUseCase := auth.NewUseCase(authRepo, jwtSecret)
 	authHandler := auth.NewHandler(authUseCase)
 
+	// Initialize Game/Pilot Module
+	gameRepo := game.NewRepository(db)
+
 	// Initialize Mech Module
 	mechRepo := mech.NewRepository(db)
 	mechUseCase := mech.NewUseCase(mechRepo)
 	mechHandler := mech.NewHandler(mechUseCase)
+
+	// Initialize Combat Module
+	combatEngine := combat.NewEngine()
+	combatService := combat.NewService(combatEngine)
+	combatHandler := combat.NewHandler(combatService, mechRepo, gameRepo)
 
 	// Routes
 	mux := http.NewServeMux()
@@ -49,6 +59,7 @@ func main() {
 	mux.HandleFunc("/api/v1/auth/login", authHandler.Login)
 	mux.HandleFunc("/api/v1/mechs/mint-starter", mechHandler.MintStarter)
 	mux.HandleFunc("/api/v1/mechs", mechHandler.ListMechs)
+	mux.HandleFunc("/api/v1/combat/simulate", combatHandler.SimulateAttack)
 
 	// Simple CORS Middleware
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -1,12 +1,24 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Enum Types
-CREATE TYPE vehicle_type AS ENUM ('MECH', 'TANK', 'SHIP');
-CREATE TYPE vehicle_class AS ENUM ('STRIKER', 'GUARDIAN', 'SCOUT', 'ARTILLERY');
-CREATE TYPE rarity_tier AS ENUM ('COMMON', 'RARE', 'LEGENDARY');
-CREATE TYPE saga_status AS ENUM ('STARTED', 'COMPLETED', 'FAILED', 'COMPENSATING');
-CREATE TYPE mech_status AS ENUM ('PENDING', 'MINTED', 'BURNED');
+-- Enum Types (Idempotent)
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_type') THEN
+        CREATE TYPE vehicle_type AS ENUM ('MECH', 'TANK', 'SHIP');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_class') THEN
+        CREATE TYPE vehicle_class AS ENUM ('STRIKER', 'GUARDIAN', 'SCOUT', 'ARTILLERY');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'rarity_tier') THEN
+        CREATE TYPE rarity_tier AS ENUM ('COMMON', 'RARE', 'LEGENDARY');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'saga_status') THEN
+        CREATE TYPE saga_status AS ENUM ('STARTED', 'COMPLETED', 'FAILED', 'COMPENSATING');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'mech_status') THEN
+        CREATE TYPE mech_status AS ENUM ('PENDING', 'MINTED', 'BURNED');
+    END IF;
+END $$;
 
 -- Users Table
 CREATE TABLE IF NOT EXISTS users (
@@ -26,11 +38,34 @@ CREATE TABLE IF NOT EXISTS mechs (
     vehicle_type vehicle_type NOT NULL,
     class vehicle_class NOT NULL,
     image_url TEXT,
-    stats JSONB NOT NULL DEFAULT '{}',
+    stats JSONB NOT NULL DEFAULT '{}', -- Base stats: HP, Attack, Defense, etc.
     rarity rarity_tier NOT NULL DEFAULT 'COMMON',
     season VARCHAR(50),
     status mech_status DEFAULT 'PENDING',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Parts (Modular Items) Table
+CREATE TABLE IF NOT EXISTS parts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    owner_id UUID REFERENCES users(id),
+    mech_id UUID REFERENCES mechs(id), -- NULL if not equipped
+    slot VARCHAR(50) NOT NULL, -- CHASSIS, ARM_L, ARM_R, LEGS, etc.
+    name VARCHAR(100) NOT NULL,
+    rarity rarity_tier NOT NULL DEFAULT 'COMMON',
+    stats JSONB NOT NULL DEFAULT '{}', -- Bonus stats: +HP, +Crit, etc.
+    visual_dna JSONB NOT NULL DEFAULT '{}', -- AI Keywords for FLUX.1
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Pilot Stats (Neural Resonance & Resources)
+CREATE TABLE IF NOT EXISTS pilot_stats (
+    user_id UUID PRIMARY KEY REFERENCES users(id),
+    resonance_level INTEGER DEFAULT 0,
+    resonance_exp INTEGER DEFAULT 0,
+    current_o2 DECIMAL(5, 2) DEFAULT 100.00,
+    current_fuel DECIMAL(5, 2) DEFAULT 100.00,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Stars (Universe) Table
@@ -70,8 +105,8 @@ CREATE TABLE IF NOT EXISTS combat_logs (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_mechs_owner ON mechs(owner_id);
-CREATE INDEX idx_saga_user ON saga_transactions(user_id);
-CREATE INDEX idx_saga_idempotency ON saga_transactions(idempotency_key);
-CREATE INDEX idx_combat_user ON combat_logs(user_id);
-CREATE INDEX idx_combat_expires ON combat_logs(expires_at) WHERE is_permanent = FALSE;
+CREATE INDEX IF NOT EXISTS idx_mechs_owner ON mechs(owner_id);
+CREATE INDEX IF NOT EXISTS idx_saga_user ON saga_transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_saga_idempotency ON saga_transactions(idempotency_key);
+CREATE INDEX IF NOT EXISTS idx_combat_user ON combat_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_combat_expires ON combat_logs(expires_at) WHERE is_permanent = FALSE;

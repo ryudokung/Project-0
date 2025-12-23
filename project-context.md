@@ -27,7 +27,15 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 - [GDD.md](_bmad-output/GDD.md): Game Design Document (Samus Shepard).
 - [architecture.md](_bmad-output/architecture.md): Technical Architecture & ADRs.
 - [game-systems-architecture.md](_bmad-output/game-systems-architecture.md): Game Systems & Showcase Engine (Cloud Dragonborn).
-- [combat-design.md](_bmad-output/combat-design.md): Combat Mechanics & Visual Wear & Tear.
+- [combat-design-bible.md](_bmad-output/combat-design-bible.md): Damage Formulas, Status Effects & Battle Logic.
+- [level-design-bible.md](_bmad-output/level-design-bible.md): Star Systems, Sectors & Environmental Hazards.
+- [vehicle-item-bible.md](_bmad-output/vehicle-item-bible.md): Modular Parts (Mechs, Tanks, Ships), Rarity Tiers & Visual DNA.
+- [mothership-bible.md](_bmad-output/mothership-bible.md): Facilities, Tech Tree & Deployment Methods (Teleportation).
+- [narrative-lore-bible.md](_bmad-output/narrative-lore-bible.md): World History, Factions & Narrative Hooks.
+- [economy-bible.md](_bmad-output/economy-bible.md): Dual-Currency, V2O Bridge & Monetization.
+- [ui-ux-bible.md](_bmad-output/ui-ux-bible.md): Tactical Noir HUD and User Journey.
+- [player-journey.md](_bmad-output/player-journey.md): Rookie to Legend Progression & Emotional Milestones.
+- [creator-studio-bible.md](_bmad-output/creator-studio-bible.md): God Mode, Context Patching & AI Guardrails.
 - [epics-stories.md](_bmad-output/epics-stories.md): Implementation Roadmap.
 
 ## Critical Implementation Rules

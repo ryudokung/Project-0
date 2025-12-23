@@ -3,8 +3,8 @@ package v2o
 import (
 	"context"
 	"fmt"
-	"project-0/internal/blockchain"
-	"project-0/internal/mech"
+	"github.com/ryudokung/Project-0/backend/internal/blockchain"
+	"github.com/ryudokung/Project-0/backend/internal/mech"
 
 	"github.com/google/uuid"
 )

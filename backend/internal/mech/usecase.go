@@ -27,13 +27,16 @@ func (u *mechUseCase) MintStarterMech(userID uuid.UUID) (*Mech, error) {
 	
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	
+	season := "Genesis"
+	imageURL := "https://api.dicebear.com/7.x/bottts/svg?seed=" + uuid.New().String()
+
 	m := &Mech{
 		ID:          uuid.New(),
 		OwnerID:     userID,
 		VehicleType: types[r.Intn(len(types))],
 		Class:       classes[r.Intn(len(classes))],
 		Rarity:      RarityCommon,
-		Season:      "Genesis",
+		Season:      &season,
 		Status:      StatusMinted, // For starter, we mark as minted immediately in DB
 		Stats: MechStats{
 			HP:      50 + r.Intn(50),
@@ -41,7 +44,7 @@ func (u *mechUseCase) MintStarterMech(userID uuid.UUID) (*Mech, error) {
 			Defense: 10 + r.Intn(10),
 			Speed:   5 + r.Intn(15),
 		},
-		ImageURL: "https://api.dicebear.com/7.x/bottts/svg?seed=" + uuid.New().String(), // Placeholder AI image
+		ImageURL: &imageURL, // Placeholder AI image
 	}
 
 	if err := u.repo.Create(m); err != nil {

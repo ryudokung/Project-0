@@ -36,10 +36,10 @@ type Mech struct {
 	OwnerID     uuid.UUID    `json:"owner_id"`
 	VehicleType VehicleType  `json:"vehicle_type"`
 	Class       VehicleClass `json:"class"`
-	ImageURL    string       `json:"image_url"`
+	ImageURL    *string      `json:"image_url,omitempty"`
 	Stats       MechStats    `json:"stats"`
 	Rarity      RarityTier   `json:"rarity"`
-	Season      string       `json:"season"`
+	Season      *string      `json:"season,omitempty"`
 	Status      MechStatus   `json:"status"`
 	CreatedAt   time.Time    `json:"created_at"`
 }
@@ -49,6 +49,30 @@ type MechStats struct {
 	Attack  int `json:"attack"`
 	Defense int `json:"defense"`
 	Speed   int `json:"speed"`
+}
+
+type Part struct {
+	ID        uuid.UUID  `json:"id"`
+	OwnerID   uuid.UUID  `json:"owner_id"`
+	MechID    *uuid.UUID `json:"mech_id,omitempty"`
+	Slot      string     `json:"slot"`
+	Name      string     `json:"name"`
+	Rarity    RarityTier `json:"rarity"`
+	Stats     PartStats  `json:"stats"`
+	VisualDNA VisualDNA  `json:"visual_dna"`
+	CreatedAt time.Time  `json:"created_at"`
+}
+
+type PartStats struct {
+	BonusHP      int `json:"bonus_hp"`
+	BonusAttack  int `json:"bonus_attack"`
+	BonusDefense int `json:"bonus_defense"`
+}
+
+type VisualDNA struct {
+	Keywords []string `json:"keywords"`
+	Faction  string   `json:"faction"`
+	Style    string   `json:"style"`
 }
 
 type MintRequest struct {
