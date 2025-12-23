@@ -10,9 +10,11 @@ type DeploymentMode = 'PILOT' | 'SPEEDER' | 'MECH' | 'TANK' | 'SHIP' | 'EXOSUIT'
 
 interface MothershipUpgrades {
   atmosphericEntry: boolean;
-  teleport: boolean;
+  quantumGate: boolean; // Renamed from teleport
   miningDrill: boolean;
   hackingModule: boolean;
+  radarLevel: number;
+  scannerLevel: number;
 }
 
 interface PlanetLocation {
@@ -100,9 +102,11 @@ export default function ExplorationLoop() {
   const [inventory, setInventory] = useState<string[]>(['Basic O2 Tank']);
   const [upgrades, setUpgrades] = useState<MothershipUpgrades>({
     atmosphericEntry: false,
-    teleport: false,
+    quantumGate: false,
     miningDrill: false,
-    hackingModule: false
+    hackingModule: false,
+    radarLevel: 1,
+    scannerLevel: 1
   });
 
   const [currentMode, setCurrentMode] = useState<DeploymentMode>('PILOT');
@@ -121,7 +125,7 @@ export default function ExplorationLoop() {
     const modeAllowed = target.allowedModes.includes(currentMode);
     
     // Check Entry System
-    const entryAllowed = !target.requiresAtmosphere || upgrades.atmosphericEntry || upgrades.teleport;
+    const entryAllowed = !target.requiresAtmosphere || upgrades.atmosphericEntry || upgrades.quantumGate;
     
     return modeAllowed && entryAllowed;
   };
@@ -137,18 +141,52 @@ export default function ExplorationLoop() {
   const sectors: Sector[] = [
     {
       id: '1',
-      name: 'IRON NEBULA',
-      description: 'A dense cloud of metallic dust and derelict warships.',
-      difficulty: 'MEDIUM',
-      coordinates: { x: 25, y: 35 },
-      color: 'pink',
+      name: 'SOL GATE',
+      description: 'The industrial gateway to the system. Relatively safe but heavily monitored.',
+      difficulty: 'LOW',
+      coordinates: { x: 15, y: 20 },
+      color: 'blue',
       subSectors: [
         {
           id: '1-1',
+          type: 'STATION',
+          name: 'Outpost 01',
+          description: 'A standard refueling station for independent scavengers.',
+          rewards: ['Scrap Metal', 'Fuel Isotopes'],
+          requirements: [],
+          allowedModes: ['PILOT', 'SPEEDER'],
+          requiresAtmosphere: false,
+          suitability: { pilot: 100, mech: 20 },
+          coordinates: { x: 40, y: 30 }
+        },
+        {
+          id: '1-2',
+          type: 'WRECK',
+          name: 'Old Freighter',
+          description: 'A derelict cargo ship drifting near the gate.',
+          rewards: ['Scrap Metal', 'O2 Crystals'],
+          requirements: [],
+          allowedModes: ['PILOT', 'EXOSUIT'],
+          requiresAtmosphere: false,
+          suitability: { pilot: 90, mech: 10 },
+          coordinates: { x: 60, y: 50 }
+        }
+      ]
+    },
+    {
+      id: '2',
+      name: 'IRON NEBULA',
+      description: 'A dense cloud of metallic dust and derelict warships. High gravity zones.',
+      difficulty: 'MEDIUM',
+      coordinates: { x: 45, y: 40 },
+      color: 'pink',
+      subSectors: [
+        {
+          id: '2-1',
           type: 'WRECK',
           name: 'Scrap Graveyard',
           description: 'A massive cluster of destroyed freighter hulls.',
-          rewards: ['Metal Scraps', 'Fuel Cells'],
+          rewards: ['Scrap Metal', 'Neural Links'],
           requirements: [],
           allowedModes: ['PILOT', 'SPEEDER', 'EXOSUIT'],
           requiresAtmosphere: false,
@@ -156,11 +194,11 @@ export default function ExplorationLoop() {
           coordinates: { x: 30, y: 40 }
         },
         {
-          id: '1-2',
+          id: '2-2',
           type: 'PLANET',
           name: 'Krios Prime',
           description: 'A frozen planetoid with hidden Syndicate bunkers.',
-          rewards: ['High-Grade Fuel', 'Weapon Parts'],
+          rewards: ['Fuel Isotopes', 'Neural Links'],
           requirements: [],
           allowedModes: ['MECH', 'TANK', 'HAULER'],
           requiresAtmosphere: true,
@@ -168,10 +206,10 @@ export default function ExplorationLoop() {
           coordinates: { x: 70, y: 60 },
           locations: [
             {
-              id: '1-2-1',
+              id: '2-2-1',
               name: 'Bunker Alpha',
               description: 'Deep underground storage facility.',
-              rewards: ['Classified Data', 'Ammo'],
+              rewards: ['Neural Links', 'Scrap Metal'],
               requirements: ['Hacking Module'],
               allowedModes: ['PILOT', 'EXOSUIT'],
               requiresAtmosphere: true,
@@ -179,10 +217,10 @@ export default function ExplorationLoop() {
               coordinates: { x: 20, y: 30 }
             },
             {
-              id: '1-2-2',
+              id: '2-2-2',
               name: 'Mining Rig 7',
               description: 'Automated extraction site on the surface.',
-              rewards: ['Raw Ore', 'Power Cells'],
+              rewards: ['Scrap Metal', 'Fuel Isotopes'],
               requirements: ['Mining Drill'],
               allowedModes: ['MECH', 'HAULER'],
               requiresAtmosphere: true,
@@ -194,41 +232,41 @@ export default function ExplorationLoop() {
       ]
     },
     {
-      id: '2',
-      name: 'VOID SECTOR 7',
-      description: 'Absolute silence. Only the echoes of ancient signals remain.',
-      difficulty: 'LOW',
-      coordinates: { x: 65, y: 25 },
-      color: 'blue',
+      id: '3',
+      name: 'NEON ABYSS',
+      description: 'A high-tech sector plagued by EMP storms and rogue AI signals.',
+      difficulty: 'HIGH',
+      coordinates: { x: 75, y: 30 },
+      color: 'red',
       subSectors: [
         {
-          id: '2-1',
+          id: '3-1',
           type: 'STATION',
-          name: 'Echo Station',
-          description: 'Abandoned research facility drifting in the void.',
-          rewards: ['Data Cores', 'O2'],
-          requirements: [],
-          allowedModes: ['PILOT'],
+          name: 'Data Hive',
+          description: 'A massive server farm drifting in a nebula.',
+          rewards: ['Neural Links', 'Void Shards'],
+          requirements: ['Hacking Module'],
+          allowedModes: ['PILOT', 'EXOSUIT'],
           requiresAtmosphere: false,
-          suitability: { pilot: 100, mech: 10 },
+          suitability: { pilot: 100, mech: 0 },
           coordinates: { x: 50, y: 50 }
         }
       ]
     },
     {
-      id: '3',
-      name: 'CORE BASTION',
-      description: 'The heart of the Syndicate territory.',
-      difficulty: 'HIGH',
-      coordinates: { x: 50, y: 75 },
+      id: '4',
+      name: 'THE DEAD RIM',
+      description: 'The edge of known space. Ancient ruins and ghost signals.',
+      difficulty: 'EXTREME',
+      coordinates: { x: 50, y: 80 },
       color: 'red',
       subSectors: [
         {
-          id: '3-1',
+          id: '4-1',
           type: 'PLANET',
           name: 'Vulcanis',
           description: 'A high-gravity mining planet near a dying star.',
-          rewards: ['Rare Isotopes', 'Advanced Tech'],
+          rewards: ['Void Shards', 'Ancient Tech'],
           requirements: [],
           allowedModes: ['MECH', 'TANK', 'SHIP'],
           requiresAtmosphere: true,
@@ -236,10 +274,10 @@ export default function ExplorationLoop() {
           coordinates: { x: 40, y: 30 },
           locations: [
             {
-              id: '3-1-1',
+              id: '4-1-1',
               name: 'Magma Chamber',
               description: 'Extreme heat zone with rare mineral deposits.',
-              rewards: ['Obsidian Core'],
+              rewards: ['Ancient Tech', 'Nexus Cores'],
               requirements: ['Mining Drill'],
               allowedModes: ['MECH', 'TANK'],
               requiresAtmosphere: true,
@@ -533,7 +571,7 @@ export default function ExplorationLoop() {
             </div>
 
             <div className="mb-8 border border-zinc-800 p-6">
-              <h2 className="text-xl font-bold mb-4 uppercase tracking-tighter">Mothership Systems</h2>
+              <h2 className="text-xl font-bold mb-4 uppercase tracking-tighter">Mothership Research Tree</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div 
                   onClick={() => setUpgrades(prev => ({ ...prev, atmosphericEntry: !prev.atmosphericEntry }))}
@@ -543,11 +581,11 @@ export default function ExplorationLoop() {
                   <div className="text-[8px]">{upgrades.atmosphericEntry ? 'ONLINE' : 'OFFLINE'}</div>
                 </div>
                 <div 
-                  onClick={() => setUpgrades(prev => ({ ...prev, teleport: !prev.teleport }))}
-                  className={`p-3 border cursor-pointer transition-all ${upgrades.teleport ? 'border-blue-500 bg-blue-500/10' : 'border-zinc-800 text-zinc-600'}`}
+                  onClick={() => setUpgrades(prev => ({ ...prev, quantumGate: !prev.quantumGate }))}
+                  className={`p-3 border cursor-pointer transition-all ${upgrades.quantumGate ? 'border-blue-500 bg-blue-500/10' : 'border-zinc-800 text-zinc-600'}`}
                 >
-                  <div className="text-[10px] uppercase font-bold">Teleport System</div>
-                  <div className="text-[8px]">{upgrades.teleport ? 'ONLINE' : 'OFFLINE'}</div>
+                  <div className="text-[10px] uppercase font-bold">Quantum Gate</div>
+                  <div className="text-[8px]">{upgrades.quantumGate ? 'ONLINE' : 'OFFLINE'}</div>
                 </div>
                 <div 
                   onClick={() => setUpgrades(prev => ({ ...prev, miningDrill: !prev.miningDrill }))}
@@ -564,11 +602,11 @@ export default function ExplorationLoop() {
                   <div className="text-[8px]">{upgrades.hackingModule ? 'INSTALLED' : 'NOT INSTALLED'}</div>
                 </div>
               </div>
-              {(upgrades.teleport || upgrades.miningDrill || upgrades.hackingModule) && (
+              {(upgrades.quantumGate || upgrades.miningDrill || upgrades.hackingModule) && (
                 <div className="mt-4 space-y-1">
-                  {upgrades.teleport && (
+                  {upgrades.quantumGate && (
                     <div className="text-[8px] text-blue-400 italic uppercase">
-                      Gimmick Active: Teleport bypasses all atmospheric entry requirements.
+                      Quantum Gate: Bypasses all atmospheric entry requirements.
                     </div>
                   )}
                   {upgrades.miningDrill && (
@@ -811,7 +849,7 @@ export default function ExplorationLoop() {
                           <div className="h-full bg-white" style={{ width: `${selectedSubSector.suitability.pilot}%` }} />
                         </div>
                         <div className="flex justify-between text-[10px]">
-                          <span>Mech Deployment</span>
+                          <span>Heavy Asset Deployment</span>
                           <span className={selectedSubSector.suitability.mech > 50 ? 'text-green-500' : 'text-red-500'}>
                             {selectedSubSector.suitability.mech}%
                           </span>
@@ -860,8 +898,8 @@ export default function ExplorationLoop() {
                       
                       <div className="flex justify-between items-center border-b border-zinc-900 pb-2">
                         <span className="text-[10px] text-zinc-400">Entry System</span>
-                        <span className={(!selectedSubSector.requiresAtmosphere || upgrades.atmosphericEntry || upgrades.teleport) ? 'text-green-500' : 'text-red-500'}>
-                          {upgrades.teleport ? '✓ TELEPORT READY' : 
+                        <span className={(!selectedSubSector.requiresAtmosphere || upgrades.atmosphericEntry || upgrades.quantumGate) ? 'text-green-500' : 'text-red-500'}>
+                          {upgrades.quantumGate ? '✓ QUANTUM GATE READY' : 
                            (!selectedSubSector.requiresAtmosphere ? '✓ NO ENTRY REQ' : 
                            (upgrades.atmosphericEntry ? '✓ ATMOSPHERE READY' : '✗ ENTRY SYSTEM REQUIRED'))}
                         </span>
@@ -987,7 +1025,7 @@ export default function ExplorationLoop() {
                           <div className="h-full bg-white" style={{ width: `${selectedPlanetLocation.suitability.pilot}%` }} />
                         </div>
                         <div className="flex justify-between text-[10px]">
-                          <span>Mech Power</span>
+                          <span>Heavy Asset Power</span>
                           <span className={selectedPlanetLocation.suitability.mech > 50 ? 'text-green-500' : 'text-red-500'}>
                             {selectedPlanetLocation.suitability.mech}%
                           </span>
@@ -1141,7 +1179,7 @@ export default function ExplorationLoop() {
                   <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8">
                     <div className="text-[10px] text-pink-500 font-bold mb-2 tracking-[0.3em] uppercase">Visual DNA Synthesis</div>
                     <div className="text-[10px] md:text-xs text-zinc-400 font-mono bg-black/60 p-2 md:p-3 border-l-2 border-pink-500 backdrop-blur-sm">
-                      {currentBead.visualPrompt}
+                      <span className="text-zinc-500">DNA_KEYWORDS:</span> {currentBead.visualPrompt.toUpperCase()}
                     </div>
                   </div>
 
@@ -1196,9 +1234,16 @@ export default function ExplorationLoop() {
                   }
                 }}
                 disabled={o2 <= 0 || isTransitioning}
-                className="bg-white text-black px-12 py-4 font-black uppercase tracking-tighter hover:bg-pink-500 hover:text-white transition-all disabled:opacity-20"
+                className="bg-white text-black px-12 py-4 font-black uppercase tracking-tighter hover:bg-pink-500 hover:text-white transition-all disabled:opacity-20 relative group"
               >
-                {currentBead?.type === 'COMBAT' ? 'Enter Combat' : (o2 < 30 ? 'Desperate Move' : 'Advance Timeline')}
+                <div className="flex flex-col items-center">
+                  <span>{currentBead?.type === 'COMBAT' ? 'Enter Combat' : (o2 < 30 ? 'Desperate Move' : 'Advance Timeline')}</span>
+                  {currentBead?.type !== 'COMBAT' && (
+                    <span className="text-[8px] font-bold opacity-60 group-hover:opacity-100">
+                      COST: 15 O2 | 5 FUEL
+                    </span>
+                  )}
+                </div>
               </button>
             </div>
           </div>
