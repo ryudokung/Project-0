@@ -23,7 +23,7 @@ date: '2025-12-21'
 ## 1. Executive Summary
 
 ### 1.1 Product Vision
-Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles and high entry barriers, utilizing AI to generate unique, seasonal NFT assets (Mechs, Tanks, Ships) with genuine aesthetic and functional rarity. The game is an **Evolving Live-Service Universe** where the creator gradually releases new lore, star systems, and context-driven patches to keep the exploration loop fresh and meaningful.
+Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles and high entry barriers, utilizing AI to generate unique, seasonal NFT assets (Mechs, Tanks, Ships) with genuine aesthetic and functional rarity. The game is an **Intense, Evolving Live-Service Universe** where the creator gradually releases a dark, gripping narrative, new star systems, and context-driven patches to keep the exploration loop fresh and meaningful.
 
 ### 1.2 Project Classification
 - **Project Type:** Blockchain/Web3 & Web Application
@@ -38,8 +38,8 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 
 ### 2.1 User Success
 - **The "Aha!" Moment:** Players receive a high-quality AI-generated Mech or Item for the first time, experiencing the thrill of unique visual ownership and social prestige.
-- **Emotional Outcome:** A deep sense of "True Ownership" and "Collection Pride," especially for rare seasonal assets that will never be generated again.
-- **Immersion:** Players feel like "Engineers" and "Commanders" through the story-driven assembly process, rather than just clicking a button.
+- **Emotional Outcome:** A deep sense of "Collection Pride" and "Social Dominance," especially for rare seasonal assets that trigger envy in other players.
+- **Immersion:** Players feel like "Operatives" and "Commanders" caught in an intense, dark narrative where every mission advances a gripping plot.
 - **Visual Pride:** Players feel a "Gasp" moment when they see their unique, high-fidelity AI-generated Mech for the first time—a design that is uniquely theirs and visually stunning.
 
 ### 2.2 Business Success

@@ -24,9 +24,11 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 
 ## Technical Bible
 - [PRD.md](_bmad-output/PRD.md): Product Requirements Document.
+- [GDD.md](_bmad-output/GDD.md): Game Design Document (Samus Shepard).
 - [architecture.md](_bmad-output/architecture.md): Technical Architecture & ADRs.
-- [gameplay-architecture.md](_bmad-output/gameplay-architecture.md): Gameplay System Mapping.
+- [game-systems-architecture.md](_bmad-output/game-systems-architecture.md): Game Systems & Showcase Engine (Cloud Dragonborn).
 - [combat-design.md](_bmad-output/combat-design.md): Combat Mechanics & Visual Wear & Tear.
+- [epics-stories.md](_bmad-output/epics-stories.md): Implementation Roadmap.
 
 ## Critical Implementation Rules
 - **Saga Pattern:** All multi-step transactions (Assembly, Discovery) must use the Saga Pattern with idempotency keys.

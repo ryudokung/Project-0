@@ -1,7 +1,7 @@
 # Combat & Gameplay Design: Project-0
 
 ## 1. Combat Philosophy
-Combat in Project-0 is designed to be **Strategic, High-Stakes, and Personal**. The scale is **1:1 (One Pilot, One Mech)**. You are not commanding an army; you are a lone explorer in a vast, dangerous universe. This personal scale makes every scratch on your Mech and every drop of O2 feel critical.
+Combat in Project-0 is designed to be **Strategic, High-Stakes, and Narrative-Driven**. The scale is **1:1 (One Pilot, One Mech)**, but the focus is on the **Asset Value** and the **Intense Story**. You are a high-stakes operative in a dangerous universe where your Mech is a powerful tool for dominance and collection. Every mission is a chapter in a dark, evolving plot.
 
 ## 2. Combat Stats & Attributes
 Every unit (Mothership, Mech, Pilot) has core stats, but their roles differ:
