@@ -33,6 +33,8 @@ func main() {
 
 	// Initialize Game/Pilot Module
 	gameRepo := game.NewRepository(db)
+	mechRepo := mech.NewRepository(db) // Move up to use in gameUseCase
+	gameUseCase := game.NewUseCase(gameRepo, mechRepo)
 
 	// Initialize Auth Module
 	jwtSecret := os.Getenv("PRIVY_APP_SECRET")
@@ -40,11 +42,10 @@ func main() {
 		jwtSecret = "default-secret-change-me"
 	}
 	authRepo := auth.NewRepository(db)
-	authUseCase := auth.NewUseCase(authRepo, gameRepo, jwtSecret)
+	authUseCase := auth.NewUseCase(authRepo, gameUseCase, jwtSecret)
 	authHandler := auth.NewHandler(authUseCase)
 
 	// Initialize Mech Module
-	mechRepo := mech.NewRepository(db)
 	mechUseCase := mech.NewUseCase(mechRepo)
 	mechHandler := mech.NewHandler(mechUseCase)
 
@@ -60,8 +61,8 @@ func main() {
 
 	// Initialize Gacha Module
 	gachaRepo := gacha.NewRepository(db)
-	gachaUseCase := gacha.NewUseCase(gachaRepo, gameRepo, mechRepo)
-	gachaHandler := gacha.NewHandler(gachaUseCase)
+	gachaUC := gacha.NewUseCase(gachaRepo, gameRepo, mechRepo)
+	gachaHandler := gacha.NewHandler(gachaUC)
 
 	// Routes
 	mux := http.NewServeMux()

@@ -14,27 +14,32 @@ export default function GachaPage() {
   const [results, setResults] = useState<GachaResult[] | null>(null);
   const [showReveal, setShowReveal] = useState(false);
 
-  const handlePull = async (count: number) => {
+  const handlePull = async (count: number, type: string = 'VOID_SIGNAL') => {
     setIsPulling(true);
     setResults(null);
     
     try {
-      // Mocking the API call for now
-      // In reality: const res = await fetch('/api/v1/gacha/pull', { method: 'POST', body: JSON.stringify({ count, pull_type: 'VOID_SIGNAL' }) });
+      const res = await fetch('http://localhost:8080/api/v1/gacha/pull', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          count, 
+          pull_type: type,
+          user_id: '00000000-0000-0000-0000-000000000000' // Placeholder for now
+        }) 
+      });
       
-      setTimeout(() => {
-        const mockResults: GachaResult[] = Array.from({ length: count }).map(() => ({
-          item_type: Math.random() > 0.5 ? 'MECH' : 'PART',
-          rarity: rollMockRarity(),
-          item: { name: 'Void Striker' }
-        }));
-        
-        setResults(mockResults);
-        setIsPulling(false);
-        setShowReveal(true);
-      }, 2000);
-    } catch (error) {
-      console.error(error);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to pull');
+      }
+
+      const data = await res.json();
+      setResults(data.results);
+      setIsPulling(false);
+      setShowReveal(true);
+    } catch (error: any) {
+      alert(error.message);
       setIsPulling(false);
     }
   };
@@ -58,8 +63,24 @@ export default function GachaPage() {
     }
   };
 
+  const isHighRarity = results?.some(r => r.rarity === 'RELIC' || r.rarity === 'SINGULARITY');
+
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8 overflow-hidden">
+    <main className={`min-h-screen bg-black text-white flex flex-col items-center justify-center p-8 overflow-hidden ${isHighRarity && showReveal ? 'animate-glitch' : ''}`}>
+      <style jsx>{`
+        @keyframes glitch {
+          0% { transform: translate(0) }
+          20% { transform: translate(-2px, 2px) }
+          40% { transform: translate(-2px, -2px) }
+          60% { transform: translate(2px, 2px) }
+          80% { transform: translate(2px, -2px) }
+          100% { transform: translate(0) }
+        }
+        .animate-glitch {
+          animation: glitch 0.2s infinite;
+          filter: hue-rotate(90deg);
+        }
+      `}</style>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-900 via-black to-black opacity-50" />
       
       <h1 className="text-6xl font-black tracking-tighter italic uppercase mb-12 z-10">
@@ -67,6 +88,15 @@ export default function GachaPage() {
       </h1>
 
       <div className="flex gap-8 z-10">
+        <button 
+          onClick={() => handlePull(1, 'DAILY_SIGNAL')}
+          disabled={isPulling}
+          className="group relative px-8 py-4 bg-zinc-900 border border-zinc-800 hover:border-yellow-400 transition-all"
+        >
+          <span className="relative z-10 font-bold uppercase tracking-widest text-yellow-400">Daily Signal</span>
+          <div className="absolute inset-0 bg-yellow-400 opacity-0 group-hover:opacity-5 transition-opacity" />
+        </button>
+
         <button 
           onClick={() => handlePull(1)}
           disabled={isPulling}

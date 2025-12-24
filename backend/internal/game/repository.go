@@ -66,11 +66,11 @@ func (r *gameRepository) InitializePilot(userID uuid.UUID) error {
 }
 
 func (r *gameRepository) GetGachaStats(userID uuid.UUID) (*GachaStats, error) {
-	query := `SELECT user_id, pity_relic_count, pity_singularity_count, total_pulls, updated_at FROM gacha_stats WHERE user_id = $1`
+	query := `SELECT user_id, pity_relic_count, pity_singularity_count, total_pulls, last_free_pull_at, updated_at FROM gacha_stats WHERE user_id = $1`
 	row := r.db.QueryRow(query, userID)
 
 	var s GachaStats
-	err := row.Scan(&s.UserID, &s.PityRelicCount, &s.PitySingularityCount, &s.TotalPulls, &s.UpdatedAt)
+	err := row.Scan(&s.UserID, &s.PityRelicCount, &s.PitySingularityCount, &s.TotalPulls, &s.LastFreePullAt, &s.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -80,9 +80,9 @@ func (r *gameRepository) GetGachaStats(userID uuid.UUID) (*GachaStats, error) {
 func (r *gameRepository) UpdateGachaStats(s *GachaStats) error {
 	query := `
 		UPDATE gacha_stats 
-		SET pity_relic_count = $1, pity_singularity_count = $2, total_pulls = $3, updated_at = CURRENT_TIMESTAMP
-		WHERE user_id = $4
+		SET pity_relic_count = $1, pity_singularity_count = $2, total_pulls = $3, last_free_pull_at = $4, updated_at = CURRENT_TIMESTAMP
+		WHERE user_id = $5
 	`
-	_, err := r.db.Exec(query, s.PityRelicCount, s.PitySingularityCount, s.TotalPulls, s.UserID)
+	_, err := r.db.Exec(query, s.PityRelicCount, s.PitySingularityCount, s.TotalPulls, s.LastFreePullAt, s.UserID)
 	return err
 }

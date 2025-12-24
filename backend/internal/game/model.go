@@ -21,5 +21,6 @@ type GachaStats struct {
 	PityRelicCount       int       `json:"pity_relic_count"`
 	PitySingularityCount int       `json:"pity_singularity_count"`
 	TotalPulls           int       `json:"total_pulls"`
+	LastFreePullAt       *time.Time `json:"last_free_pull_at"`
 	UpdatedAt            time.Time `json:"updated_at"`
 }

@@ -15,14 +15,14 @@ type UseCase interface {
 
 type authUseCase struct {
 	repo      Repository
-	gameRepo  game.Repository
+	gameUC    game.UseCase
 	jwtSecret string
 }
 
-func NewUseCase(repo Repository, gameRepo game.Repository, jwtSecret string) UseCase {
+func NewUseCase(repo Repository, gameUC game.UseCase, jwtSecret string) UseCase {
 	return &authUseCase{
 		repo:      repo,
-		gameRepo:  gameRepo,
+		gameUC:    gameUC,
 		jwtSecret: jwtSecret,
 	}
 }
@@ -60,9 +60,9 @@ func (u *authUseCase) Login(req LoginRequest) (*LoginResponse, error) {
 			return nil, err
 		}
 
-		// Initialize Pilot and Gacha Stats for new user
-		if err := u.gameRepo.InitializePilot(user.ID); err != nil {
-			return nil, fmt.Errorf("failed to initialize pilot: %w", err)
+		// Initialize Pilot, Gacha Stats, and Starter Gear for new user
+		if err := u.gameUC.InitializeNewPlayer(user.ID); err != nil {
+			return nil, fmt.Errorf("failed to initialize player: %w", err)
 		}
 	} else {
 		if err := u.repo.UpdateLastLogin(user.ID); err != nil {

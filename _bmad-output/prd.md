@@ -296,8 +296,50 @@ Project-0 operates as a "Closed-Loop Premium Economy." USDT flows into the syste
 - **Familiarity:** การใช้ Mech หรือชิ้นส่วนเดิมซ้ำๆ จะเพิ่มค่า "Sync Rate"
 - **Bonuses:** ค่า Sync Rate ที่สูงจะมอบ Buff พิเศษ เช่น +Evasion, +Accuracy หรือลดการใช้ Energy ซึ่งเป็นการตอบแทนผู้เล่นที่ดูแลและซ่อมแซมอุปกรณ์คู่ใจแทนการเปลี่ยนใหม่ตลอดเวลา
 
-### 10.4 Mothership Tech Tree (Base Progression)
-- **Facility Upgrades:** ผู้เล่นต้องลงทุนทรัพยากรเพื่ออัปเกรด Hangar (ความเร็วในการซ่อม), Lab (คุณภาพการคราฟต์) และ Scanner (ระยะการค้นหา)
+### 10.4 Mothership Engineering Matrix (Tech Web)
+แทนที่ระบบ Tech Tree แบบเดิมด้วย **Engineering Matrix** ที่แบ่งเป็น 2 สายหลัก (Dual-Core Paths) ซึ่งผู้เล่นต้องเลือกทิศทางการพัฒนา:
+
+#### 10.4.1 Teleport (Dimensional/Speed) Path
+เน้นความรวดเร็วและการข้ามระยะทาง แต่มีความเสี่ยงสูงหากโครงสร้างไม่แข็งแรง:
+1.  **Signal Booster I**: เพิ่มระยะการมองเห็น Encounter ล่วงหน้า +1 จุด
+2.  **Dimensional Anchor**: ลดการใช้เชื้อเพลิง (Fuel) ระหว่างการ Teleport 10%
+3.  **Void Stabilizer**: ลดโอกาสเกิด "Accident" ระหว่างการกระโดดข้ามมิติ 5%
+4.  **Frequency Tuner**: เพิ่มโอกาสตรวจพบสัญญาณระดับ "Refined" ขึ้น 5%
+5.  **Wormhole Navigator**: ปลดล็อกความสามารถ "Short-range Jump" (ข้ามได้ 1 Encounter ทันที)
+
+#### 10.4.2 Atmospheric Entry (Structural/Safety) Path
+เน้นความทนทานและการลงจอดที่ปลอดภัยในสภาพแวดล้อมที่โหดร้าย:
+1.  **Heat Shielding I**: ลดการใช้ O2 ระหว่างการเข้าสู่ชั้นบรรยากาศ 15%
+2.  **Reinforced Hull**: เพิ่มค่า HP เริ่มต้นให้ Mech หลังการลงจอด 10%
+3.  **Shock Absorbers**: ลดโอกาสเกิด "Critical Damage" จากการลงจอดกระแทก 10%
+4.  **Cargo Stabilizer**: เพิ่มโอกาส 5% ที่จะรักษาไอเทมทั้งหมดไว้ได้หากเกิดอุบัติเหตุ
+5.  **Descent Thrusters**: ปลดล็อก "Precision Landing" (สามารถเลือกจุดลงจอดที่ปลอดภัยกว่าได้)
+
+### 10.5 Starter Gear & Onboarding Loot
+ผู้เล่นใหม่จะได้รับชุดอุปกรณ์เริ่มต้น (Starter Gear) ที่มี **Visual DNA** เฉพาะตัวเพื่อสร้างความผูกพัน:
+- **Pilot Suit**: "Nomad-01" (Standard, Visual DNA: Scavenged Fabric)
+- **Sidearm**: "Rusty Bolt" (Standard, Visual DNA: Industrial Scrap)
+- **O2 Tank**: "Old Lung" (Standard, Visual DNA: Dented Steel)
+- **Early Game Buff**: เพิ่มอัตราการดรอปไอเทมระดับ **Refined** ขึ้นเล็กน้อยในช่วง 3 ภารกิจแรกเพื่อช่วยในการตั้งตัว
+
+## 11. Void Signals (Gacha System)
+
+### 11.1 Gacha Mechanics (Hoyoverse-style Pity)
+- **Relic Pity**: การันตีไอเทมระดับ **Relic** หรือสูงกว่าทุกๆ 10 Pulls
+- **Singularity Pity**: การันตีไอเทมระดับ **Singularity** ทุกๆ 80 Pulls
+- **Daily Signal**: ผู้เล่นได้รับสิทธิ์สุ่มฟรี 1 ครั้งทุก 24 ชั่วโมง (ไม่สะสม)
+
+### 11.2 Technical Implementation & Logging
+- **Enhanced Logging**: ทุกการสุ่มจะถูกบันทึกข้อมูลอย่างละเอียดเพื่อการตรวจสอบ (QA) และป้องกันการโกง:
+    - `user_id`, `pull_type` (Daily/Paid), `seed`, `pity_counter_before/after`, `result_item_id`, `timestamp`
+- **API Integration**: ยกเลิกการใช้ Mock Data ใน Frontend และเชื่อมต่อกับ Backend API จริงผ่าน `/api/v1/gacha/pull`
+- **UI/UX Glitch Effect**: เพิ่มเอฟเฟกต์ Glitch และ Static Noise ในหน้า Reveal เมื่อสุ่มได้ไอเทมระดับ **Relic** หรือ **Singularity** เพื่อสร้างความตื่นเต้น
+
+## 12. Functional Requirements (Updated)
+... (FR เดิม)
+- **FR41:** ระบบ Daily Signal มอบสิทธิ์สุ่มฟรี 1 ครั้งต่อวัน โดยตรวจสอบจาก `last_free_pull_at` ในฐานข้อมูล
+- **FR42:** ระบบ Engineering Matrix บันทึกสถานะการปลดล็อก Node ในตาราง `mothership_upgrades`
+- **FR43:** ระบบ Gacha Logging บันทึก Seed และ Pity State ลงในตาราง `gacha_history` ทุกครั้งที่มีการ Pull
 - **Deep Space Access:** การอัปเกรดเครื่องยนต์และเกราะกันความร้อนของ Mothership เป็นวิธีเดียวที่จะเข้าถึงระบบดาวระดับสูงที่มี Loot ระดับตำนาน
 
 ### 10.5 Seasonal Achievements & Hall of Fame

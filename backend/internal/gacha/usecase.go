@@ -37,9 +37,28 @@ func (u *gachaUseCase) Pull(req GachaPullRequest) (*GachaPullResponse, error) {
 		return nil, fmt.Errorf("gacha stats not found for user")
 	}
 
+	// Check Daily Signal
+	if req.PullType == DailySignal {
+		if stats.LastFreePullAt != nil {
+			now := time.Now()
+			if now.Sub(*stats.LastFreePullAt) < 24*time.Hour {
+				return nil, fmt.Errorf("daily signal already used. next pull available in %v", 24*time.Hour-now.Sub(*stats.LastFreePullAt))
+			}
+		}
+		now := time.Now()
+		stats.LastFreePullAt = &now
+		req.Count = 1 // Daily signal is always 1 pull
+	}
+
 	results := make([]GachaResult, 0, req.Count)
 
 	for i := 0; i < req.Count; i++ {
+		seed := time.Now().UnixNano()
+		rand.Seed(seed)
+
+		pityRelicBefore := stats.PityRelicCount
+		pitySingularityBefore := stats.PitySingularityCount
+
 		stats.TotalPulls++
 		stats.PityRelicCount++
 		stats.PitySingularityCount++
@@ -78,14 +97,19 @@ func (u *gachaUseCase) Pull(req GachaPullRequest) (*GachaPullResponse, error) {
 			}
 		}
 
-		// Save history
+		// Save history with enhanced logging
 		history := &GachaHistory{
-			ID:       uuid.New(),
-			UserID:   req.UserID,
-			ItemID:   u.getItemID(result.Item),
-			ItemType: result.ItemType,
-			PullType: req.PullType,
-			Rarity:   rarity,
+			ID:                    uuid.New(),
+			UserID:                req.UserID,
+			ItemID:                u.getItemID(result.Item),
+			ItemType:              result.ItemType,
+			PullType:              req.PullType,
+			Rarity:                rarity,
+			Seed:                  seed,
+			PityRelicBefore:       pityRelicBefore,
+			PityRelicAfter:        stats.PityRelicCount,
+			PitySingularityBefore: pitySingularityBefore,
+			PitySingularityAfter:  stats.PitySingularityCount,
 		}
 		u.repo.SaveHistory(history)
 
