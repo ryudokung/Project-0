@@ -12,6 +12,7 @@ import (
 	"github.com/ryudokung/Project-0/backend/internal/mech"
 	"github.com/ryudokung/Project-0/backend/internal/game"
 	"github.com/ryudokung/Project-0/backend/internal/combat"
+	"github.com/ryudokung/Project-0/backend/internal/exploration"
 )
 
 func main() {
@@ -51,6 +52,11 @@ func main() {
 	combatService := combat.NewService(combatEngine)
 	combatHandler := combat.NewHandler(combatService, mechRepo, gameRepo)
 
+	// Initialize Exploration Module
+	explorationRepo := exploration.NewRepository(db)
+	explorationService := exploration.NewService(explorationRepo, mechRepo, gameRepo)
+	explorationHandler := exploration.NewHandler(explorationService)
+
 	// Routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -60,6 +66,11 @@ func main() {
 	mux.HandleFunc("/api/v1/mechs/mint-starter", mechHandler.MintStarter)
 	mux.HandleFunc("/api/v1/mechs", mechHandler.ListMechs)
 	mux.HandleFunc("/api/v1/combat/simulate", combatHandler.SimulateAttack)
+	
+	// Exploration Routes
+	mux.HandleFunc("/api/v1/exploration/universe-map", explorationHandler.GetUniverseMap)
+	mux.HandleFunc("/api/v1/exploration/start", explorationHandler.StartExploration)
+	mux.HandleFunc("/api/v1/exploration/advance", explorationHandler.AdvanceTimeline)
 
 	// Simple CORS Middleware
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

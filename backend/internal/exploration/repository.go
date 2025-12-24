@@ -3,6 +3,7 @@ package exploration
 import (
 	"database/sql"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type explorationRepository struct {
@@ -11,6 +12,63 @@ type explorationRepository struct {
 
 func NewRepository(db *sql.DB) Repository {
 	return &explorationRepository{db: db}
+}
+
+func (r *explorationRepository) GetAllSectors() ([]Sector, error) {
+	query := `SELECT id, name, description, difficulty, coordinates_x, coordinates_y, color FROM sectors WHERE is_active = TRUE`
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var sectors []Sector
+	for rows.Next() {
+		var s Sector
+		if err := rows.Scan(&s.ID, &s.Name, &s.Description, &s.Difficulty, &s.CoordinatesX, &s.CoordinatesY, &s.Color); err != nil {
+			return nil, err
+		}
+		sectors = append(sectors, s)
+	}
+	return sectors, nil
+}
+
+func (r *explorationRepository) GetSubSectorsBySectorID(sectorID uuid.UUID) ([]SubSector, error) {
+	query := `SELECT id, sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y FROM sub_sectors WHERE sector_id = $1`
+	rows, err := r.db.Query(query, sectorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var subSectors []SubSector
+	for rows.Next() {
+		var ss SubSector
+		if err := rows.Scan(&ss.ID, &ss.SectorID, &ss.Type, &ss.Name, &ss.Description, pq.Array(&ss.Rewards), pq.Array(&ss.Requirements), pq.Array(&ss.AllowedModes), &ss.RequiresAtmosphere, &ss.SuitabilityPilot, &ss.SuitabilityMech, &ss.CoordinatesX, &ss.CoordinatesY); err != nil {
+			return nil, err
+		}
+		subSectors = append(subSectors, ss)
+	}
+	return subSectors, nil
+}
+
+func (r *explorationRepository) GetPlanetLocationsBySubSectorID(subSectorID uuid.UUID) ([]PlanetLocation, error) {
+	query := `SELECT id, sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y FROM planet_locations WHERE sub_sector_id = $1`
+	rows, err := r.db.Query(query, subSectorID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var locations []PlanetLocation
+	for rows.Next() {
+		var pl PlanetLocation
+		if err := rows.Scan(&pl.ID, &pl.SubSectorID, &pl.Name, &pl.Description, pq.Array(&pl.Rewards), pq.Array(&pl.Requirements), pq.Array(&pl.AllowedModes), &pl.RequiresAtmosphere, &pl.SuitabilityPilot, &pl.SuitabilityMech, &pl.CoordinatesX, &pl.CoordinatesY); err != nil {
+			return nil, err
+		}
+		locations = append(locations, pl)
+	}
+	return locations, nil
 }
 
 func (r *explorationRepository) GetNodesByStarID(starID uuid.UUID) ([]Node, error) {
@@ -56,11 +114,17 @@ func (r *explorationRepository) GetSessionByUserID(userID uuid.UUID) (*Session, 
 	return &s, err
 }
 
+func (r *explorationRepository) CreateThread(t *Thread) error {
+	query := `INSERT INTO threads (id, user_id, sub_sector_id, planet_location_id, vehicle_id, title, description, goal) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+	_, err := r.db.Exec(query, t.ID, t.UserID, t.SubSectorID, t.PlanetLocationID, t.VehicleID, t.Title, t.Description, t.Goal)
+	return err
+}
+
 func (r *explorationRepository) GetThreadByID(id uuid.UUID) (*Thread, error) {
-	query := `SELECT id, title, description, goal FROM threads WHERE id = $1`
+	query := `SELECT id, user_id, sub_sector_id, planet_location_id, vehicle_id, title, description, goal FROM threads WHERE id = $1`
 	row := r.db.QueryRow(query, id)
 	var t Thread
-	err := row.Scan(&t.ID, &t.Title, &t.Description, &t.Goal)
+	err := row.Scan(&t.ID, &t.UserID, &t.SubSectorID, &t.PlanetLocationID, &t.VehicleID, &t.Title, &t.Description, &t.Goal)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}

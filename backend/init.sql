@@ -81,6 +81,77 @@ CREATE TABLE IF NOT EXISTS stars (
 -- Nodes (Beads on a Thread)
 CREATE TYPE node_type AS ENUM ('COMBAT', 'RESOURCE', 'NARRATIVE', 'REST', 'BOSS');
 
+-- Universe Map Structure
+CREATE TABLE IF NOT EXISTS sectors (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    difficulty VARCHAR(20), -- LOW, MEDIUM, HIGH, EXTREME
+    coordinates_x INTEGER,
+    coordinates_y INTEGER,
+    color VARCHAR(20),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sub_sectors (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    sector_id UUID REFERENCES sectors(id),
+    type VARCHAR(20), -- PLANET, STATION, WRECK, ANOMALY
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    rewards TEXT[],
+    requirements TEXT[],
+    allowed_modes TEXT[], -- PILOT, MECH, TANK, etc.
+    requires_atmosphere BOOLEAN DEFAULT FALSE,
+    suitability_pilot INTEGER DEFAULT 50,
+    suitability_mech INTEGER DEFAULT 50,
+    coordinates_x INTEGER,
+    coordinates_y INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS planet_locations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    sub_sector_id UUID REFERENCES sub_sectors(id),
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    rewards TEXT[],
+    requirements TEXT[],
+    allowed_modes TEXT[],
+    requires_atmosphere BOOLEAN DEFAULT FALSE,
+    suitability_pilot INTEGER DEFAULT 50,
+    suitability_mech INTEGER DEFAULT 50,
+    coordinates_x INTEGER,
+    coordinates_y INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Threads & Beads (Exploration Timeline)
+CREATE TABLE IF NOT EXISTS threads (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id),
+    sub_sector_id UUID REFERENCES sub_sectors(id),
+    planet_location_id UUID REFERENCES planet_locations(id),
+    vehicle_id UUID REFERENCES mechs(id),
+    title VARCHAR(200),
+    description TEXT,
+    goal TEXT,
+    status VARCHAR(20) DEFAULT 'ACTIVE', -- ACTIVE, COMPLETED, FAILED
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS beads (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    thread_id UUID REFERENCES threads(id),
+    type VARCHAR(20), -- COMBAT, RESOURCE, NARRATIVE, ANCHOR
+    title VARCHAR(200),
+    description TEXT,
+    visual_prompt TEXT,
+    image_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS threads (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title VARCHAR(100) NOT NULL,
