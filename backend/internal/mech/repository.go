@@ -38,22 +38,22 @@ func (r *mechRepository) Create(m *Mech) error {
 	}
 
 	query := `
-		INSERT INTO mechs (id, owner_id, vehicle_type, class, image_url, stats, rarity, season, status)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO mechs (id, owner_id, vehicle_type, class, image_url, stats, rarity, tier, is_void_touched, season, status)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 	`
-	_, err = r.db.Exec(query, m.ID, m.OwnerID, m.VehicleType, m.Class, m.ImageURL, statsJSON, m.Rarity, m.Season, m.Status)
+	_, err = r.db.Exec(query, m.ID, m.OwnerID, m.VehicleType, m.Class, m.ImageURL, statsJSON, m.Rarity, m.Tier, m.IsVoidTouched, m.Season, m.Status)
 	return err
 }
 
 func (r *mechRepository) GetByID(ctx context.Context, id uuid.UUID) (*Mech, error) {
-	query := `SELECT id, token_id, owner_id, vehicle_type, class, image_url, stats, rarity, season, status, created_at FROM mechs WHERE id = $1`
+	query := `SELECT id, token_id, owner_id, vehicle_type, class, image_url, stats, rarity, tier, is_void_touched, season, status, created_at FROM mechs WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	var m Mech
 	var statsJSON []byte
 	var tokenID, imageURL, season sql.NullString
 
-	err := row.Scan(&m.ID, &tokenID, &m.OwnerID, &m.VehicleType, &m.Class, &imageURL, &statsJSON, &m.Rarity, &season, &m.Status, &m.CreatedAt)
+	err := row.Scan(&m.ID, &tokenID, &m.OwnerID, &m.VehicleType, &m.Class, &imageURL, &statsJSON, &m.Rarity, &m.Tier, &m.IsVoidTouched, &season, &m.Status, &m.CreatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -82,15 +82,15 @@ func (r *mechRepository) Update(ctx context.Context, m *Mech) error {
 	statsJSON, _ := json.Marshal(m.Stats)
 	query := `
 		UPDATE mechs 
-		SET token_id = $1, owner_id = $2, vehicle_type = $3, class = $4, image_url = $5, stats = $6, rarity = $7, season = $8, status = $9
-		WHERE id = $10
+		SET token_id = $1, owner_id = $2, vehicle_type = $3, class = $4, image_url = $5, stats = $6, rarity = $7, tier = $8, is_void_touched = $9, season = $10, status = $11
+		WHERE id = $12
 	`
-	_, err := r.db.ExecContext(ctx, query, m.TokenID, m.OwnerID, m.VehicleType, m.Class, m.ImageURL, statsJSON, m.Rarity, m.Season, m.Status, m.ID)
+	_, err := r.db.ExecContext(ctx, query, m.TokenID, m.OwnerID, m.VehicleType, m.Class, m.ImageURL, statsJSON, m.Rarity, m.Tier, m.IsVoidTouched, m.Season, m.Status, m.ID)
 	return err
 }
 
 func (r *mechRepository) GetByOwnerID(ownerID uuid.UUID) ([]Mech, error) {
-	query := `SELECT id, token_id, owner_id, vehicle_type, class, image_url, stats, rarity, season, status, created_at FROM mechs WHERE owner_id = $1`
+	query := `SELECT id, token_id, owner_id, vehicle_type, class, image_url, stats, rarity, tier, is_void_touched, season, status, created_at FROM mechs WHERE owner_id = $1`
 	rows, err := r.db.Query(query, ownerID)
 	if err != nil {
 		return nil, err
@@ -98,6 +98,27 @@ func (r *mechRepository) GetByOwnerID(ownerID uuid.UUID) ([]Mech, error) {
 	defer rows.Close()
 
 	var mechs []Mech
+	for rows.Next() {
+		var m Mech
+		var statsJSON []byte
+		var tokenID, imageURL, season sql.NullString
+		if err := rows.Scan(&m.ID, &tokenID, &m.OwnerID, &m.VehicleType, &m.Class, &imageURL, &statsJSON, &m.Rarity, &m.Tier, &m.IsVoidTouched, &season, &m.Status, &m.CreatedAt); err != nil {
+			return nil, err
+		}
+		if tokenID.Valid {
+			m.TokenID = &tokenID.String
+		}
+		if imageURL.Valid {
+			m.ImageURL = &imageURL.String
+		}
+		if season.Valid {
+			m.Season = &season.String
+		}
+		json.Unmarshal(statsJSON, &m.Stats)
+		mechs = append(mechs, m)
+	}
+	return mechs, nil
+}
 	for rows.Next() {
 		var m Mech
 		var statsJSON []byte
@@ -131,15 +152,15 @@ func (r *mechRepository) CreatePart(p *Part) error {
 	dnaJSON, _ := json.Marshal(p.VisualDNA)
 
 	query := `
-		INSERT INTO parts (id, owner_id, mech_id, slot, name, rarity, stats, visual_dna)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO parts (id, owner_id, mech_id, slot, name, rarity, tier, is_void_touched, is_minted, stats, visual_dna)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 	`
-	_, err := r.db.Exec(query, p.ID, p.OwnerID, p.MechID, p.Slot, p.Name, p.Rarity, statsJSON, dnaJSON)
+	_, err := r.db.Exec(query, p.ID, p.OwnerID, p.MechID, p.Slot, p.Name, p.Rarity, p.Tier, p.IsVoidTouched, p.IsMinted, statsJSON, dnaJSON)
 	return err
 }
 
 func (r *mechRepository) GetPartsByOwnerID(ownerID uuid.UUID) ([]Part, error) {
-	query := `SELECT id, owner_id, mech_id, slot, name, rarity, stats, visual_dna, created_at FROM parts WHERE owner_id = $1`
+	query := `SELECT id, owner_id, mech_id, slot, name, rarity, tier, is_void_touched, is_minted, stats, visual_dna, created_at FROM parts WHERE owner_id = $1`
 	rows, err := r.db.Query(query, ownerID)
 	if err != nil {
 		return nil, err
@@ -150,7 +171,7 @@ func (r *mechRepository) GetPartsByOwnerID(ownerID uuid.UUID) ([]Part, error) {
 }
 
 func (r *mechRepository) GetPartsByMechID(mechID uuid.UUID) ([]Part, error) {
-	query := `SELECT id, owner_id, mech_id, slot, name, rarity, stats, visual_dna, created_at FROM parts WHERE mech_id = $1`
+	query := `SELECT id, owner_id, mech_id, slot, name, rarity, tier, is_void_touched, is_minted, stats, visual_dna, created_at FROM parts WHERE mech_id = $1`
 	rows, err := r.db.Query(query, mechID)
 	if err != nil {
 		return nil, err
@@ -165,7 +186,7 @@ func (r *mechRepository) scanParts(rows *sql.Rows) ([]Part, error) {
 	for rows.Next() {
 		var p Part
 		var statsJSON, dnaJSON []byte
-		if err := rows.Scan(&p.ID, &p.OwnerID, &p.MechID, &p.Slot, &p.Name, &p.Rarity, &statsJSON, &dnaJSON, &p.CreatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.OwnerID, &p.MechID, &p.Slot, &p.Name, &p.Rarity, &p.Tier, &p.IsVoidTouched, &p.IsMinted, &statsJSON, &dnaJSON, &p.CreatedAt); err != nil {
 			return nil, err
 		}
 		json.Unmarshal(statsJSON, &p.Stats)

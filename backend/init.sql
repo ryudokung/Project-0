@@ -10,7 +10,7 @@ DO $$ BEGIN
         CREATE TYPE vehicle_class AS ENUM ('STRIKER', 'GUARDIAN', 'SCOUT', 'ARTILLERY');
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'rarity_tier') THEN
-        CREATE TYPE rarity_tier AS ENUM ('COMMON', 'RARE', 'LEGENDARY');
+        CREATE TYPE rarity_tier AS ENUM ('COMMON', 'RARE', 'LEGENDARY', 'REFINED', 'PROTOTYPE', 'RELIC', 'SINGULARITY');
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'saga_status') THEN
         CREATE TYPE saga_status AS ENUM ('STARTED', 'COMPLETED', 'FAILED', 'COMPENSATING');
@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS mechs (
     image_url TEXT,
     stats JSONB NOT NULL DEFAULT '{}', -- Base stats: HP, Attack, Defense, etc.
     rarity rarity_tier NOT NULL DEFAULT 'COMMON',
+    tier INTEGER DEFAULT 1,
+    is_void_touched BOOLEAN DEFAULT FALSE,
     season VARCHAR(50),
     status mech_status DEFAULT 'PENDING',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -53,6 +55,9 @@ CREATE TABLE IF NOT EXISTS parts (
     slot VARCHAR(50) NOT NULL, -- CHASSIS, ARM_L, ARM_R, LEGS, etc.
     name VARCHAR(100) NOT NULL,
     rarity rarity_tier NOT NULL DEFAULT 'COMMON',
+    tier INTEGER DEFAULT 1,
+    is_void_touched BOOLEAN DEFAULT FALSE,
+    is_minted BOOLEAN DEFAULT FALSE,
     stats JSONB NOT NULL DEFAULT '{}', -- Bonus stats: +HP, +Crit, etc.
     visual_dna JSONB NOT NULL DEFAULT '{}', -- AI Keywords for FLUX.1
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -63,6 +68,8 @@ CREATE TABLE IF NOT EXISTS pilot_stats (
     user_id UUID PRIMARY KEY REFERENCES users(id),
     resonance_level INTEGER DEFAULT 0,
     resonance_exp INTEGER DEFAULT 0,
+    xp INTEGER DEFAULT 0,
+    rank INTEGER DEFAULT 1,
     current_o2 DECIMAL(5, 2) DEFAULT 100.00,
     current_fuel DECIMAL(5, 2) DEFAULT 100.00,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -199,6 +206,26 @@ CREATE TABLE IF NOT EXISTS combat_logs (
     is_permanent BOOLEAN DEFAULT FALSE,
     expires_at TIMESTAMP WITH TIME ZONE,
     saved_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Gacha Pity System
+CREATE TABLE IF NOT EXISTS gacha_stats (
+    user_id UUID PRIMARY KEY REFERENCES users(id),
+    pity_relic_count INTEGER DEFAULT 0,
+    pity_singularity_count INTEGER DEFAULT 0,
+    total_pulls INTEGER DEFAULT 0,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Gacha History
+CREATE TABLE IF NOT EXISTS gacha_history (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id),
+    item_id UUID, -- Can be Mech or Part ID
+    item_type TEXT NOT NULL, -- 'MECH', 'PART'
+    pull_type TEXT NOT NULL, -- 'STANDARD_SIGNAL', 'VOID_SIGNAL'
+    rarity rarity_tier NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

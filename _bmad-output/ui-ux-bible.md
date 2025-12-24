@@ -65,7 +65,21 @@ The Gacha experience is designed to be high-tension and visually rewarding:
 - **The "Gasp" Moment:** For **Relic** or **Singularity** items, a full-screen splash art (AI-generated) is revealed with a dramatic sound effect and a "DNA Sequence" animation.
 - **Pity Tracker:** A subtle "Signal Strength" bar at the bottom shows how close the player is to a guaranteed high-tier drop.
 
-## 8. Seasonal UI: "Temporal Wormholes"
-- **The Wormhole Map:** A separate, distorted map view for seasonal events.
-- **Compatibility HUD:** A "Resonance Meter" that shows if the player's current gear is compatible with the wormhole's stability.
-- **Limited-Time Badges:** Items found in wormholes have a "Season X" watermark, increasing their collector value.
+## 9. Mothership Systems HUD
+The Mothership interface must clearly distinguish between the two independent engineering paths:
+
+### 9.1 Teleport Interface (Dimensional)
+- **Visuals:** Distorted, "glitchy" blue/purple UI elements.
+- **Metrics:** Stability %, Energy Drain, Gravity Interference.
+- **Feedback:** A "Dimensional Tear" animation when jumping.
+
+### 9.2 Atmospheric Entry Interface (Structural)
+- **Visuals:** Solid, industrial orange/red UI elements.
+- **Metrics:** Hull Temperature, G-Force, Structural Integrity.
+- **Feedback:** Heat haze and vibration effects during descent.
+
+### 9.3 Engineering Profile
+Ships are categorized by their "Engineering Bias":
+- **Warp-Bias:** High Teleport stability, fragile hull (Risky landing).
+- **Entry-Bias:** Reinforced hull (Safe landing), no Teleport capacity.
+- **Hybrid (End-game):** Balanced metrics for both systems.

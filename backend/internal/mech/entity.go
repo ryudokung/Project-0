@@ -21,9 +21,13 @@ const (
 	ClassScout     VehicleClass = "SCOUT"
 	ClassArtillery VehicleClass = "ARTILLERY"
 
-	RarityCommon    RarityTier = "COMMON"
-	RarityRare      RarityTier = "RARE"
-	RarityLegendary RarityTier = "LEGENDARY"
+	RarityCommon      RarityTier = "COMMON"
+	RarityRare        RarityTier = "RARE"
+	RarityLegendary   RarityTier = "LEGENDARY"
+	RarityRefined     RarityTier = "REFINED"
+	RarityPrototype   RarityTier = "PROTOTYPE"
+	RarityRelic       RarityTier = "RELIC"
+	RaritySingularity RarityTier = "SINGULARITY"
 
 	StatusPending MechStatus = "PENDING"
 	StatusMinted  MechStatus = "MINTED"
@@ -31,17 +35,19 @@ const (
 )
 
 type Mech struct {
-	ID          uuid.UUID    `json:"id"`
-	TokenID     *string      `json:"token_id,omitempty"` // Using string for uint256 compatibility
-	OwnerID     uuid.UUID    `json:"owner_id"`
-	VehicleType VehicleType  `json:"vehicle_type"`
-	Class       VehicleClass `json:"class"`
-	ImageURL    *string      `json:"image_url,omitempty"`
-	Stats       MechStats    `json:"stats"`
-	Rarity      RarityTier   `json:"rarity"`
-	Season      *string      `json:"season,omitempty"`
-	Status      MechStatus   `json:"status"`
-	CreatedAt   time.Time    `json:"created_at"`
+	ID            uuid.UUID    `json:"id"`
+	TokenID       *string      `json:"token_id,omitempty"` // Using string for uint256 compatibility
+	OwnerID       uuid.UUID    `json:"owner_id"`
+	VehicleType   VehicleType  `json:"vehicle_type"`
+	Class         VehicleClass `json:"class"`
+	ImageURL      *string      `json:"image_url,omitempty"`
+	Stats         MechStats    `json:"stats"`
+	Rarity        RarityTier   `json:"rarity"`
+	Tier          int          `json:"tier"`
+	IsVoidTouched bool         `json:"is_void_touched"`
+	Season        *string      `json:"season,omitempty"`
+	Status        MechStatus   `json:"status"`
+	CreatedAt     time.Time    `json:"created_at"`
 }
 
 type MechStats struct {
@@ -52,15 +58,18 @@ type MechStats struct {
 }
 
 type Part struct {
-	ID        uuid.UUID  `json:"id"`
-	OwnerID   uuid.UUID  `json:"owner_id"`
-	MechID    *uuid.UUID `json:"mech_id,omitempty"`
-	Slot      string     `json:"slot"`
-	Name      string     `json:"name"`
-	Rarity    RarityTier `json:"rarity"`
-	Stats     PartStats  `json:"stats"`
-	VisualDNA VisualDNA  `json:"visual_dna"`
-	CreatedAt time.Time  `json:"created_at"`
+	ID            uuid.UUID  `json:"id"`
+	OwnerID       uuid.UUID  `json:"owner_id"`
+	MechID        *uuid.UUID `json:"mech_id,omitempty"`
+	Slot          string     `json:"slot"`
+	Name          string     `json:"name"`
+	Rarity        RarityTier `json:"rarity"`
+	Tier          int        `json:"tier"`
+	IsVoidTouched bool       `json:"is_void_touched"`
+	IsMinted      bool       `json:"is_minted"`
+	Stats         PartStats  `json:"stats"`
+	VisualDNA     VisualDNA  `json:"visual_dna"`
+	CreatedAt     time.Time  `json:"created_at"`
 }
 
 type PartStats struct {

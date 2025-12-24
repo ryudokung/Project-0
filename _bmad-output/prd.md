@@ -60,6 +60,10 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 
 ### 3.1 MVP - Minimum Viable Product
 - **Player Identity:** Start as a **Void Scavenger** with a **Resonance Suit** and **Striker Mech**.
+- **Mothership Engineering Philosophy:** Motherships are defined by two independent, non-linear systems:
+    1. **Teleport System (Dimensional Tech):** For instant travel across dangerous sectors. High energy cost and instability. Some ships cannot install this due to structural mass.
+    2. **Atmospheric Entry System (Structural Tech):** For safe landing on planets. Manages heat and gravity. Independent of Teleport capabilities.
+    - **Strategic Choice:** Players choose between Speed (Teleport) vs. Safety (Entry) vs. Cost. Not a linear upgrade.
 - **Multi-Vehicle System:** Motherships, Mechs, Aircraft, and Pilot Gear with distinct gameplay roles.
 - **Engineering & Assembly System:** A story-driven crafting system (Synthesize) where asset generation requires resources, time, and engineers. Unlocked after the first mission.
 - **Tiered AI Assets:** 
@@ -92,11 +96,16 @@ Alex thrives on community engagement and being "first." He monitors the `#star-d
 ### 4.3 Journey 3: Sarah - The Collector/Trader (The Value Seeker)
 Sarah focuses on the long-term value of AI-generated art. As "Season 1: Iron Age" nears its end, she realizes certain AI designs will never be produced again. She browses the **Web-Based Marketplace** and purchases a "Key" for a rare "Rusty Chrome" Mech from a Grinder. She uses the **Dynamic NFT Evolution** system to apply a seasonal prestige frame, increasing its aesthetic appeal. Sarah holds the asset, knowing its rarity will increase as the player base grows, feeling pride in her curated collection of unique digital masterpieces.
 
-### 4.4 Journey 4: Marcus - The Game Master (Admin/Ops)
-Marcus ensures the universe remains balanced. He monitors the **Admin Dashboard** for anomalies. When he detects a bot cluster attempting to spam low-quality item generation, he triggers the **Difficulty Adjustment** mechanism, increasing the resource requirements and assembly time for small items temporarily. He also updates the **AI Prompt Library** for the upcoming season, ensuring fresh visual styles. His goal is to maintain a fair playing field and a stable economy for all participants.
+### 4.4 Journey 4: Marcus - The Architect (Seasonal Planning)
+Marcus มุ่งเน้นไปที่การวางโครงสร้างจักรวาลในระยะยาว เขาไม่ได้ปรับเปลี่ยนเกมแบบ Real-time แต่จะทำงานเป็นรอบ **Season (เช่น ทุก 3 เดือน)**:
+1. **Pre-Season:** ออกแบบ "Visual DNA" และ Meta ของ Season ถัดไป (เช่น ปรับสมดุลอาวุธประเภท Kinetic ให้แรงขึ้น)
+2. **Patch Deployment:** ปล่อย Patch ใหญ่เพื่อเปิดโซนใหม่, เพิ่มรูหนอน (Wormholes), และอัปเดตเนื้อเรื่องผ่าน AI Narrative Engine
+3. **Monitoring:** ติดตาม Feedback และข้อมูลเศรษฐกิจเพื่อนำไปวางแผนใน Patch หรือ Season ถัดไป
 
-### 4.5 Journey 5: The Adaptive Universe (System Difficulty Adjustment)
-The system itself acts as a participant. As more players flock to a specific star system to mine "Iron," the **Resource Difficulty** increases, lowering the drop rate and pushing players to explore uncharted territories. Similarly, as more Legendary Mechs are generated in a season, the **Rarity Difficulty** adjusts, making the next Legendary harder to obtain. This "Bitcoin-style" adjustment ensures that the economy remains self-balancing, preventing hyperinflation and maintaining the prestige of high-tier assets without constant manual intervention.
+### 4.5 Journey 5: The Adaptive Economy (Dynamic Scarcity)
+ระบบใช้ **Dynamic Adjustment** ในเชิงเศรษฐศาสตร์ (Bitcoin-style) เพื่อรักษาคุณค่าของไอเทม:
+- **Resource Scarcity:** หากใน Season นี้มีการขุดแร่ "Void Crystal" มากเกินไป ระบบจะค่อยๆ ปรับความยากในการหาเพิ่มขึ้นโดยอัตโนมัติ เพื่อป้องกันเงินเฟ้อ
+- **Rarity Balancing:** อัตราการดรอปของไอเทมระดับ Singularity จะถูกปรับตามจำนวนที่มีอยู่ในระบบ เพื่อให้ของแรร์ยังคงความแรร์ตลอดทั้ง Season
 
 ### 4.6 Journey Requirements Summary
 - **Core Gameplay:** Resource farming, stat-based combat, and buff-augmented exploration.
@@ -259,16 +268,15 @@ Project-0 operates as a "Closed-Loop Premium Economy." USDT flows into the syste
 
 ### 9.6 Admin & Quality Control (HITL)
 - **FR21:** Admin สามารถตรวจสอบและอนุมัติภาพที่ AI สังเคราะห์ขึ้น (HITL) ก่อนที่จะทำการ Mint หรืออัปเดต Metadata
-- **FR22:** ระบบสามารถปรับระดับความยาก (Difficulty Adjustment) ของทรัพยากรและอัตราการดรอปได้โดยอัตโนมัติ
+- **FR22:** ระบบสามารถปรับระดับความยาก (Difficulty Adjustment) ของทรัพยากรและอัตราการดรอปได้โดยอัตโนมัติ (Economic Balancing)
 - **FR23:** ระบบสามารถส่งการแจ้งเตือน Star Discovery ไปยัง Discord Channel ที่กำหนดได้ทันทีเมื่อมีการค้นพบใหม่
 - **FR26:** ผู้เล่นสามารถจ่าย USDT เพื่อบันทึก Combat Log และภาพ Snapshot การสำรวจแบบถาวร (Permanent Save) ลงใน Profile/Lore
-- **FR36:** ระบบ Creator Studio (The God Mode Engine):
-    - **Style Guide Management:** ผู้สร้างสามารถกำหนด "Visual DNA" (เช่น Hoyoverse Style, Artistic Painterly) ผ่าน AI Prompts และ LoRA
-    - **Comprehensive Templates:** ระบบกำหนดแม่แบบครอบคลุมทุกองค์ประกอบ (Character, Vehicle, Environment, UI, VFX)
-    - **Context Patching & Staging:** ระบบจัดการการปล่อย Patch แบบลากวาง พร้อมพื้นที่ทดสอบ (Sandbox/Staging) ก่อนปล่อยจริง
-    - **Universe Analytics & Heatmaps:** ระบบมอนิเตอร์ความเคลื่อนไหวของผู้เล่น, จุดที่ตายบ่อย, และอัตราการ Salvage แบบ Real-time
+- **FR36:** ระบบ Creator Studio (The Architect Engine):
+    - **Style Guide Management:** ผู้สร้างสามารถกำหนด "Visual DNA" ผ่าน AI Prompts และ LoRA สำหรับแต่ละ Season
+    - **Context Patching & Staging:** ระบบจัดการการปล่อย Patch ใหญ่ (Seasonal Updates) พร้อมพื้นที่ทดสอบ (Sandbox/Staging)
+    - **Universe Analytics:** ระบบมอนิเตอร์ข้อมูลเศรษฐกิจและพฤติกรรมผู้เล่นเพื่อใช้ในการออกแบบ Meta ใน Season ถัดไป
     - **Safety & Automation:** ระบบ One-Click Rollback สำหรับกู้คืนสถานะจักรวาล และระบบ Procedural Auto-Pilot สำหรับสร้างเหตุการณ์ย่อยอัตโนมัติ
-    - **Live Universe Control:** เครื่องมือสำหรับปรับแต่ง Event สดในเกมและคุมทิศทาง Narrative ทั้งหมดแบบ Real-time
+    - **Seasonal Control:** เครื่องมือสำหรับกำหนดวันเปิด-ปิดรูหนอน และการปล่อยเนื้อเรื่องตาม Timeline ที่วางไว้ใน Patch
 
 ## 10. Progression & Growth (Measuring Strength)
 

@@ -13,6 +13,7 @@ import (
 	"github.com/ryudokung/Project-0/backend/internal/game"
 	"github.com/ryudokung/Project-0/backend/internal/combat"
 	"github.com/ryudokung/Project-0/backend/internal/exploration"
+	"github.com/ryudokung/Project-0/backend/internal/gacha"
 )
 
 func main() {
@@ -30,17 +31,17 @@ func main() {
 	}
 	defer db.Close()
 
+	// Initialize Game/Pilot Module
+	gameRepo := game.NewRepository(db)
+
 	// Initialize Auth Module
 	jwtSecret := os.Getenv("PRIVY_APP_SECRET")
 	if jwtSecret == "" {
 		jwtSecret = "default-secret-change-me"
 	}
 	authRepo := auth.NewRepository(db)
-	authUseCase := auth.NewUseCase(authRepo, jwtSecret)
+	authUseCase := auth.NewUseCase(authRepo, gameRepo, jwtSecret)
 	authHandler := auth.NewHandler(authUseCase)
-
-	// Initialize Game/Pilot Module
-	gameRepo := game.NewRepository(db)
 
 	// Initialize Mech Module
 	mechRepo := mech.NewRepository(db)
@@ -57,6 +58,11 @@ func main() {
 	explorationService := exploration.NewService(explorationRepo, mechRepo, gameRepo)
 	explorationHandler := exploration.NewHandler(explorationService)
 
+	// Initialize Gacha Module
+	gachaRepo := gacha.NewRepository(db)
+	gachaUseCase := gacha.NewUseCase(gachaRepo, gameRepo, mechRepo)
+	gachaHandler := gacha.NewHandler(gachaUseCase)
+
 	// Routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -66,6 +72,9 @@ func main() {
 	mux.HandleFunc("/api/v1/mechs/mint-starter", mechHandler.MintStarter)
 	mux.HandleFunc("/api/v1/mechs", mechHandler.ListMechs)
 	mux.HandleFunc("/api/v1/combat/simulate", combatHandler.SimulateAttack)
+	
+	// Gacha Routes
+	mux.HandleFunc("/api/v1/gacha/pull", gachaHandler.Pull)
 	
 	// Exploration Routes
 	mux.HandleFunc("/api/v1/exploration/universe-map", explorationHandler.GetUniverseMap)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/ryudokung/Project-0/backend/internal/game"
 )
 
 type UseCase interface {
@@ -14,12 +15,14 @@ type UseCase interface {
 
 type authUseCase struct {
 	repo      Repository
+	gameRepo  game.Repository
 	jwtSecret string
 }
 
-func NewUseCase(repo Repository, jwtSecret string) UseCase {
+func NewUseCase(repo Repository, gameRepo game.Repository, jwtSecret string) UseCase {
 	return &authUseCase{
 		repo:      repo,
+		gameRepo:  gameRepo,
 		jwtSecret: jwtSecret,
 	}
 }
@@ -55,6 +58,11 @@ func (u *authUseCase) Login(req LoginRequest) (*LoginResponse, error) {
 		}
 		if err := u.repo.Create(user); err != nil {
 			return nil, err
+		}
+
+		// Initialize Pilot and Gacha Stats for new user
+		if err := u.gameRepo.InitializePilot(user.ID); err != nil {
+			return nil, fmt.Errorf("failed to initialize pilot: %w", err)
 		}
 	} else {
 		if err := u.repo.UpdateLastLogin(user.ID); err != nil {
