@@ -49,11 +49,11 @@ type Repository interface {
 	GetSubSectorsBySectorID(sectorID uuid.UUID) ([]SubSector, error)
 	GetPlanetLocationsBySubSectorID(subSectorID uuid.UUID) ([]PlanetLocation, error)
 
-	// Thread & Bead operations
-	CreateThread(thread *Thread) error
-	GetThreadByID(id uuid.UUID) (*Thread, error)
-	SaveBead(bead *Bead, threadID uuid.UUID) error
-	GetBeadsByThreadID(threadID uuid.UUID) ([]Bead, error)
+	// Expedition & Encounter operations
+	CreateExpedition(expedition *Expedition) error
+	GetExpeditionByID(id uuid.UUID) (*Expedition, error)
+	SaveEncounter(encounter *Encounter, expeditionID uuid.UUID) error
+	GetEncountersByExpeditionID(expeditionID uuid.UUID) ([]Encounter, error)
 }
 
 type Sector struct {
@@ -97,7 +97,7 @@ type PlanetLocation struct {
 	CoordinatesY       int       `json:"coordinates_y"`
 }
 
-type Thread struct {
+type Expedition struct {
 	ID               uuid.UUID  `json:"id"`
 	UserID           uuid.UUID  `json:"user_id"`
 	SubSectorID      uuid.UUID  `json:"sub_sector_id"`
@@ -108,7 +108,7 @@ type Thread struct {
 	Goal             string     `json:"goal"`
 }
 
-type Bead struct {
+type Encounter struct {
 	ID          uuid.UUID `json:"id"`
 	Type        NodeType  `json:"type"`
 	Title       string    `json:"title"`
@@ -126,9 +126,9 @@ func NewService(repo Repository, mechRepo mech.Repository, gameRepo game.Reposit
 	return &Service{repo: repo, mechRepo: mechRepo, gameRepo: gameRepo}
 }
 
-func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSectorID uuid.UUID, planetLocationID *uuid.UUID, vehicleID uuid.UUID) (*Thread, error) {
-	// 1. Create Thread
-	thread := &Thread{
+func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSectorID uuid.UUID, planetLocationID *uuid.UUID, vehicleID uuid.UUID) (*Expedition, error) {
+	// 1. Create Expedition
+	expedition := &Expedition{
 		ID:               uuid.New(),
 		UserID:           userID,
 		SubSectorID:      subSectorID,
@@ -139,23 +139,23 @@ func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSec
 		Goal:             "Locate the source of the signal.",
 	}
 
-	if err := s.repo.CreateThread(thread); err != nil {
+	if err := s.repo.CreateExpedition(expedition); err != nil {
 		return nil, err
 	}
 
-	// 2. Generate First Bead
-	_, err := s.StringNewBead(ctx, thread.ID, vehicleID)
+	// 2. Generate First Encounter
+	_, err := s.StringNewEncounter(ctx, expedition.ID, vehicleID)
 	if err != nil {
 		return nil, err
 	}
 
-	return thread, nil
+	return expedition, nil
 }
 
-// StringNewBead generates a new procedural event (Bead) based on the current Thread context
-func (s *Service) StringNewBead(ctx context.Context, threadID uuid.UUID, mechID uuid.UUID) (*Bead, error) {
+// StringNewEncounter generates a new procedural event (Encounter) based on the current Expedition context
+func (s *Service) StringNewEncounter(ctx context.Context, expeditionID uuid.UUID, mechID uuid.UUID) (*Encounter, error) {
 	// 1. Fetch Context Data
-	thread, err := s.repo.GetThreadByID(threadID)
+	expedition, err := s.repo.GetExpeditionByID(expeditionID)
 	if err != nil {
 		return nil, err
 	}
@@ -172,8 +172,8 @@ func (s *Service) StringNewBead(ctx context.Context, threadID uuid.UUID, mechID 
 		return nil, err
 	}
 
-	// 2. Determine Bead Type based on Thread and Pilot Stats
-	beadType := NodeCombat
+	// 2. Determine Encounter Type based on Expedition and Pilot Stats
+	encounterType := NodeCombat
 	if pilot != nil {
 		// Consume Resources
 		pilot.CurrentO2 -= 15.0
@@ -190,7 +190,7 @@ func (s *Service) StringNewBead(ctx context.Context, threadID uuid.UUID, mechID 
 		}
 
 		if pilot.CurrentO2 < 30 {
-			beadType = NodeResource
+			encounterType = NodeResource
 		}
 	}
 
@@ -199,9 +199,9 @@ func (s *Service) StringNewBead(ctx context.Context, threadID uuid.UUID, mechID 
 	desc := ""
 	env := ""
 
-	switch thread.Title {
+	switch expedition.Title {
 	case "The Silent Signal":
-		if beadType == NodeCombat {
+		if encounterType == NodeCombat {
 			title = "Scavenger Ambush"
 			desc = "A group of Iron Syndicate scavengers spotted your repair signal."
 			env = "Electromagnetic Storm, Rusted Satellite Debris"
@@ -220,20 +220,20 @@ func (s *Service) StringNewBead(ctx context.Context, threadID uuid.UUID, mechID 
 	node := &Node{EnvironmentDescription: env}
 	prompt := s.GenerateVisualPrompt(m, parts, node)
 
-	bead := &Bead{
+	encounter := &Encounter{
 		ID:           uuid.New(),
-		Type:         beadType,
+		Type:         encounterType,
 		Title:        title,
 		Description:  desc,
 		VisualPrompt: prompt,
 	}
 
 	// 5. Save to Repository
-	if err := s.repo.SaveBead(bead, threadID); err != nil {
+	if err := s.repo.SaveEncounter(encounter, expeditionID); err != nil {
 		return nil, err
 	}
 
-	return bead, nil
+	return encounter, nil
 }
 
 // GenerateVisualPrompt combines Mech DNA and Node Environment for AI Image Generation

@@ -79,33 +79,33 @@ func (h *Handler) StartExploration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	thread, err := h.service.StartExploration(r.Context(), req.UserID, req.SubSectorID, req.PlanetLocationID, req.VehicleID)
+	expedition, err := h.service.StartExploration(r.Context(), req.UserID, req.SubSectorID, req.PlanetLocationID, req.VehicleID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Fetch beads for the thread
-	beads, err := h.service.repo.GetBeadsByThreadID(thread.ID)
+	// Fetch encounters for the expedition
+	encounters, err := h.service.repo.GetEncountersByExpeditionID(expedition.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Fetch pilot stats
-	pilotStats, err := h.service.gameRepo.GetPilotStats(thread.UserID)
+	pilotStats, err := h.service.gameRepo.GetPilotStats(expedition.UserID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	response := struct {
-		Thread     *Thread          `json:"thread"`
-		Beads      []Bead           `json:"beads"`
+		Expedition *Expedition      `json:"expedition"`
+		Encounters []Encounter      `json:"encounters"`
 		PilotStats *game.PilotStats `json:"pilot_stats"`
 	}{
-		Thread:     thread,
-		Beads:      beads,
+		Expedition: expedition,
+		Encounters: encounters,
 		PilotStats: pilotStats,
 	}
 
@@ -115,8 +115,8 @@ func (h *Handler) StartExploration(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) AdvanceTimeline(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		ThreadID  uuid.UUID `json:"thread_id"`
-		VehicleID uuid.UUID `json:"vehicle_id"`
+		ExpeditionID uuid.UUID `json:"expedition_id"`
+		VehicleID    uuid.UUID `json:"vehicle_id"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -124,30 +124,30 @@ func (h *Handler) AdvanceTimeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bead, err := h.service.StringNewBead(r.Context(), req.ThreadID, req.VehicleID)
+	encounter, err := h.service.StringNewEncounter(r.Context(), req.ExpeditionID, req.VehicleID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Fetch updated pilot stats
-	thread, err := h.service.repo.GetThreadByID(req.ThreadID)
+	expedition, err := h.service.repo.GetExpeditionByID(req.ExpeditionID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
-	pilotStats, err := h.service.gameRepo.GetPilotStats(thread.UserID)
+	pilotStats, err := h.service.gameRepo.GetPilotStats(expedition.UserID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	response := struct {
-		Bead       *Bead            `json:"bead"`
+		Encounter  *Encounter       `json:"encounter"`
 		PilotStats *game.PilotStats `json:"pilot_stats"`
 	}{
-		Bead:       bead,
+		Encounter:  encounter,
 		PilotStats: pilotStats,
 	}
 

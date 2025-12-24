@@ -50,7 +50,7 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
     - Compensating transactions (e.g., credit refunds) for failed steps in the assembly pipeline.
     - **New Sagas:**
         - `ColonyUpgradeSaga`: Resource deduction, timer management, and facility state update.
-        - `ExplorationMissionSaga`: Fuel consumption, encounter resolution, and loot/durability updates.
+        - `ExpeditionSaga`: Fuel consumption, encounter resolution, and loot/durability updates.
         - `SalvageOperationSaga`: Unit capture processing (Sell/Research/Scrap) and inventory sync.
         - `StoryProgressionSaga`: Narrative milestone validation and fixed reward distribution.
         - `CombatSimulationSaga`: Turn-based simulation, durability deduction, and AI narrative trigger.
@@ -92,7 +92,9 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 - **หน้าที่:** ประมวลผล Logic ของเกมที่ไม่ต้องอยู่บน Chain ทั้งหมด.
 - **Logic:** 
     - **Hybrid Energy Management:** คำนวณการใช้ Standard Energy (Free) และ Premium Energy (Paid) สำหรับการสำรวจ.
-    - **Web2 Backend Fog of War:** ใช้ Server-side Validation ในการจัดการ Fog of War โดย Backend จะส่งข้อมูลเฉพาะสิ่งที่ผู้เล่น "มองเห็น" (ตามระยะ Scan) ไปยัง Client เท่านั้น เพื่อป้องกันการโกง (Map Hack) โดยไม่ต้องใช้ ZKP ในช่วงแรก.
+    - **Web2 Backend Fog of War:** ใช้ Server-side Validation ในการจัดการ Fog of War โดย Backend จะส่งข้อมูลเฉพาะสิ่งที่ผู้เล่น "มองเห็น" (ตามระยะ Scan) ไปยัง Client เท่านั้น เพื่อป้องกันการโกง (Map Hack) โดยใช้ **Go + PostgreSQL** เป็นหลัก.
+    - **Hierarchical Map System:** จัดเก็บข้อมูลแผนที่แบบลำดับชั้น (Sectors -> Sub-Sectors -> Planet Locations) เพื่อรองรับการขยายตัวของจักรวาล.
+    - **Expedition & Encounters:** ใช้ระบบ Expedition ในการบันทึกสถานะการสำรวจ และ Encounter สำหรับเหตุการณ์ย่อย เพื่อให้ผู้เล่นสามารถกลับมาเล่นต่อจากจุดเดิมได้ (Persistence).
     - **Radar & Risk Assessment Logic:** คำนวณโอกาสรอดชีวิตและระดับความอันตราย (Threat Level) ตาม Scanner ของ Mothership.
     - **AI Event Trigger:** หากเกิดอุบัติเหตุ ระบบจะส่งบริบท (Context) ผ่าน MCP ไปให้ AI Service เพื่อสร้างเหตุการณ์สุ่มที่สมจริง.
     - **Multi-Stage Exploration:** 

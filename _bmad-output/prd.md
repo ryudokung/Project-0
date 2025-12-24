@@ -210,13 +210,19 @@ Project-0 operates as a "Closed-Loop Premium Economy." USDT flows into the syste
 
 ### 9.2 Exploration & Discovery
 - **FR5:** ระบบ Multi-Stage Exploration (Mothership -> Mech -> Pilot EVA) ที่บังคับใช้ประเภท Vehicle และอุปกรณ์ต่างกันตามระยะทางและสภาพแวดล้อม
-- **FR6:** ระบบสุ่มเหตุการณ์ (Events) และอุบัติเหตุ (Accidents) ระหว่างการสำรวจ โดยใช้ AI สร้างเนื้อเรื่องตามบริบท (Context-aware AI Narrative) ผ่าน **Model Context Protocol (MCP)**
+- **FR6:** ระบบสุ่มเหตุการณ์ (Events) และอุบัติเหตุ (Accidents) ระหว่างการสำรวจ โดยใช้โครงสร้าง **Expedition & Encounters**:
+    - **Expedition:** แทนเซสชันการสำรวจในหนึ่งพื้นที่ (เช่น การลงจอดบนดาว)
+    - **Encounter:** แทนเหตุการณ์ย่อยใน Timeline (เช่น การพบซากหุ่น, การถูกโจมตี, การขุดแร่)
+    - **AI Narrative:** ใช้ AI สร้างเนื้อเรื่องตามบริบท (Context-aware AI Narrative) ผ่าน **Model Context Protocol (MCP)**
 - **FR7:** ระบบสามารถคำนวณระยะเวลาการสำรวจและโอกาสสำเร็จ (Success Probability %) ตาม Stat ของอุปกรณ์ที่สวมใส่
 - **FR8:** ผู้เล่นที่มี Season Pass+ สามารถรับบัฟความเร็ว/ประสิทธิภาพการสำรวจเพิ่มขึ้น 2 เท่า (ภายใต้ Daily Cap)
-- **FR9:** ระบบ Radar Scan & Fog of War: ผู้เล่นสามารถสแกนหาพิกัดดาวเพื่อดูระดับความอันตราย (Threat Level) เบื้องต้น โดยใช้ **Web2 Backend Fog of War** (Server-side validation) เพื่อความรวดเร็วและป้องกันการโกง
+- **FR9:** ระบบ Radar Scan & Fog of War:
+    - **Hierarchical Map:** แบ่งระดับพื้นที่เป็น Sector -> Sub-Sector -> Planet Location
+    - **Server-side Validation:** ผู้เล่นสามารถสแกนหาพิกัดดาวเพื่อดูระดับความอันตราย (Threat Level) เบื้องต้น โดยใช้ **Web2 Backend Fog of War** (Go + PostgreSQL) เพื่อความรวดเร็วและป้องกันการโกง
 - **FR27:** ระบบ Pre-flight Briefing: แสดงความเสี่ยงและคำเตือนก่อน Launch (เช่น ขาดเกราะกันความร้อน หรือ O2 ไม่พอ) โดยผู้เล่นสามารถเลือก "เสี่ยง" (Proceed at Own Risk) ได้
 - **FR33:** ระบบ Pilot Death & Penalty: หากนักบินเสียชีวิตระหว่าง EVA จะสูญเสียไอเทมที่เก็บได้ในรอบนั้นทั้งหมด และหุ่น Mech จะได้รับความเสียหายหนัก (Critical Damage)
 - **FR34:** ระบบ Evolving Universe: ระบบรองรับการอัปเดต "Context Patches" จากผู้สร้าง (Creator) เพื่อเพิ่มดาวเคราะห์ใหม่, ศัตรูใหม่ และเนื้อเรื่องใหม่ตามฤดูกาล
+- **FR40:** ระบบ Real-time Resource Consumption: ทุกการก้าวเดิน (Next Encounter) ในการสำรวจจะมีการหักทรัพยากรจริงจาก Pilot Stats (ค่าเริ่มต้น: O2 -15.0, Fuel -5.0) และบันทึกลงฐานข้อมูลทันที
 
 ### 9.3 Combat System (MVP - Immersive 1:1)
 - **FR10:** ระบบการต่อสู้แบบ 1:1 (One Pilot, One Mech) เน้นความสมจริงและผลกระทบส่วนบุคคล (Personal Stakes)

@@ -114,16 +114,16 @@ func (r *explorationRepository) GetSessionByUserID(userID uuid.UUID) (*Session, 
 	return &s, err
 }
 
-func (r *explorationRepository) CreateThread(t *Thread) error {
-	query := `INSERT INTO threads (id, user_id, sub_sector_id, planet_location_id, vehicle_id, title, description, goal) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+func (r *explorationRepository) CreateExpedition(t *Expedition) error {
+	query := `INSERT INTO expeditions (id, user_id, sub_sector_id, planet_location_id, vehicle_id, title, description, goal) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 	_, err := r.db.Exec(query, t.ID, t.UserID, t.SubSectorID, t.PlanetLocationID, t.VehicleID, t.Title, t.Description, t.Goal)
 	return err
 }
 
-func (r *explorationRepository) GetThreadByID(id uuid.UUID) (*Thread, error) {
-	query := `SELECT id, user_id, sub_sector_id, planet_location_id, vehicle_id, title, description, goal FROM threads WHERE id = $1`
+func (r *explorationRepository) GetExpeditionByID(id uuid.UUID) (*Expedition, error) {
+	query := `SELECT id, user_id, sub_sector_id, planet_location_id, vehicle_id, title, description, goal FROM expeditions WHERE id = $1`
 	row := r.db.QueryRow(query, id)
-	var t Thread
+	var t Expedition
 	err := row.Scan(&t.ID, &t.UserID, &t.SubSectorID, &t.PlanetLocationID, &t.VehicleID, &t.Title, &t.Description, &t.Goal)
 	if err == sql.ErrNoRows {
 		return nil, nil
@@ -131,27 +131,27 @@ func (r *explorationRepository) GetThreadByID(id uuid.UUID) (*Thread, error) {
 	return &t, err
 }
 
-func (r *explorationRepository) SaveBead(b *Bead, threadID uuid.UUID) error {
-	query := `INSERT INTO beads (id, thread_id, type, title, description, visual_prompt) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := r.db.Exec(query, b.ID, threadID, b.Type, b.Title, b.Description, b.VisualPrompt)
+func (r *explorationRepository) SaveEncounter(b *Encounter, expeditionID uuid.UUID) error {
+	query := `INSERT INTO encounters (id, expedition_id, type, title, description, visual_prompt) VALUES ($1, $2, $3, $4, $5, $6)`
+	_, err := r.db.Exec(query, b.ID, expeditionID, b.Type, b.Title, b.Description, b.VisualPrompt)
 	return err
 }
 
-func (r *explorationRepository) GetBeadsByThreadID(threadID uuid.UUID) ([]Bead, error) {
-	query := `SELECT id, type, title, description, visual_prompt FROM beads WHERE thread_id = $1 ORDER BY created_at ASC`
-	rows, err := r.db.Query(query, threadID)
+func (r *explorationRepository) GetEncountersByExpeditionID(expeditionID uuid.UUID) ([]Encounter, error) {
+	query := `SELECT id, type, title, description, visual_prompt FROM encounters WHERE expedition_id = $1 ORDER BY created_at ASC`
+	rows, err := r.db.Query(query, expeditionID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var beads []Bead
+	var encounters []Encounter
 	for rows.Next() {
-		var b Bead
+		var b Encounter
 		if err := rows.Scan(&b.ID, &b.Type, &b.Title, &b.Description, &b.VisualPrompt); err != nil {
 			return nil, err
 		}
-		beads = append(beads, b)
+		encounters = append(encounters, b)
 	}
-	return beads, nil
+	return encounters, nil
 }

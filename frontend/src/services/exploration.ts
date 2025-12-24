@@ -93,7 +93,7 @@ export interface PilotStats {
 }
 
 export interface ExplorationStartResponse {
-  thread: {
+  expedition: {
     id: string;
     user_id: string;
     sub_sector_id: string;
@@ -103,12 +103,12 @@ export interface ExplorationStartResponse {
     description: string;
     goal: string;
   };
-  beads: any[];
+  encounters: any[];
   pilot_stats: PilotStats;
 }
 
 export interface AdvanceTimelineResponse {
-  bead: any;
+  encounter: any;
   pilot_stats: PilotStats;
 }
 
@@ -179,13 +179,13 @@ export const explorationService = {
     return response.json();
   },
 
-  async advanceTimeline(threadId: string, vehicleId: string): Promise<AdvanceTimelineResponse> {
+  async advanceTimeline(expeditionId: string, vehicleId: string): Promise<AdvanceTimelineResponse> {
     const response = await fetch(`${API_BASE_URL}/exploration/advance`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ thread_id: threadId, vehicle_id: vehicleId }),
+      body: JSON.stringify({ expedition_id: expeditionId, vehicle_id: vehicleId }),
     });
     if (!response.ok) {
       throw new Error('Failed to advance timeline');

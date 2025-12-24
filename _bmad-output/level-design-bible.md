@@ -2,16 +2,16 @@
 
 **Goal:** Define the specific structure of the game world, sectors, and environmental hazards to ensure a consistent exploration experience.
 
-## 1. World Structure: The "Thread and Beads" Narrative Timeline
+## 1. World Structure: The "Expedition and Encounters" Narrative Timeline
 The game world is explored through a dynamic timeline model that balances fixed narrative goals with procedural variety:
 
-1.  **The Thread (Narrative Anchors):** Fixed milestones defined by the Director (e.g., "Reach the Sol Gate", "Repair the Radar"). These are the "Anchors" that provide the context for the journey.
-2.  **The Beads (Procedural Events):** AI-generated sub-events strung onto the Thread. These include:
-    *   **Combat Beads:** Tactical encounters with enemy factions.
-    *   **Resource Beads:** Salvage opportunities or fuel/O2 replenishment.
-    *   **Narrative Beads:** Lore fragments, pilot logs, or environmental storytelling.
-3.  **Discovery Nodes:** The physical locations on the Star Map where Threads are initiated.
-4.  **Encounter Scenes:** The visual result of a "Bead" being activated, featuring AI-generated Visual DNA prompts.
+1.  **The Expedition (Narrative Anchors):** Fixed milestones defined by the Director (e.g., "Reach the Sol Gate", "Repair the Radar"). These are the "Anchors" that provide the context for the journey.
+2.  **The Encounters (Procedural Events):** AI-generated sub-events strung onto the Expedition. These include:
+    *   **Combat Encounters:** Tactical encounters with enemy factions.
+    *   **Resource Encounters:** Salvage opportunities or fuel/O2 replenishment.
+    *   **Narrative Encounters:** Lore fragments, pilot logs, or environmental storytelling.
+3.  **Discovery Nodes:** The physical locations on the Star Map where Expeditions are initiated.
+4.  **Encounter Scenes:** The visual result of an "Encounter" being activated, featuring AI-generated Visual DNA prompts.
 
 ## 2. Sector Archetypes
 Each sector has a specific "Theme" and "Difficulty Tier":

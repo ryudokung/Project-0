@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { explorationService, Sector, SubSector, PlanetLocation } from '@/services/exploration';
 
 type GameState = 'HANGAR' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'ENCOUNTER' | 'DEBRIEF';
-type BeadType = 'COMBAT' | 'RESOURCE' | 'NARRATIVE' | 'ANCHOR';
+type EncounterType = 'COMBAT' | 'RESOURCE' | 'NARRATIVE' | 'ANCHOR';
 type POIType = 'PLANET' | 'STATION' | 'WRECK' | 'ANOMALY';
 type DeploymentMode = 'PILOT' | 'SPEEDER' | 'MECH' | 'TANK' | 'SHIP' | 'EXOSUIT' | 'HAULER';
 
@@ -18,9 +18,9 @@ interface MothershipUpgrades {
   scannerLevel: number;
 }
 
-interface Bead {
+interface Encounter {
   id: string;
-  type: BeadType;
+  type: EncounterType;
   title: string;
   description: string;
   visualPrompt: string;
@@ -45,9 +45,9 @@ export default function ExplorationLoop() {
   const [gameState, setGameState] = useState<GameState>('HANGAR');
   const [o2, setO2] = useState(100);
   const [fuel, setFuel] = useState(100);
-  const [beads, setBeads] = useState<Bead[]>([]);
-  const [currentBead, setCurrentBead] = useState<Bead | null>(null);
-  const [threadTitle, setThreadTitle] = useState('THE SILENT SIGNAL');
+  const [encounters, setEncounters] = useState<Encounter[]>([]);
+  const [currentEncounter, setCurrentEncounter] = useState<Encounter | null>(null);
+  const [expeditionTitle, setExpeditionTitle] = useState('THE SILENT SIGNAL');
   
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
@@ -55,7 +55,7 @@ export default function ExplorationLoop() {
   const [selectedSector, setSelectedSector] = useState<Sector | null>(null);
   const [selectedSubSector, setSelectedSubSector] = useState<SubSector | null>(null);
   const [selectedPlanetLocation, setSelectedPlanetLocation] = useState<PlanetLocation | null>(null);
-  const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
+  const [currentExpeditionId, setCurrentExpeditionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   
@@ -223,8 +223,8 @@ export default function ExplorationLoop() {
           selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
         );
         
-        setCurrentThreadId(result.thread.id);
-        setThreadTitle(`${selectedSector?.name} // ${selectedSubSector.name}`);
+        setCurrentExpeditionId(result.expedition.id);
+        setExpeditionTitle(`${selectedSector?.name} // ${selectedSubSector.name}`);
         setGameState('EXPLORATION');
         
         // Update stats from backend
@@ -233,17 +233,17 @@ export default function ExplorationLoop() {
           setFuel(result.pilot_stats.current_fuel);
         }
 
-        const mappedBeads = result.beads.map((b: any) => ({
-          id: b.id,
-          type: b.type,
-          title: b.title,
-          description: b.description,
-          visualPrompt: b.visual_prompt,
+        const mappedEncounters = result.encounters.map((e: any) => ({
+          id: e.id,
+          type: e.type,
+          title: e.title,
+          description: e.description,
+          visualPrompt: e.visual_prompt,
           image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1000&auto=format&fit=crop'
         }));
         
-        setBeads(mappedBeads);
-        setCurrentBead(mappedBeads[0]);
+        setEncounters(mappedEncounters);
+        setCurrentEncounter(mappedEncounters[0]);
       } catch (error) {
         console.error('Failed to start exploration:', error);
       } finally {
@@ -265,8 +265,8 @@ export default function ExplorationLoop() {
         selectedPlanetLocation.id
       );
       
-      setCurrentThreadId(result.thread.id);
-      setThreadTitle(`${selectedSector?.name} // ${selectedSubSector?.name} // ${selectedPlanetLocation.name}`);
+      setCurrentExpeditionId(result.expedition.id);
+      setExpeditionTitle(`${selectedSector?.name} // ${selectedSubSector?.name} // ${selectedPlanetLocation.name}`);
       setGameState('EXPLORATION');
       
       // Update stats from backend
@@ -275,17 +275,17 @@ export default function ExplorationLoop() {
         setFuel(result.pilot_stats.current_fuel);
       }
 
-      const mappedBeads = result.beads.map((b: any) => ({
-        id: b.id,
-        type: b.type,
-        title: b.title,
-        description: b.description,
-        visualPrompt: b.visual_prompt,
+const mappedEncounters = result.encounters.map((e: any) => ({
+          id: e.id,
+          type: e.type,
+          title: e.title,
+          description: e.description,
+          visualPrompt: e.visual_prompt,
         image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1000&auto=format&fit=crop'
       }));
       
-      setBeads(mappedBeads);
-      setCurrentBead(mappedBeads[0]);
+        setEncounters(mappedEncounters);
+        setCurrentEncounter(mappedEncounters[0]);
     } catch (error) {
       console.error('Failed to start planet exploration:', error);
     } finally {
@@ -294,42 +294,42 @@ export default function ExplorationLoop() {
   };
 
   const advanceTimeline = async () => {
-    if (isTransitioning || !currentThreadId) return;
+    if (isTransitioning || !currentExpeditionId) return;
 
     try {
       setIsTransitioning(true);
       
       // Call backend to advance
-      const nextBeadData = await explorationService.advanceTimeline(
-        currentThreadId,
+      const nextEncounterData = await explorationService.advanceTimeline(
+        currentExpeditionId,
         selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
       );
 
       // Update stats from backend
-      if (nextBeadData.pilot_stats) {
-        setO2(nextBeadData.pilot_stats.current_o2);
-        setFuel(nextBeadData.pilot_stats.current_fuel);
+      if (nextEncounterData.pilot_stats) {
+        setO2(nextEncounterData.pilot_stats.current_o2);
+        setFuel(nextEncounterData.pilot_stats.current_fuel);
         
-        if (nextBeadData.pilot_stats.current_o2 <= 0) {
+        if (nextEncounterData.pilot_stats.current_o2 <= 0) {
           setGameState('DEBRIEF');
           return;
         }
       }
 
-      const nextBead = {
-        id: nextBeadData.bead.id,
-        type: nextBeadData.bead.type,
-        title: nextBeadData.bead.title,
-        description: nextBeadData.bead.description,
-        visualPrompt: nextBeadData.bead.visual_prompt,
+      const nextEncounter = {
+        id: nextEncounterData.encounter.id,
+        type: nextEncounterData.encounter.type,
+        title: nextEncounterData.encounter.title,
+        description: nextEncounterData.encounter.description,
+        visualPrompt: nextEncounterData.encounter.visual_prompt,
         image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop'
       };
       
-      setBeads(prev => [...prev, nextBead]);
-      setCurrentBead(nextBead);
+      setEncounters(prev => [...prev, nextEncounter]);
+      setCurrentEncounter(nextEncounter);
 
-      if (nextBead.type === 'COMBAT') {
-        // Show the combat bead for a moment before switching to encounter
+      if (nextEncounter.type === 'COMBAT') {
+        // Show the combat encounter for a moment before switching to encounter
         setTimeout(() => {
           setGameState('ENCOUNTER');
           setIsTransitioning(false);
@@ -346,10 +346,10 @@ export default function ExplorationLoop() {
   const finishEncounter = () => {
     setGameState('EXPLORATION');
     setIsTransitioning(false);
-    // Update current bead to reflect victory
-    if (currentBead) {
-      setCurrentBead({
-        ...currentBead,
+    // Update current encounter to reflect victory
+    if (currentEncounter) {
+      setCurrentEncounter({
+        ...currentEncounter,
         type: 'NARRATIVE',
         title: 'Area Secured',
         description: 'The threat has been neutralized. The path forward is clear.'
@@ -996,8 +996,8 @@ export default function ExplorationLoop() {
           {/* HUD TOP */}
           <div className="p-6 flex justify-between items-start border-b border-zinc-900 bg-black/80 backdrop-blur-md z-10">
             <div>
-              <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Current Thread</div>
-              <div className="text-lg font-black italic text-pink-500">{threadTitle}</div>
+              <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Current Expedition</div>
+              <div className="text-lg font-black italic text-pink-500">{expeditionTitle}</div>
             </div>
             <div className="flex gap-8">
               <div className="text-right">
@@ -1022,7 +1022,7 @@ export default function ExplorationLoop() {
             className="flex-1 relative flex items-center justify-center p-4 md:p-12 cursor-pointer group"
             onClick={() => {
               if (gameState === 'EXPLORATION') {
-                if (currentBead?.type === 'COMBAT') {
+                if (currentEncounter?.type === 'COMBAT') {
                   // Manual skip to combat
                   setGameState('ENCOUNTER');
                   setIsTransitioning(false);
@@ -1033,15 +1033,15 @@ export default function ExplorationLoop() {
             }}
           >
             <AnimatePresence mode="wait">
-              {currentBead && (
+              {currentEncounter && (
                 <motion.div 
-                  key={currentBead.id}
+                  key={currentEncounter.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   className="relative w-full max-w-4xl aspect-video border border-zinc-800 overflow-hidden"
                 >
-                  <img src={currentBead.image} className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700" />
+                  <img src={currentEncounter.image} className="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
                   
                   {/* CLICK TO ADVANCE HINT */}
@@ -1055,17 +1055,17 @@ export default function ExplorationLoop() {
                   <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8">
                     <div className="text-[10px] text-pink-500 font-bold mb-2 tracking-[0.3em] uppercase">Visual DNA Synthesis</div>
                     <div className="text-[10px] md:text-xs text-zinc-400 font-mono bg-black/60 p-2 md:p-3 border-l-2 border-pink-500 backdrop-blur-sm">
-                      <span className="text-zinc-500">DNA_KEYWORDS:</span> {currentBead.visualPrompt.toUpperCase()}
+                      <span className="text-zinc-500">DNA_KEYWORDS:</span> {currentEncounter.visualPrompt.toUpperCase()}
                     </div>
                   </div>
 
-                  {/* BEAD INFO */}
+              {/* ENCOUNTER INFO */}
                   <div className="absolute top-4 left-4 md:top-8 md:left-8">
                     <div className="bg-white text-black px-2 py-0.5 md:px-3 md:py-1 text-[8px] md:text-[10px] font-black uppercase mb-1 md:mb-2 inline-block">
-                      {currentBead.type}
+                      {currentEncounter.type}
                     </div>
-                    <h3 className="text-xl md:text-3xl font-black italic tracking-tighter">{currentBead.title}</h3>
-                    <p className="text-zinc-400 max-w-xs md:max-w-md mt-1 md:mt-2 text-[10px] md:text-sm leading-relaxed">{currentBead.description}</p>
+                    <h3 className="text-xl md:text-3xl font-black italic tracking-tighter">{currentEncounter.title}</h3>
+                    <p className="text-zinc-400 max-w-xs md:max-w-md mt-1 md:mt-2 text-[10px] md:text-sm leading-relaxed">{currentEncounter.description}</p>
                   </div>
                 </motion.div>
               )}
@@ -1075,14 +1075,14 @@ export default function ExplorationLoop() {
           {/* TIMELINE STRING */}
           <div className="p-4 md:p-8 border-t border-zinc-900 bg-zinc-950/50 backdrop-blur-xl">
             <div className="flex items-center gap-4 mb-6 overflow-x-auto pb-4 no-scrollbar">
-              {beads.map((b, i) => (
-                <div key={b.id} className="flex items-center gap-4 shrink-0">
+              {encounters.map((e, i) => (
+                <div key={e.id} className="flex items-center gap-4 shrink-0">
                   <div className={`w-3 h-3 rounded-full ${
-                    b.type === 'COMBAT' ? 'bg-red-500' : 
-                    b.type === 'RESOURCE' ? 'bg-blue-500' : 
+                    e.type === 'COMBAT' ? 'bg-red-500' : 
+                    e.type === 'RESOURCE' ? 'bg-blue-500' : 
                     'bg-white'
-                  } ${i === beads.length - 1 ? 'ring-4 ring-pink-500/20 scale-125' : 'opacity-40'}`} />
-                  {i < beads.length - 1 && <div className="w-12 h-[1px] bg-zinc-800" />}
+                  } ${i === encounters.length - 1 ? 'ring-4 ring-pink-500/20 scale-125' : 'opacity-40'}`} />
+                  {i < encounters.length - 1 && <div className="w-12 h-[1px] bg-zinc-800" />}
                 </div>
               ))}
               <div className="w-12 h-[1px] bg-zinc-800 border-dashed border-t" />
@@ -1092,7 +1092,7 @@ export default function ExplorationLoop() {
             <div className="flex justify-between items-center">
               <div className="flex flex-col">
                 <div className="text-[10px] text-zinc-600 uppercase tracking-widest">
-                  Step {beads.length} / Narrative Timeline
+                  Step {encounters.length} / Narrative Timeline
                 </div>
                 {isTransitioning && (
                   <div className="text-[10px] text-red-500 font-bold animate-pulse uppercase mt-1">
@@ -1102,7 +1102,7 @@ export default function ExplorationLoop() {
               </div>
               <button 
                 onClick={() => {
-                  if (currentBead?.type === 'COMBAT') {
+                  if (currentEncounter?.type === 'COMBAT') {
                     setGameState('ENCOUNTER');
                     setIsTransitioning(false);
                   } else {
@@ -1113,8 +1113,8 @@ export default function ExplorationLoop() {
                 className="bg-white text-black px-12 py-4 font-black uppercase tracking-tighter hover:bg-pink-500 hover:text-white transition-all disabled:opacity-20 relative group"
               >
                 <div className="flex flex-col items-center">
-                  <span>{currentBead?.type === 'COMBAT' ? 'Enter Combat' : (o2 < 30 ? 'Desperate Move' : 'Advance Timeline')}</span>
-                  {currentBead?.type !== 'COMBAT' && (
+                  <span>{currentEncounter?.type === 'COMBAT' ? 'Enter Combat' : (o2 < 30 ? 'Desperate Move' : 'Advance Timeline')}</span>
+                  {currentEncounter?.type !== 'COMBAT' && (
                     <span className="text-[8px] font-bold opacity-60 group-hover:opacity-100">
                       COST: 15 O2 | 5 FUEL
                     </span>
@@ -1195,15 +1195,15 @@ export default function ExplorationLoop() {
             <div className="space-y-4 mb-12">
               <div className="flex justify-between border-b border-zinc-900 pb-2">
                 <span className="text-zinc-500 uppercase text-xs">Distance Traveled</span>
-                <span className="font-bold">{beads.length} Beads</span>
+                <span className="font-bold">{encounters.length} Encounters</span>
               </div>
               <div className="flex justify-between border-b border-zinc-900 pb-2">
                 <span className="text-zinc-500 uppercase text-xs">Combat Encounters</span>
-                <span className="font-bold text-red-500">{beads.filter(b => b.type === 'COMBAT').length}</span>
+                <span className="font-bold text-red-500">{encounters.filter(e => e.type === 'COMBAT').length}</span>
               </div>
               <div className="flex justify-between border-b border-zinc-900 pb-2">
                 <span className="text-zinc-500 uppercase text-xs">Resources Salvaged</span>
-                <span className="font-bold text-blue-500">{beads.filter(b => b.type === 'RESOURCE').length}</span>
+                <span className="font-bold text-blue-500">{encounters.filter(e => e.type === 'RESOURCE').length}</span>
               </div>
             </div>
 

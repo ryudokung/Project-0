@@ -24,7 +24,7 @@ var (
 			Padding(0, 1).
 			Bold(true)
 
-	beadStyle = lipgloss.NewStyle().
+	encounterStyle = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color("#383838")).
 			Padding(1, 2).
@@ -36,11 +36,11 @@ var (
 )
 
 type model struct {
-	service *exploration.Service
-	thread  *exploration.Thread
-	beads   []exploration.Bead
-	mechID  uuid.UUID
-	err     error
+	service    *exploration.Service
+	expedition *exploration.Expedition
+	encounters []exploration.Encounter
+	mechID     uuid.UUID
+	err        error
 }
 
 func initialModel(db *sql.DB) model {
@@ -49,20 +49,20 @@ func initialModel(db *sql.DB) model {
 	gameRepo := game.NewRepository(db)
 	service := exploration.NewService(repo, mechRepo, gameRepo)
 
-	// Use the sample thread ID from init.sql
-	threadID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
-	thread, _ := repo.GetThreadByID(threadID)
-	beads, _ := repo.GetBeadsByThreadID(threadID)
+	// Use the sample expedition ID from init.sql
+	expeditionID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
+	expedition, _ := repo.GetExpeditionByID(expeditionID)
+	encounters, _ := repo.GetEncountersByExpeditionID(expeditionID)
 
 	// Fetch a sample mech ID
 	var mechID uuid.UUID
 	db.QueryRow("SELECT id FROM mechs LIMIT 1").Scan(&mechID)
 
 	return model{
-		service: service,
-		thread:  thread,
-		beads:   beads,
-		mechID:  mechID,
+		service:    service,
+		expedition: expedition,
+		encounters: encounters,
+		mechID:     mechID,
 	}
 }
 
@@ -77,14 +77,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "n":
-			// String a new bead
+			// String a new encounter
 			ctx := context.Background()
-			bead, err := m.service.StringNewBead(ctx, m.thread.ID, m.mechID)
+			encounter, err := m.service.StringNewEncounter(ctx, m.expedition.ID, m.mechID)
 			if err != nil {
 				m.err = err
 				return m, nil
 			}
-			m.beads = append(m.beads, *bead)
+			m.encounters = append(m.encounters, *encounter)
 		}
 	}
 	return m, nil
@@ -96,22 +96,22 @@ func (m model) View() string {
 	}
 
 	var s strings.Builder
-	s.WriteString(titleStyle.Render("PROJECT-0: NARRATIVE TIMELINE (THREAD & BEADS)"))
+	s.WriteString(titleStyle.Render("PROJECT-0: NARRATIVE TIMELINE (EXPEDITION & ENCOUNTERS)"))
 	s.WriteString("\n\n")
 
-	if m.thread != nil {
-		s.WriteString(fmt.Sprintf("THREAD: %s\n", m.thread.Title))
-		s.WriteString(fmt.Sprintf("GOAL: %s\n\n", m.thread.Goal))
+	if m.expedition != nil {
+		s.WriteString(fmt.Sprintf("EXPEDITION: %s\n", m.expedition.Title))
+		s.WriteString(fmt.Sprintf("GOAL: %s\n\n", m.expedition.Goal))
 	}
 
 	s.WriteString("TIMELINE:\n")
-	for i, b := range m.beads {
+	for i, b := range m.encounters {
 		content := fmt.Sprintf("[%d] %s (%s)\n%s\n\n", i+1, b.Title, b.Type, b.Description)
 		content += promptStyle.Render("Visual DNA: " + b.VisualPrompt)
-		s.WriteString(beadStyle.Render(content))
+		s.WriteString(encounterStyle.Render(content))
 	}
 
-	s.WriteString("\nPress 'n' to string a new bead, 'q' to quit.\n")
+	s.WriteString("\nPress 'n' to string a new encounter, 'q' to quit.\n")
 
 	return s.String()
 }

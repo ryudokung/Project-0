@@ -48,23 +48,23 @@ In the dark void of Project-0, some pilots develop a supernatural connection wit
 - **The Ghost in the Machine:** During an awakening, the pilot's mind merges with the vehicle's AI. They don't just "drive" the machine; they **become** the machine.
 - **Societal Impact:** Awakened pilots are feared by factions like the Iron Syndicate but worshipped as "Seekers" by the Void Cult.
 
-## 7. Hybrid Narrative Architecture (The "Thread and Beads" Model)
+## 7. Hybrid Narrative Architecture (The "Expedition and Encounters" Model)
 To maintain the Director's vision while allowing for AI-driven variety, the game uses a unique model:
 
-### 6.1 The Thread: Narrative Anchors (Fixed by Director)
+### 6.1 The Expedition: Narrative Anchors (Fixed by Director)
 - **Definition:** Core plot points that every player must experience (e.g., "The Radar Repair").
-- **Requirement:** The Director **must define the Thread first**. Without the thread, the AI has no context for the journey.
+- **Requirement:** The Director **must define the Expedition first**. Without the expedition, the AI has no context for the journey.
 - **Function:** Acts as the "spine" of the story.
 
-### 6.2 The Beads: Procedural Sub-Events (Dynamic & AI-Generated)
+### 6.2 The Encounters: Procedural Sub-Events (Dynamic & AI-Generated)
 - **Definition:** The randomized events (Major/Minor) that happen between Anchors.
-- **Requirement:** The Director defines the **"Pool of Beads"** (types of events allowed), and the AI "strings" them onto the thread during gameplay.
+- **Requirement:** The Director defines the **"Pool of Encounters"** (types of events allowed), and the AI "strings" them onto the expedition during gameplay.
 - **Function:** Provides variety, rewards, and unique "Visual Reveals" (AI-generated images).
 
 ### 6.3 Visual Representation of Sub-Events
-- **Major Beads:** High-fidelity AI generation (FLUX.1) for unique, never-before-seen scenes.
-- **Minor Beads:** Visual glitches, radar static, and silhouettes to maintain mystery and save resources.
+- **Major Encounters:** High-fidelity AI generation (FLUX.1) for unique, never-before-seen scenes.
+- **Minor Encounters:** Visual glitches, radar static, and silhouettes to maintain mystery and save resources.
 
-### 6.4 Constraint Logic: Stringing the Beads
-When the AI generates a "Bead," it must check the "Thread" context:
-- *Example:* If the current Thread is "Repairing Radar," the AI cannot generate a Bead about "Interstellar Travel." It must stay within the current context.
+### 6.4 Constraint Logic: Stringing the Encounters
+When the AI generates an "Encounter," it must check the "Expedition" context:
+- *Example:* If the current Expedition is "Repairing Radar," the AI cannot generate an Encounter about "Interstellar Travel." It must stay within the current context.

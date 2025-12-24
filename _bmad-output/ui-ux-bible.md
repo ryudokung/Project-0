@@ -21,26 +21,26 @@ The Hangar is the primary social space:
 - **Photo Mode:** A dedicated UI to take high-res snapshots of the vehicle with custom filters.
 - **Social Sharing:** One-click sharing to X (Twitter) or Discord with the vehicle's stats and rarity.
 
-## 4. The Narrative Timeline: "Thread and Beads" UX
-The exploration interface is designed around the "Thread and Beads" model, focusing on the feeling of a journey unfolding in real-time:
+## 4. The Narrative Timeline: "Expedition and Encounters" UX
+The exploration interface is designed around the "Expedition and Encounters" model, focusing on the feeling of a journey unfolding in real-time:
 
-### 4.1 The Timeline String (The Thread)
+### 4.1 The Timeline String (The Expedition)
 - **Visual:** A glowing, data-driven line that runs across the top or side of the HUD.
-- **Beads:** As the player clicks "Advance," new nodes (Beads) appear on the string.
+- **Encounters:** As the player clicks "Advance," new nodes (Encounters) appear on the string.
 - **Color Coding:** 
-    - **Red Beads:** Combat encounters.
-    - **Blue Beads:** Resource/Salvage points.
-    - **White Beads:** Narrative/Lore fragments.
-    - **Gold Beads:** Major Anchors (Fixed plot points).
+    - **Red Encounters:** Combat encounters.
+    - **Blue Encounters:** Resource/Salvage points.
+    - **White Encounters:** Narrative/Lore fragments.
+    - **Gold Encounters:** Major Anchors (Fixed plot points).
 
 ### 4.2 The Visual Reveal (AI Image Display)
 - **Presentation:** The AI-generated image (based on Visual DNA) appears as a "Main Viewport" or a "Tactical Feed" in the center of the cockpit.
-- **Transition:** When a new Bead is generated, the image "glitches" or "scans" into view, emphasizing the AI-generated nature of the world.
+- **Transition:** When a new Encounter is generated, the image "glitches" or "scans" into view, emphasizing the AI-generated nature of the world.
 - **Metadata Overlay:** Small, monospaced text at the corner of the image showing the "DNA Keywords" used to generate it (e.g., `FACTION: IRON_SYNDICATE | STYLE: BRUTALIST`).
 
 ### 4.3 Resource-Driven Interaction
 - **The "Advance" Button:** The primary interaction. It displays the O2/Fuel cost for the next step.
-- **Dynamic Warnings:** If O2 is low, the HUD turns red, and the "Advance" button text changes to "DESPERATE MOVE," signaling that the AI is now more likely to generate high-stakes or resource-focused Beads.
+- **Dynamic Warnings:** If O2 is low, the HUD turns red, and the "Advance" button text changes to "DESPERATE MOVE," signaling that the AI is now more likely to generate high-stakes or resource-focused Encounters.
 
 ## 5. User Journey: The "Click-to-Explore" Loop
 

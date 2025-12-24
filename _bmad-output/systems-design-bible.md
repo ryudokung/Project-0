@@ -2,15 +2,15 @@
 
 **Goal:** Define the core gameplay systems, including materials, items, skills, and the research tree to ensure deep progression and clear utility.
 
-## 1. Exploration Mechanics: The "Thread and Beads" System
+## 1. Exploration Mechanics: The "Expedition and Encounters" System
 Exploration is governed by the interaction between the Pilot's resources and the AI-generated narrative timeline:
 
-1.  **The Thread (Narrative Spine):** A sequence of fixed goals (e.g., "Locate the Signal Source").
-2.  **The Beads (Procedural Events):** Each "Click" or "Move" on the timeline generates a Bead.
+1.  **The Expedition (Narrative Spine):** A sequence of fixed goals (e.g., "Locate the Signal Source").
+2.  **The Encounters (Procedural Events):** Each "Click" or "Move" on the timeline generates an Encounter.
     *   **Generation Logic:** The AI checks the Pilot's current **O2** and **Fuel**.
-    *   **Low Resources:** Triggers "Resource Beads" (e.g., finding an O2 tank) or "High-Stakes Narrative Beads" (e.g., a desperate gamble).
-    *   **High Resources:** Triggers "Combat Beads" or "Lore Beads" to progress the story.
-3.  **Visual DNA Synthesis:** Every Bead generates a unique visual prompt combining the Mech's parts and the current environment, providing a "Visual Reveal" for the player.
+    *   **Low Resources:** Triggers "Resource Encounters" (e.g., finding an O2 tank) or "High-Stakes Narrative Encounters" (e.g., a desperate gamble).
+    *   **High Resources:** Triggers "Combat Encounters" or "Lore Encounters" to progress the story.
+3.  **Visual DNA Synthesis:** Every Encounter generates a unique visual prompt combining the Mech's parts and the current environment, providing a "Visual Reveal" for the player.
 
 ## 2. Materials & Resource Economy
 
