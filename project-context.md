@@ -6,6 +6,7 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 ### Core Gameplay Pillars
 - **Adaptive Universe:** AI-driven ecosystem with evolving narratives and combat logs.
 - **Modular NFT Assembly:** Every part (Railgun, Shield, Pilot Suit) is an individual NFT. AI dynamically synthesizes these parts into a single visual representation based on the player's loadout and mission context.
+- **Web2.5 Onboarding (Seamless Entry):** Players can join using Google, Email, or Social accounts via Privy. A "Virtual-to-On-chain" (V2O) model allows immediate gameplay with virtual assets in the database, with optional wallet linking and on-chain minting later.
 - **Colony Management:** Upgradeable home bases that can move between star systems.
 - **AI Narrative Timeline (Expedition & Encounters):** 
     - **The Expedition:** The core narrative anchor or mission objective defined by the Director (e.g., "Repairing the Radar"). It provides the context and constraints for the AI.

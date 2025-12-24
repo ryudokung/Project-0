@@ -1,7 +1,6 @@
 package game
 
 import (
-	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/ryudokung/Project-0/backend/internal/mech"
 )
@@ -37,10 +36,10 @@ func (u *gameUseCase) InitializeNewPlayer(userID uuid.UUID) error {
 			Name:    "Nomad-01",
 			Rarity:  mech.RarityCommon,
 			Tier:    1,
-			Stats:   map[string]interface{}{"defense": 5},
-			VisualDNA: map[string]interface{}{
-				"base": "Scavenged Fabric",
-				"wear": "Light",
+			Stats:   mech.PartStats{BonusDefense: 5},
+			VisualDNA: mech.VisualDNA{
+				Keywords: []string{"Scavenged Fabric", "Light Wear"},
+				Style:    "Nomad",
 			},
 		},
 		{
@@ -50,10 +49,10 @@ func (u *gameUseCase) InitializeNewPlayer(userID uuid.UUID) error {
 			Name:    "Rusty Bolt",
 			Rarity:  mech.RarityCommon,
 			Tier:    1,
-			Stats:   map[string]interface{}{"attack": 3},
-			VisualDNA: map[string]interface{}{
-				"base": "Industrial Scrap",
-				"wear": "Heavy",
+			Stats:   mech.PartStats{BonusAttack: 3},
+			VisualDNA: mech.VisualDNA{
+				Keywords: []string{"Industrial Scrap", "Heavy Wear"},
+				Style:    "Scavenger",
 			},
 		},
 		{
@@ -63,10 +62,10 @@ func (u *gameUseCase) InitializeNewPlayer(userID uuid.UUID) error {
 			Name:    "Old Lung",
 			Rarity:  mech.RarityCommon,
 			Tier:    1,
-			Stats:   map[string]interface{}{"o2_capacity": 50},
-			VisualDNA: map[string]interface{}{
-				"base": "Dented Steel",
-				"wear": "Medium",
+			Stats:   mech.PartStats{BonusHP: 10}, // Using HP as capacity proxy
+			VisualDNA: mech.VisualDNA{
+				Keywords: []string{"Dented Steel", "Medium Wear"},
+				Style:    "Industrial",
 			},
 		},
 	}

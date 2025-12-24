@@ -57,7 +57,7 @@ export default function ExplorationPage() {
       <div className="flex-1 border border-green-900 p-4 bg-green-950/5 overflow-y-auto">
         <div className="text-xs text-green-700 uppercase mb-2">Mission Logs</div>
         {logs.map((log, i) => (
-          <div key={i} className="text-sm mb-1">
+          <div key={`log-${i}`} className="text-sm mb-1">
             <span className="text-green-800 mr-2">[{new Date().toLocaleTimeString()}]</span>
             {log}
           </div>

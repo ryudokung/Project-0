@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthSync } from '@/hooks/use-auth-sync';
+import { LoginButton } from '@/components/login-button';
 
 interface GachaResult {
   item_type: string;
@@ -10,11 +12,16 @@ interface GachaResult {
 }
 
 export default function GachaPage() {
+  const { user } = useAuthSync();
   const [isPulling, setIsPulling] = useState(false);
   const [results, setResults] = useState<GachaResult[] | null>(null);
   const [showReveal, setShowReveal] = useState(false);
 
   const handlePull = async (count: number, type: string = 'VOID_SIGNAL') => {
+    if (!user?.id) {
+      alert('Please login first');
+      return;
+    }
     setIsPulling(true);
     setResults(null);
     
@@ -25,7 +32,7 @@ export default function GachaPage() {
         body: JSON.stringify({ 
           count, 
           pull_type: type,
-          user_id: '00000000-0000-0000-0000-000000000000' // Placeholder for now
+          user_id: user.id
         }) 
       });
       
@@ -67,7 +74,10 @@ export default function GachaPage() {
 
   return (
     <main className={`min-h-screen bg-black text-white flex flex-col items-center justify-center p-8 overflow-hidden ${isHighRarity && showReveal ? 'animate-glitch' : ''}`}>
-      <style jsx>{`
+      <div className="absolute top-8 right-8 z-20">
+        <LoginButton />
+      </div>
+      <style>{`
         @keyframes glitch {
           0% { transform: translate(0) }
           20% { transform: translate(-2px, 2px) }
@@ -118,6 +128,7 @@ export default function GachaPage() {
       <AnimatePresence>
         {isPulling && (
           <motion.div 
+            key="pulling-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -142,6 +153,7 @@ export default function GachaPage() {
 
         {showReveal && results && (
           <motion.div 
+            key="reveal-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-12"
@@ -149,7 +161,7 @@ export default function GachaPage() {
             <div className="grid grid-cols-5 gap-4 max-w-6xl w-full">
               {results.map((res, i) => (
                 <motion.div
-                  key={i}
+                  key={`result-${i}-${res.item_type}`}
                   initial={{ y: 50, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: i * 0.1 }}
@@ -163,7 +175,7 @@ export default function GachaPage() {
                   </div>
                   <div className="text-center">
                     <div className="text-xs font-bold uppercase">{res.item_type}</div>
-                    <div className="text-[10px] text-zinc-500 font-mono mt-1">ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
+                    <div className="text-[10px] text-zinc-500 font-mono mt-1">ID: INTERCEPTED_{i}</div>
                   </div>
                 </motion.div>
               ))}

@@ -23,7 +23,7 @@ date: '2025-12-21'
 ## 1. Executive Summary
 
 ### 1.1 Product Vision
-Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles and high entry barriers, utilizing AI to generate unique, seasonal NFT assets (Mechs, Tanks, Ships) with genuine aesthetic and functional rarity. The game is an **Intense, Evolving Live-Service Universe** where the creator gradually releases a dark, gripping narrative, new star systems, and context-driven patches to keep the exploration loop fresh and meaningful.
+Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles and high entry barriers by utilizing a **Web2.5 Onboarding strategy** (Social Login first, Wallet later). It utilizes AI to generate unique, seasonal NFT assets (Mechs, Tanks, Ships) with genuine aesthetic and functional rarity. The game is an **Intense, Evolving Live-Service Universe** where the creator gradually releases a dark, gripping narrative, new star systems, and context-driven patches to keep the exploration loop fresh and meaningful.
 
 ### 1.2 Project Classification
 - **Project Type:** Blockchain/Web3 & Web Application
@@ -37,6 +37,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 ## 2. Success Criteria
 
 ### 2.1 User Success
+- **Zero-Friction Entry:** Players can start playing within seconds using Google/Email without needing a crypto wallet or gas fees.
 - **The "Aha!" Moment:** Players receive a high-quality AI-generated Mech or Item for the first time, experiencing the thrill of unique visual ownership and social prestige.
 - **Emotional Outcome:** A deep sense of "Collection Pride" and "Social Dominance," especially for rare seasonal assets that trigger envy in other players.
 - **Immersion:** Players feel like "Operatives" and "Commanders" caught in an intense, dark narrative where every mission advances a gripping plot.

@@ -119,27 +119,6 @@ func (r *mechRepository) GetByOwnerID(ownerID uuid.UUID) ([]Mech, error) {
 	}
 	return mechs, nil
 }
-	for rows.Next() {
-		var m Mech
-		var statsJSON []byte
-		var tokenID, imageURL, season sql.NullString
-		if err := rows.Scan(&m.ID, &tokenID, &m.OwnerID, &m.VehicleType, &m.Class, &imageURL, &statsJSON, &m.Rarity, &season, &m.Status, &m.CreatedAt); err != nil {
-			return nil, err
-		}
-		if tokenID.Valid {
-			m.TokenID = &tokenID.String
-		}
-		if imageURL.Valid {
-			m.ImageURL = &imageURL.String
-		}
-		if season.Valid {
-			m.Season = &season.String
-		}
-		json.Unmarshal(statsJSON, &m.Stats)
-		mechs = append(mechs, m)
-	}
-	return mechs, nil
-}
 
 func (r *mechRepository) UpdateStatus(id uuid.UUID, status MechStatus, tokenID string) error {
 	query := `UPDATE mechs SET status = $1, token_id = $2 WHERE id = $3`

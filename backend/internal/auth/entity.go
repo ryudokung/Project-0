@@ -8,6 +8,7 @@ import (
 
 type User struct {
 	ID            uuid.UUID `json:"id"`
+	PrivyDID      string    `json:"privy_did"`
 	WalletAddress string    `json:"wallet_address"`
 	Username      string    `json:"username"`
 	Credits       float64   `json:"credits"`
@@ -16,6 +17,7 @@ type User struct {
 }
 
 type LoginRequest struct {
+	PrivyDID      string `json:"privy_did"`
 	WalletAddress string `json:"wallet_address"`
 	PrivyToken    string `json:"privy_token"`
 }

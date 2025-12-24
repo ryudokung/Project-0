@@ -11,6 +11,7 @@ import (
 
 type UseCase interface {
 	Login(req LoginRequest) (*LoginResponse, error)
+	LinkWallet(userID uuid.UUID, walletAddress string) error
 }
 
 type authUseCase struct {
@@ -28,32 +29,45 @@ func NewUseCase(repo Repository, gameUC game.UseCase, jwtSecret string) UseCase 
 }
 
 func (u *authUseCase) Login(req LoginRequest) (*LoginResponse, error) {
-	// TODO: Verify Privy Token
-	// 1. Fetch JWKS from https://auth.privy.io/api/v1/apps/<app-id>/.well-known/jwks.json
-	// 2. Verify req.PrivyToken signature and claims (iss, aud, exp)
+	fmt.Printf("Login attempt for DID: %s, wallet: %s\n", req.PrivyDID, req.WalletAddress)
 	
-	if req.PrivyToken == "" && req.WalletAddress == "" {
-		return nil, fmt.Errorf("invalid request: missing token or wallet")
+	if req.PrivyDID == "" && req.WalletAddress == "" {
+		return nil, fmt.Errorf("invalid request: missing DID or wallet")
 	}
 
-	// For now, we use the wallet address provided or extract it from token (placeholder)
-	walletAddress := req.WalletAddress
-	if walletAddress == "" {
-		// Placeholder: In reality, extract from verified token
-		walletAddress = "0x0000000000000000000000000000000000000000" 
+	// 1. Try to find user by Privy DID first (most reliable)
+	var user *User
+	var err error
+	if req.PrivyDID != "" {
+		user, err = u.repo.GetByPrivyDID(req.PrivyDID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	user, err := u.repo.GetByWalletAddress(walletAddress)
-	if err != nil {
-		return nil, err
+	// 2. If not found by DID, try wallet address
+	if user == nil && req.WalletAddress != "" {
+		user, err = u.repo.GetByWalletAddress(req.WalletAddress)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if user == nil {
 		// Create new user if not exists
+		walletAddress := req.WalletAddress
+		username := "Pilot-"
+		if walletAddress != "" && len(walletAddress) >= 6 {
+			username += walletAddress[2:6]
+		} else {
+			username += uuid.New().String()[:4]
+		}
+
 		user = &User{
 			ID:            uuid.New(),
+			PrivyDID:      req.PrivyDID,
 			WalletAddress: walletAddress,
-			Username:      "Pilot-" + walletAddress[2:6],
+			Username:      username,
 			Credits:       0,
 		}
 		if err := u.repo.Create(user); err != nil {
@@ -65,6 +79,24 @@ func (u *authUseCase) Login(req LoginRequest) (*LoginResponse, error) {
 			return nil, fmt.Errorf("failed to initialize player: %w", err)
 		}
 	} else {
+		// Update PrivyDID if it's missing (for old users found by wallet)
+		if user.PrivyDID == "" && req.PrivyDID != "" {
+			if err := u.repo.UpdatePrivyDID(user.ID, req.PrivyDID); err != nil {
+				fmt.Printf("Warning: failed to update PrivyDID for user %s: %v\n", user.ID, err)
+			} else {
+				user.PrivyDID = req.PrivyDID
+			}
+		}
+
+		// Update WalletAddress if it's missing (for users who logged in with social first)
+		if user.WalletAddress == "" && req.WalletAddress != "" {
+			if err := u.repo.UpdateWalletAddress(user.ID, req.WalletAddress); err != nil {
+				fmt.Printf("Warning: failed to update WalletAddress for user %s: %v\n", user.ID, err)
+			} else {
+				user.WalletAddress = req.WalletAddress
+			}
+		}
+
 		if err := u.repo.UpdateLastLogin(user.ID); err != nil {
 			return nil, err
 		}
@@ -86,4 +118,11 @@ func (u *authUseCase) Login(req LoginRequest) (*LoginResponse, error) {
 		Token: tokenString,
 		User:  *user,
 	}, nil
+}
+
+func (u *authUseCase) LinkWallet(userID uuid.UUID, walletAddress string) error {
+	if walletAddress == "" {
+		return fmt.Errorf("wallet address is required")
+	}
+	return u.repo.UpdateWalletAddress(userID, walletAddress)
 }

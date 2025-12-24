@@ -2,7 +2,6 @@ package gacha
 
 import (
 	"database/sql"
-	"github.com/google/uuid"
 )
 
 type Repository interface {

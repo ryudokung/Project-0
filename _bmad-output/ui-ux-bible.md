@@ -44,6 +44,11 @@ The exploration interface is designed around the "Expedition and Encounters" mod
 
 ## 5. User Journey: The "Click-to-Explore" Loop
 
+### 5.1 Onboarding: "The Operative Recruitment"
+- **Login:** Minimalist screen with "Enter Project-0" via Google/Email. No wallet popup.
+- **First Contact:** Immediate transition to the Hangar where the first "Starter Mech" is waiting.
+- **Late Binding:** A subtle "Link External Wallet" button in the Hangar settings or profile, framed as "Securing Assets to the Void-Chain."
+
 ## 6. Rarity & Tier Visuals (The "Flex" Hierarchy)
 To distinguish between items and allow players to "show off," the UI uses a strict color and effect hierarchy:
 

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/ryudokung/Project-0/backend/internal/game"
 )
 
 type Handler struct {

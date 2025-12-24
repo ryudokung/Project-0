@@ -5,6 +5,7 @@
 ## 1. Phase 1: The Rookie Operative (Early Game)
 *Focus: Survival, Learning, and First Ownership.*
 
+- **The Seamless Entry:** Player joins the universe instantly via Social Login. No wallet setup required to start the journey.
 - **The Initial Hook:** Player wakes up in a cold, dark void, wearing only a basic **Pilot Spacesuit** with limited O2 and a standard-issue **Pistol**. They are floating near a small, nondescript **Mothership** that is powered down.
 - **Starter Quest: "Signal Lost":** The Mothership's Radar is broken. The player must perform a manual EVA (Extra-Vehicular Activity) to find Scrap from nearby debris to repair the Radar and unlock the mission board.
 - **The Awakening:** The first official mission. The player uses a basic **Exosuit** (not a full Mech yet) to enter a nearby derelict wreck.

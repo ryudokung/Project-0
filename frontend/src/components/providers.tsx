@@ -3,10 +3,12 @@
 import {PrivyProvider} from '@privy-io/react-auth';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {ReactNode, useState} from 'react';
+import {useRouter} from 'next/navigation';
 
 export default function Providers({children}: {children: ReactNode}) {
   const [queryClient] = useState(() => new QueryClient());
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+  const router = useRouter();
 
   if (!appId) {
     return (
@@ -27,6 +29,9 @@ export default function Providers({children}: {children: ReactNode}) {
   return (
     <PrivyProvider
       appId={appId}
+      onSuccess={() => {
+        router.push('/hangar');
+      }}
       config={{
         // Customize Privy's appearance and login methods
         appearance: {
@@ -40,7 +45,7 @@ export default function Providers({children}: {children: ReactNode}) {
             createOnLogin: 'users-without-wallets',
           },
         },
-        loginMethods: ['email', 'wallet', 'google', 'twitter'],
+        loginMethods: ['google', 'email', 'wallet', 'twitter'],
       }}
     >
       <QueryClientProvider client={queryClient}>

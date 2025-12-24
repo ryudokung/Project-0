@@ -8,10 +8,11 @@ export function LoginButton() {
   if (authenticated) {
     return (
       <div className="flex flex-col items-center gap-4">
-        <p className="text-sm text-gray-400">
+        <p key="user-info" className="text-sm text-gray-400">
           Logged in as: <span className="text-white font-mono">{user?.wallet?.address || user?.email?.address}</span>
         </p>
         <button
+          key="logout-btn"
           onClick={logout}
           className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
         >

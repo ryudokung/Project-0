@@ -34,6 +34,7 @@ This document captures the architectural decisions for Project-0, a Crypto Web G
 Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (Generative Art), and real-time gaming mechanics. The architecture must handle high-stakes financial transactions (USDT) while maintaining an immersive, story-driven user experience.
 
 ### 2.2 Key Architectural Challenges
+- **Identity Management (Web2.5):** Using `privy_did` as the primary user identifier to support non-wallet logins while allowing late-binding of Ethereum addresses.
 - **Hybrid State Consistency:** Ensuring 100% alignment between off-chain AI generation and on-chain NFT minting.
 - **Economic Integrity:** Implementing a transparent, self-balancing difficulty adjustment mechanism (Bitcoin-style).
 - **Scalability:** Supporting 10,000 concurrent users with real-time updates and load-adaptive AI processing.
@@ -58,6 +59,14 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 #### ADR 002: Backend Architecture Pattern
 - **Decision:** Use **Modular Monolith** with **Clean Architecture**.
 - **Rationale:** Provides the best balance between development speed (MVP) and future scalability. Allows for clear separation of concerns while avoiding the operational overhead of Microservices in the early stages.
+
+#### ADR 003: Identity & Onboarding (Web2.5)
+- **Decision:** Use **Privy DID** as the primary key for users.
+- **Rationale:** Decouples user identity from wallet addresses, enabling social login (Google/Email) and allowing users to link/change wallets without losing game progress.
+- **Key Implementation Details:**
+    - `users` table uses `privy_did` (Unique) for lookups.
+    - `wallet_address` is nullable and updated via a secure "Link Wallet" flow.
+    - JWT claims include `user_id` (UUID) for internal authorization.
 - **Key Implementation Details:**
     - Domain-driven folder structure (e.g., `internal/ai`, `internal/blockchain`).
     - Shared kernel for common types and utilities.

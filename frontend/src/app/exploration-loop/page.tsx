@@ -390,9 +390,9 @@ const mappedEncounters = result.encounters.map((e: any) => ({
                       <div className="text-[10px] text-zinc-500 mt-1">Pilot EVA Gear: Standard Issue</div>
                     </div>
 
-                    {vehicles.map(v => (
+                    {vehicles.map((v, idx) => (
                       <div 
-                        key={v.id}
+                        key={`vehicle-select-${v.id || idx}`}
                         onClick={() => setSelectedVehicle(v)}
                         className={`p-4 border cursor-pointer transition-all ${
                           selectedVehicle?.id === v.id ? 'border-pink-500 bg-pink-500/10' : 'border-zinc-800 hover:border-zinc-600'
@@ -532,9 +532,9 @@ const mappedEncounters = result.encounters.map((e: any) => ({
               />
               
               {/* Sector Points */}
-              {sectors.map(s => (
+              {sectors.map((s, idx) => (
                 <motion.div
-                  key={s.id}
+                  key={`sector-${s.id || idx}`}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   whileHover={{ scale: 1.2 }}
@@ -659,9 +659,9 @@ const mappedEncounters = result.encounters.map((e: any) => ({
               </div>
               
               {/* Sub-Sector Points */}
-              {selectedSector.subSectors.map(ss => (
+              {selectedSector.subSectors.map((ss, idx) => (
                 <motion.div
-                  key={ss.id}
+                  key={`subsector-${ss.id || idx}`}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   whileHover={{ scale: 1.2 }}
@@ -751,9 +751,9 @@ const mappedEncounters = result.encounters.map((e: any) => ({
                             </span>
                           </div>
                         </div>
-                        {vehicles.map(v => (
+                        {vehicles.map((v, idx) => (
                           <div 
-                            key={v.id}
+                            key={`vehicle-deploy-subsector-${v.id || idx}`}
                             onClick={() => setSelectedVehicle(v)}
                             className={`p-2 border text-[10px] cursor-pointer transition-all ${selectedVehicle?.id === v.id ? 'border-pink-500 bg-pink-500/10' : 'border-zinc-800 hover:border-zinc-700'}`}
                           >
@@ -848,9 +848,9 @@ const mappedEncounters = result.encounters.map((e: any) => ({
               </div>
               
               {/* Planet Locations */}
-              {selectedSubSector.locations?.map(loc => (
+              {selectedSubSector.locations?.map((loc, idx) => (
                 <motion.div
-                  key={loc.id}
+                  key={`location-${loc.id || idx}`}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   whileHover={{ scale: 1.2 }}
@@ -917,14 +917,14 @@ const mappedEncounters = result.encounters.map((e: any) => ({
                       <div>
                         <div className="text-[8px] text-zinc-500 uppercase mb-2">Objective Rewards</div>
                         <ul className="text-[10px] space-y-1">
-                          {selectedPlanetLocation.rewards.map(r => <li key={r} className="text-blue-400">+ {r}</li>)}
+                          {selectedPlanetLocation.rewards.map((r, idx) => <li key={`reward-${idx}-${r}`} className="text-blue-400">+ {r}</li>)}
                         </ul>
                       </div>
                       <div>
                         <div className="text-[8px] text-zinc-500 uppercase mb-2">Requirements</div>
                         <ul className="text-[10px] space-y-1">
-                          {selectedPlanetLocation.requirements.map(r => (
-                            <li key={r} className={inventory.includes(r) ? 'text-green-500' : 'text-red-500 animate-pulse'}>
+                          {selectedPlanetLocation.requirements.map((r, idx) => (
+                            <li key={`req-${idx}-${r}`} className={inventory.includes(r) ? 'text-green-500' : 'text-red-500 animate-pulse'}>
                               {inventory.includes(r) ? '✓' : '✗'} {r}
                             </li>
                           ))}
@@ -947,9 +947,9 @@ const mappedEncounters = result.encounters.map((e: any) => ({
                             </span>
                           </div>
                         </div>
-                        {vehicles.map(v => (
+                        {vehicles.map((v, idx) => (
                           <div 
-                            key={v.id}
+                            key={`vehicle-deploy-location-${v.id || idx}`}
                             onClick={() => setSelectedVehicle(v)}
                             className={`p-2 border text-[10px] cursor-pointer transition-all ${selectedVehicle?.id === v.id ? 'border-pink-500 bg-pink-500/10' : 'border-zinc-800 hover:border-zinc-700'}`}
                           >
@@ -1076,7 +1076,7 @@ const mappedEncounters = result.encounters.map((e: any) => ({
           <div className="p-4 md:p-8 border-t border-zinc-900 bg-zinc-950/50 backdrop-blur-xl">
             <div className="flex items-center gap-4 mb-6 overflow-x-auto pb-4 no-scrollbar">
               {encounters.map((e, i) => (
-                <div key={e.id} className="flex items-center gap-4 shrink-0">
+                <div key={`timeline-${e.id}-${i}`} className="flex items-center gap-4 shrink-0">
                   <div className={`w-3 h-3 rounded-full ${
                     e.type === 'COMBAT' ? 'bg-red-500' : 
                     e.type === 'RESOURCE' ? 'bg-blue-500' : 

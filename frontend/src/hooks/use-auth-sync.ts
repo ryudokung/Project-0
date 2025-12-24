@@ -17,6 +17,7 @@ export function useAuthSync() {
           const privyToken = await getAccessToken();
           const walletAddress = privyUser.wallet?.address;
           
+          console.log("Syncing with backend at:", process.env.NEXT_PUBLIC_API_URL);
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
             method: "POST",
             headers: {
@@ -24,18 +25,21 @@ export function useAuthSync() {
               "Authorization": `Bearer ${privyToken}`,
             },
             body: JSON.stringify({
-              wallet_address: walletAddress,
+              privy_did: privyUser.id,
+              wallet_address: walletAddress || "",
               privy_token: privyToken,
             }),
           });
 
           if (response.ok) {
             const data = await response.json();
+            console.log("Backend sync successful:", data.user.id);
             setBackendToken(data.token);
             setUser(data.user);
             localStorage.setItem("project0_token", data.token);
           } else {
-            console.error("Failed to sync with backend");
+            const errorText = await response.text();
+            console.error("Failed to sync with backend:", response.status, errorText);
           }
         } catch (error) {
           console.error("Error syncing with backend:", error);

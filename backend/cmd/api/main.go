@@ -70,6 +70,7 @@ func main() {
 		fmt.Fprintf(w, "OK")
 	})
 	mux.HandleFunc("/api/v1/auth/login", authHandler.Login)
+	mux.HandleFunc("/api/v1/auth/link-wallet", authHandler.LinkWallet)
 	mux.HandleFunc("/api/v1/mechs/mint-starter", mechHandler.MintStarter)
 	mux.HandleFunc("/api/v1/mechs", mechHandler.ListMechs)
 	mux.HandleFunc("/api/v1/combat/simulate", combatHandler.SimulateAttack)
