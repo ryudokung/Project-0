@@ -24,6 +24,12 @@ func main() {
 
 	fmt.Println("Seeding Exploration Data...")
 
+	// Clear existing data
+	_, err = db.Exec(`TRUNCATE sectors, sub_sectors, planet_locations CASCADE`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// 1. SOL GATE
 	solGateID := uuid.New()
 	_, err = db.Exec(`INSERT INTO sectors (id, name, description, difficulty, coordinates_x, coordinates_y, color) 
@@ -66,6 +72,42 @@ func main() {
 	_, err = db.Exec(`INSERT INTO planet_locations (sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
 		VALUES ($1, 'Mining Rig 7', 'Automated extraction site on the surface.', '{"Scrap Metal", "Fuel Isotopes"}', '{"Mining Drill"}', '{"MECH", "HAULER"}', TRUE, 10, 100, 60, 70)`,
 		kriosPrimeID)
+
+	// 3. NEON ABYSS
+	neonAbyssID := uuid.New()
+	_, err = db.Exec(`INSERT INTO sectors (id, name, description, difficulty, coordinates_x, coordinates_y, color) 
+		VALUES ($1, 'NEON ABYSS', 'A high-tech sector plagued by EMP storms and rogue AI signals.', 'HIGH', 75, 30, 'red')`,
+		neonAbyssID)
+
+	_, err = db.Exec(`INSERT INTO sub_sectors (sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+		VALUES ($1, 'STATION', 'Data Hive', 'A massive server farm drifting in a nebula.', '{"Neural Links", "Void Shards"}', '{"Hacking Module"}', '{"PILOT", "EXOSUIT"}', FALSE, 100, 0, 50, 50)`,
+		neonAbyssID)
+
+	// 4. THE DEAD RIM
+	deadRimID := uuid.New()
+	_, err = db.Exec(`INSERT INTO sectors (id, name, description, difficulty, coordinates_x, coordinates_y, color) 
+		VALUES ($1, 'THE DEAD RIM', 'The edge of known space. Ancient ruins and ghost signals.', 'EXTREME', 50, 80, 'red')`,
+		deadRimID)
+
+	vulcanisID := uuid.New()
+	_, err = db.Exec(`INSERT INTO sub_sectors (id, sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+		VALUES ($1, $2, 'PLANET', 'Vulcanis', 'A high-gravity mining planet near a dying star.', '{"Void Shards", "Ancient Tech"}', '{}', '{"MECH", "TANK", "SHIP"}', TRUE, 5, 95, 40, 30)`,
+		vulcanisID, deadRimID)
+
+	_, err = db.Exec(`INSERT INTO planet_locations (sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+		VALUES ($1, 'Magma Chamber', 'Extreme heat zone with rare mineral deposits.', '{"Ancient Tech", "Nexus Cores"}', '{"Mining Drill"}', '{"MECH", "TANK"}', TRUE, 0, 100, 50, 50)`,
+		vulcanisID)
+
+	// 5. Initialize Mock Pilot
+	mockUserID := "a58aa13f-f715-4137-bdf3-6ee44dd244ba"
+	_, err = db.Exec(`INSERT INTO users (id, wallet_address, username) VALUES ($1, '0x1234567890123456789012345678901234567890', 'PILOT_0') ON CONFLICT DO NOTHING`, mockUserID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = db.Exec(`INSERT INTO pilot_stats (user_id, current_o2, current_fuel) VALUES ($1, 100.0, 100.0) ON CONFLICT (user_id) DO UPDATE SET current_o2 = 100.0, current_fuel = 100.0`, mockUserID)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	fmt.Println("Seeding Complete!")
 }

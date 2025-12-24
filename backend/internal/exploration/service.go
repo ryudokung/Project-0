@@ -174,8 +174,24 @@ func (s *Service) StringNewBead(ctx context.Context, threadID uuid.UUID, mechID 
 
 	// 2. Determine Bead Type based on Thread and Pilot Stats
 	beadType := NodeCombat
-	if pilot != nil && pilot.CurrentO2 < 30 {
-		beadType = NodeResource
+	if pilot != nil {
+		// Consume Resources
+		pilot.CurrentO2 -= 15.0
+		pilot.CurrentFuel -= 5.0
+		if pilot.CurrentO2 < 0 {
+			pilot.CurrentO2 = 0
+		}
+		if pilot.CurrentFuel < 0 {
+			pilot.CurrentFuel = 0
+		}
+		
+		if err := s.gameRepo.UpdatePilotStats(pilot); err != nil {
+			return nil, err
+		}
+
+		if pilot.CurrentO2 < 30 {
+			beadType = NodeResource
+		}
 	}
 
 	// 3. Generate Narrative Context

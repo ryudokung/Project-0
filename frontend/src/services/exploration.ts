@@ -83,6 +83,35 @@ interface BackendPlanetLocation {
   coordinates_y: number;
 }
 
+export interface PilotStats {
+  user_id: string;
+  resonance_level: number;
+  resonance_exp: number;
+  current_o2: number;
+  current_fuel: number;
+  updated_at: string;
+}
+
+export interface ExplorationStartResponse {
+  thread: {
+    id: string;
+    user_id: string;
+    sub_sector_id: string;
+    planet_location_id: string | null;
+    vehicle_id: string;
+    title: string;
+    description: string;
+    goal: string;
+  };
+  beads: any[];
+  pilot_stats: PilotStats;
+}
+
+export interface AdvanceTimelineResponse {
+  bead: any;
+  pilot_stats: PilotStats;
+}
+
 export const explorationService = {
   async getUniverseMap(): Promise<Sector[]> {
     const response = await fetch(`${API_BASE_URL}/exploration/universe-map`);
@@ -131,7 +160,7 @@ export const explorationService = {
     }));
   },
 
-  async startExploration(userId: string, subSectorId: string, vehicleId: string, planetLocationId?: string) {
+  async startExploration(userId: string, subSectorId: string, vehicleId: string, planetLocationId?: string): Promise<ExplorationStartResponse> {
     const response = await fetch(`${API_BASE_URL}/exploration/start`, {
       method: 'POST',
       headers: {
@@ -150,7 +179,7 @@ export const explorationService = {
     return response.json();
   },
 
-  async advanceTimeline(threadId: string, vehicleId: string) {
+  async advanceTimeline(threadId: string, vehicleId: string): Promise<AdvanceTimelineResponse> {
     const response = await fetch(`${API_BASE_URL}/exploration/advance`, {
       method: 'POST',
       headers: {

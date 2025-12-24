@@ -227,6 +227,12 @@ export default function ExplorationLoop() {
         setThreadTitle(`${selectedSector?.name} // ${selectedSubSector.name}`);
         setGameState('EXPLORATION');
         
+        // Update stats from backend
+        if (result.pilot_stats) {
+          setO2(result.pilot_stats.current_o2);
+          setFuel(result.pilot_stats.current_fuel);
+        }
+
         const mappedBeads = result.beads.map((b: any) => ({
           id: b.id,
           type: b.type,
@@ -263,6 +269,12 @@ export default function ExplorationLoop() {
       setThreadTitle(`${selectedSector?.name} // ${selectedSubSector?.name} // ${selectedPlanetLocation.name}`);
       setGameState('EXPLORATION');
       
+      // Update stats from backend
+      if (result.pilot_stats) {
+        setO2(result.pilot_stats.current_o2);
+        setFuel(result.pilot_stats.current_fuel);
+      }
+
       const mappedBeads = result.beads.map((b: any) => ({
         id: b.id,
         type: b.type,
@@ -293,23 +305,23 @@ export default function ExplorationLoop() {
         selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
       );
 
-      const nextO2 = Math.max(0, o2 - 15);
-      const nextFuel = Math.max(0, fuel - 5);
-      
-      setO2(nextO2);
-      setFuel(nextFuel);
-
-      if (nextO2 <= 0) {
-        setGameState('DEBRIEF');
-        return;
+      // Update stats from backend
+      if (nextBeadData.pilot_stats) {
+        setO2(nextBeadData.pilot_stats.current_o2);
+        setFuel(nextBeadData.pilot_stats.current_fuel);
+        
+        if (nextBeadData.pilot_stats.current_o2 <= 0) {
+          setGameState('DEBRIEF');
+          return;
+        }
       }
 
       const nextBead = {
-        id: nextBeadData.id,
-        type: nextBeadData.type,
-        title: nextBeadData.title,
-        description: nextBeadData.description,
-        visualPrompt: nextBeadData.visual_prompt,
+        id: nextBeadData.bead.id,
+        type: nextBeadData.bead.type,
+        title: nextBeadData.bead.title,
+        description: nextBeadData.bead.description,
+        visualPrompt: nextBeadData.bead.visual_prompt,
         image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop'
       };
       

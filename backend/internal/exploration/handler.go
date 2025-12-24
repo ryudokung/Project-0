@@ -92,12 +92,21 @@ func (h *Handler) StartExploration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch pilot stats
+	pilotStats, err := h.service.gameRepo.GetPilotStats(thread.UserID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	response := struct {
-		Thread *Thread `json:"thread"`
-		Beads  []Bead  `json:"beads"`
+		Thread     *Thread          `json:"thread"`
+		Beads      []Bead           `json:"beads"`
+		PilotStats *game.PilotStats `json:"pilot_stats"`
 	}{
-		Thread: thread,
-		Beads:  beads,
+		Thread:     thread,
+		Beads:      beads,
+		PilotStats: pilotStats,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -121,6 +130,27 @@ func (h *Handler) AdvanceTimeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch updated pilot stats
+	thread, err := h.service.repo.GetThreadByID(req.ThreadID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	pilotStats, err := h.service.gameRepo.GetPilotStats(thread.UserID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := struct {
+		Bead       *Bead            `json:"bead"`
+		PilotStats *game.PilotStats `json:"pilot_stats"`
+	}{
+		Bead:       bead,
+		PilotStats: pilotStats,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(bead)
+	json.NewEncoder(w).Encode(response)
 }
