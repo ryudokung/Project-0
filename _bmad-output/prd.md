@@ -59,16 +59,20 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 ## 3. Product Scope
 
 ### 3.1 MVP - Minimum Viable Product
+- **Player Identity:** Start as a **Void Scavenger** with a **Resonance Suit** and **Striker Mech**.
 - **Multi-Vehicle System:** Motherships, Mechs, Aircraft, and Pilot Gear with distinct gameplay roles.
-- **Engineering & Assembly System:** A story-driven crafting system where asset generation requires resources, time, and engineers.
+- **Engineering & Assembly System:** A story-driven crafting system (Synthesize) where asset generation requires resources, time, and engineers. Unlocked after the first mission.
 - **Tiered AI Assets:** 
-    - **Premium (USDT):** High-fidelity, complex AI designs.
-    - **Standard (In-game):** Theme-consistent but simpler AI designs.
+    - **Tiers (T1 - T5):** Power levels.
+    - **Rarity Classes:** Standard (White), Refined (Green), Prototype (Blue), Relic (Purple), Singularity (Gold).
+- **Void Signals (Gacha):** A "Hoyoverse-style" pull system for high-tier assets with a pity mechanism.
+- **Seasonal Temporal Wormholes:** Limited-time exploration zones requiring specific gear compatibility, offering exclusive "Lost Tech" and "Rare DNA Fragments."
 - **Complex Combat Engine:** Stat-based battle system integrating vehicle attributes (Mothership, Mech, Aircraft, Pilot) and AI-generated item "Options."
-- **Monetization Engine:** Season Pass and Season Pass+ with exploration buffs and social prestige items.
+- **Monetization Engine:** Season Pass, Void Signals, and Minting fees for "Void-Touched" (Premium) items.
 - **Discord Integration:** Real-time alerts for star discoveries and achievement broadcasting.
 
 ### 3.2 Growth Features (Post-MVP)
+- **Marketplace:** Peer-to-peer trading of Minted assets (NFTs).
 - **Dynamic NFT Evolution:** Profile frames and assets that evolve based on seasonal achievements.
 - **Advanced Social Systems:** Guilds, territory control, and integrated marketplaces.
 - **Automated Star Discovery:** Procedural generation of new exploration zones.

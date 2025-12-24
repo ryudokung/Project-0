@@ -44,7 +44,28 @@ The exploration interface is designed around the "Expedition and Encounters" mod
 
 ## 5. User Journey: The "Click-to-Explore" Loop
 
-## 5. Interaction Model: "Tactical Clicks"
-- **Node Discovery:** Clicking the "Scan" button reveals new clickable nodes on the Radar.
-- **Resource Cost:** Every click in a mission (moving, searching) has a cost (O2 for Pilot, Fuel for Mothership).
-- **Visual Feedback:** Every click triggers a high-quality 3D animation or camera shift to keep the experience immersive.
+## 6. Rarity & Tier Visuals (The "Flex" Hierarchy)
+To distinguish between items and allow players to "show off," the UI uses a strict color and effect hierarchy:
+
+### 6.1 Rarity Color Palette
+- **Standard (White):** `#FFFFFF` - Clean, industrial look.
+- **Refined (Green):** `#4ADE80` - Stable, functional glow.
+- **Prototype (Blue):** `#60A5FA` - Experimental, pulsing energy.
+- **Relic (Purple):** `#A855F7` - Ancient, deep resonance. High-fidelity textures.
+- **Singularity (Gold):** `#FBBF24` - God-tier. Includes "Void Glow" particle effects and animated UI borders.
+
+### 6.2 Premium vs. Standard Distinction
+- **Void-Touched (Premium):** Items obtained via Gacha or Seasonal Wormholes have a **"Void Signature"**—a subtle, dark smoke or glitch effect that surrounds the item's icon and 3D model.
+- **Mintable Badge:** A small, glowing "M" icon on the item card indicates it can be bridged to the blockchain.
+
+## 7. The Gacha UI: "Void Signals"
+The Gacha experience is designed to be high-tension and visually rewarding:
+- **The Pull:** The player activates a "Signal Decoder." The screen goes dark, and a 3D radar sweep begins.
+- **The Reveal:** A beam of light (colored by rarity) shoots from the center. 
+- **The "Gasp" Moment:** For **Relic** or **Singularity** items, a full-screen splash art (AI-generated) is revealed with a dramatic sound effect and a "DNA Sequence" animation.
+- **Pity Tracker:** A subtle "Signal Strength" bar at the bottom shows how close the player is to a guaranteed high-tier drop.
+
+## 8. Seasonal UI: "Temporal Wormholes"
+- **The Wormhole Map:** A separate, distorted map view for seasonal events.
+- **Compatibility HUD:** A "Resonance Meter" that shows if the player's current gear is compatible with the wormhole's stability.
+- **Limited-Time Badges:** Items found in wormholes have a "Season X" watermark, increasing their collector value.
