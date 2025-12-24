@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { explorationService, Sector, SubSector, PlanetLocation } from '@/services/exploration';
+import { useAuthSync } from '@/hooks/useAuthSync';
 
 type GameState = 'HANGAR' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'ENCOUNTER' | 'DEBRIEF';
 type EncounterType = 'COMBAT' | 'RESOURCE' | 'NARRATIVE' | 'ANCHOR';
@@ -42,6 +43,7 @@ interface Vehicle {
 }
 
 export default function ExplorationLoop() {
+  const { user, isLoading: authLoading } = useAuthSync();
   const [gameState, setGameState] = useState<GameState>('HANGAR');
   const [o2, setO2] = useState(100);
   const [fuel, setFuel] = useState(100);
@@ -118,8 +120,9 @@ export default function ExplorationLoop() {
   // Fetch Real Vehicles from DB
   useEffect(() => {
     const fetchVehicles = async () => {
+      if (!user?.id) return;
       try {
-        const response = await fetch('http://localhost:8080/api/v1/mechs?user_id=a58aa13f-f715-4137-bdf3-6ee44dd244ba');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/mechs?user_id=${user.id}`);
         const data = await response.json();
         if (Array.isArray(data)) {
           // Map backend data to our Vehicle interface
@@ -216,9 +219,9 @@ export default function ExplorationLoop() {
     } else {
       try {
         setIsTransitioning(true);
-        const userId = 'a58aa13f-f715-4137-bdf3-6ee44dd244ba'; // Mock user ID
+        if (!user?.id) throw new Error('User not authenticated');
         const result = await explorationService.startExploration(
-          userId,
+          user.id,
           selectedSubSector.id,
           selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
         );
@@ -257,9 +260,9 @@ export default function ExplorationLoop() {
     
     try {
       setIsTransitioning(true);
-      const userId = 'a58aa13f-f715-4137-bdf3-6ee44dd244ba'; // Mock user ID
+      if (!user?.id) throw new Error('User not authenticated');
       const result = await explorationService.startExploration(
-        userId,
+        user.id,
         selectedSubSector.id,
         selectedVehicle?.id || '00000000-0000-0000-0000-000000000000',
         selectedPlanetLocation.id
