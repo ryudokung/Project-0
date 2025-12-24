@@ -7,7 +7,7 @@
 ## 1. Executive Summary
 
 ### 1.1 Game Concept
-Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game. Players take on the role of a lone Pilot operating a modular Mech/Aircraft, supported by a massive Mothership. The game blends deep customization (Modular NFTs) with a high-fidelity 3D experience (WebGPU) and a creator-driven evolving universe.
+Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game. Players begin their journey by creating a unique **Pilot Character**, starting with a **Starter Ship** to navigate the void. As they progress, they operate modular Mechs, Aircraft, and Tanks, all supported by a massive Mothership. The game blends deep customization (Modular NFTs) with a high-fidelity 3D experience (WebGPU) and a creator-driven evolving universe.
 
 ### 1.2 Design Pillars (The "Samus" Touch)
 - **Intense Narrative (The Core):** A deep, dark, and gripping story that drives every mission. You aren't just exploring; you're surviving a complex plot.
@@ -21,11 +21,12 @@ Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game. Player
 ## 2. Gameplay Systems
 
 ### 2.1 The Core Loop (The "Heartbeat")
-1. **Hangar (Preparation):** Customize Mech, repair damage, and refuel.
-2. **Scanner (Risk Assessment):** Probe star systems for loot and threats.
-3. **Transit (The Journey):** Travel to the target, surviving atmospheric entry.
-4. **Combat/Salvage (The Action):** 1:1 Mech combat or Pilot EVA for rare tech.
-5. **Return (The Debrief):** Refine salvaged scrap and upgrade the Mothership.
+1.  **Onboarding (Identity):** Create a Pilot Character (Name, Gender, Appearance).
+2.  **Hangar (Preparation):** Customize Ship/Mech, repair damage, and refuel.
+3.  **Scanner (Risk Assessment):** Probe star systems for loot and threats.
+4.  **Transit (The Journey):** Travel to the target, surviving atmospheric entry.
+5.  **Combat/Salvage (The Action):** 1:1 Mech/Ship combat or Pilot EVA for rare tech.
+6.  **Return (The Debrief):** Refine salvaged scrap and upgrade the Mothership.
 
 ### 2.2 Multi-Stage Exploration
 - **Stage 1: Mothership (Strategic):** Managing fuel and scanner range.
@@ -49,6 +50,15 @@ Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game. Player
 ### 3.3 Pilot EVA & Death
 - **EVA Mode:** Pilot exits the Mech to enter narrow spaces.
 - **Death Penalty:** Loss of all loot from the current run + critical Mech damage. This creates the "Sweaty Palms" feeling.
+
+### 3.4 Character Creation & Identity
+- **Pilot Registration:** New players must register their first character before entering the game world.
+- **Customization Options:**
+    - **Name:** Unique callsign for the pilot.
+    - **Gender:** Male / Female / Non-binary.
+    - **Appearance:** Selection of Face types and Hair styles.
+- **Starter Asset:** Upon completion, the character is granted a **Starter Ship** (Type: Ship) and basic **Pilot Stats**.
+- **Character Instances:** A single user account can host multiple characters (acquired via Gacha or progression).
 
 ---
 

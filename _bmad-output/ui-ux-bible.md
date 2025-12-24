@@ -6,6 +6,7 @@
 - **Color Palette:** Deep Blacks, Neon Greens (HUD), Warning Oranges, and Industrial Grays.
 - **Typography:** Monospaced fonts (for that "Terminal" feel) and bold, italicized headers for impact.
 - **Effects:** Scanlines, slight chromatic aberration, and HUD glitches when taking damage.
+- **Dynamic Background:** A global 3D space environment rendered with R3F, featuring a rotating Earth-like planet, floating space debris, and a deep starfield to maintain immersion across all application states.
 
 ## 2. The Immersive Cockpit HUD (3D)
 Rendered using **WebGPU + R3F**, the HUD is part of the 3D world:
@@ -46,8 +47,16 @@ The exploration interface is designed around the "Expedition and Encounters" mod
 
 ### 5.1 Onboarding: "The Operative Recruitment"
 - **Login:** Minimalist screen with "Enter Project-0" via Google/Email. No wallet popup.
-- **First Contact:** Immediate transition to the Hangar where the first "Starter Mech" is waiting.
+- **Character Creation:** Immediate transition to the **Pilot Registration** screen.
+    - **UI Style:** Bento Grid layout for selecting Gender, Face, and Hair.
+    - **Visuals:** Real-time preview of the character's appearance.
+- **First Contact:** After registration, the player enters the Hangar where their **Starter Ship** is waiting.
 - **Late Binding:** A subtle "Link External Wallet" button in the Hangar settings or profile, framed as "Securing Assets to the Void-Chain."
+
+### 5.2 The Pilot ID Badge (Hangar UI)
+- **Visual:** A glassmorphic "ID Card" displayed in the Hangar.
+- **Details:** Shows Character Name, Rank, Gender, and a portrait based on the selected appearance.
+- **Functionality:** Serves as the primary entry point for Character Stats and Skill progression.
 
 ## 6. Rarity & Tier Visuals (The "Flex" Hierarchy)
 To distinguish between items and allow players to "show off," the UI uses a strict color and effect hierarchy:

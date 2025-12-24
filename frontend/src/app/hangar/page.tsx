@@ -14,12 +14,16 @@ export default function HangarPage() {
   const [isLinking, setIsLinking] = useState(false);
 
   useEffect(() => {
-    if (backendUser?.id) {
+    if (backendUser?.active_character_id) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/mechs?character_id=${backendUser.active_character_id}`)
+        .then(res => res.json())
+        .then(data => setMechs(data || []));
+    } else if (backendUser?.id) {
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/mechs?user_id=${backendUser.id}`)
         .then(res => res.json())
         .then(data => setMechs(data || []));
     }
-  }, [backendUser?.id]);
+  }, [backendUser?.id, backendUser?.active_character_id]);
 
   const handleLinkWallet = async () => {
     setIsLinking(true);
@@ -43,12 +47,27 @@ export default function HangarPage() {
         
         {/* UI Overlay for Flexing */}
         <div className="absolute top-8 left-8 z-10">
-          <h1 className="text-4xl font-bold text-white tracking-tighter uppercase italic">
-            The Hangar
-          </h1>
-          <p className="text-gray-400 font-mono text-sm mt-2">
-            [STATUS: SECURE] // [OWNER: {backendUser?.username || 'PILOT_0'}]
-          </p>
+          <div className="flex items-start gap-4">
+            {/* Pilot ID Badge */}
+            <div className="bg-zinc-900/80 border border-zinc-700 p-4 rounded-lg backdrop-blur-md shadow-xl flex gap-4 items-center">
+              <div className="w-16 h-16 bg-pink-500/20 border border-pink-500/50 rounded flex items-center justify-center text-pink-500 text-2xl font-bold">
+                {backendUser?.active_character?.name?.[0] || 'P'}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white tracking-tighter uppercase italic">
+                  {backendUser?.active_character?.name || 'UNREGISTERED PILOT'}
+                </h2>
+                <div className="flex gap-2 mt-1">
+                  <span className="text-[10px] font-mono text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded">
+                    {backendUser?.active_character?.gender || 'UNKNOWN'}
+                  </span>
+                  <span className="text-[10px] font-mono text-pink-400 bg-pink-400/10 border border-pink-400/20 px-1.5 py-0.5 rounded">
+                    RANK 1
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
           
           <div className="mt-4 flex flex-col gap-2">
             <LoginButton />

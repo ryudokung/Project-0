@@ -3,22 +3,23 @@
 **Goal:** Define the specific modular parts, rarity tiers, and "Visual DNA" traits for all vehicle types (Mechs, Tanks, Ships) to ensure a consistent asset ecosystem.
 
 ## 1. Modular Vehicle Anatomy (Functional Hardpoints)
-All vehicles are composed of 4 core NFT slots. The Hangar serves as a central **Asset Inventory** where players can view their collection. Actual vehicle selection occurs at the **Deployment Phase** based on mission requirements.
+All vehicles are composed of 4 core NFT slots. The Hangar serves as a central **Asset Inventory** where players can view their collection. Every new character begins with a **Starter Ship** to facilitate initial exploration. Actual vehicle selection occurs at the **Deployment Phase** based on mission requirements.
 
-### 1.1 Mech (Bipedal/Multipedal)
+### 1.1 Ship (Atmospheric/Space) - **Starter Vehicle**
+- **Role:** Interception, Long-range Scouting, Mothership Defense.
+- **Deployment:** Space combat, atmospheric entry escort.
+- **Hardpoints:** Fuselage, Wing/Pylon, Engine, Avionics.
+- **Starter Model:** `FS-01: "Void Runner"` (Standard Fuselage).
+
+### 1.2 Mech (Bipedal/Multipedal)
 - **Role:** Heavy Combat, Extraction, All-terrain.
 - **Deployment:** Surface missions, high-gravity zones.
 - **Hardpoints:** Chassis, Left Arm, Right Arm, Legs.
 
-### 1.2 Tank (Treaded/Wheeled)
+### 1.3 Tank (Treaded/Wheeled)
 - **Role:** Siege, Defensive Escort, High-threat Zones.
 - **Deployment:** Open surface combat, defensive missions.
 - **Hardpoints:** Hull, Turret, Sponson, Drive System.
-
-### 1.3 Ship (Atmospheric/Space)
-- **Role:** Interception, Long-range Scouting, Mothership Defense.
-- **Deployment:** Space combat, atmospheric entry escort.
-- **Hardpoints:** Fuselage, Wing/Pylon, Engine, Avionics.
 
 ### 1.4 Speeder (Hoverbike/Swoop)
 - **Role:** High-speed Scouting, Time-sensitive Salvage, Stealth.

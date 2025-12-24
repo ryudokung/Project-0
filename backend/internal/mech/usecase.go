@@ -10,6 +10,7 @@ import (
 type UseCase interface {
 	MintStarterMech(userID uuid.UUID) (*Mech, error)
 	GetUserMechs(userID uuid.UUID) ([]Mech, error)
+	GetCharacterMechs(charID uuid.UUID) ([]Mech, error)
 }
 
 type mechUseCase struct {
@@ -52,6 +53,10 @@ func (u *mechUseCase) MintStarterMech(userID uuid.UUID) (*Mech, error) {
 	}
 
 	return m, nil
+}
+
+func (u *mechUseCase) GetCharacterMechs(charID uuid.UUID) ([]Mech, error) {
+	return u.repo.GetByCharacterID(charID)
 }
 
 func (u *mechUseCase) GetUserMechs(userID uuid.UUID) ([]Mech, error) {

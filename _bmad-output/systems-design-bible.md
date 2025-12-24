@@ -62,19 +62,19 @@ Progression is gated by the Mothership's facilities. You must invest Materials t
 - **Singularity Archive:** Unlocks research into Ancient Tech and Legendary parts.
 - **V2O Bridge:** Unlocks the ability to mint Virtual Assets into On-chain NFTs.
 
-## 4. Skill System: Pilot vs. Vehicle
-Skills provide the tactical edge needed to survive high-risk missions.
+## 4. Skill System: Character vs. Vehicle
+Skills provide the tactical edge needed to survive high-risk missions. All progression is tied to the **Active Character**.
 
-### 4.1 Pilot Skills (Passive/Permanent)
+### 4.1 Character Skills (Passive/Permanent)
 *Trained in the Mothership Lab using Neural Links.*
 - **O2 Discipline:** Reduces O2 consumption during EVA by 10/20/30%.
 - **Scavenger's Eye:** Increases the chance of finding Rare materials by 5/10/15%.
 - **Stealth Training:** Reduces detection range from enemy drones.
 
 ### 4.2 Neural Resonance (The "Awakening" System)
-Inspired by the "Newtype" concept, this is a latent power that triggers when a Pilot's intent aligns with their Vehicle's core.
+Inspired by the "Newtype" concept, this is a latent power that triggers when a **Character's** intent aligns with their Vehicle's core.
 
-- **Resonance Potential:** A hidden stat for every Pilot. Some are born with high potential, others develop it through high-stakes survival.
+- **Resonance Potential:** A hidden stat for every **Character**. Some are born with high potential, others develop it through high-stakes survival.
 - **The Trigger (Willpower):** Triggers during "Critical Moments" (e.g., O2 < 5%, Hull Integrity < 10%, or after 5 consecutive High-Risk successes).
 - **Awakened State: "The Ghost Shift":**
     - **Visual:** The Vehicle's Visual DNA changes in real-time (AI-generated glowing vents, "Ghost" after-images, or shifting armor plates).

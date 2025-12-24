@@ -5,7 +5,7 @@
 ## 1. The Narrative Pillar: "The Shattered Universe" (The Expedition)
 - **The Setting:** 300 years after *The Great Collapse*. The universe is dark, silent, and isolated.
 - **The Player Identity:** You are a **Void Scavenger**, a pilot with a rare neural resonance capable of linking with ancient tech.
-- **The Starting Point:** You begin with a standard-issue **Resonance Suit** and a salvaged **Striker-class Mech**, provided by the Director (Loki) to investigate the first signal.
+- **The Starting Point:** You begin with a standard-issue **Resonance Suit** and a salvaged **FS-01 Starter Ship**, provided by the Director (Loki) to navigate the first sector.
 - **The Core Conflict:** Survival against the void and competing NPC factions (Iron Syndicate, Void Cult, Scavengers).
 - **The Ultimate Goal:** Discovering fragments of **The Singularity** to restore interstellar travel.
 - **The Director's Role (Loki):** You control the "Expeditions" (Context Patches), opening new sectors and events for players to explore.

@@ -46,6 +46,23 @@ func (h *Handler) ListMechs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	charIDStr := r.URL.Query().Get("character_id")
+	if charIDStr != "" {
+		charID, err := uuid.Parse(charIDStr)
+		if err != nil {
+			http.Error(w, "Invalid character_id", http.StatusBadRequest)
+			return
+		}
+		mechs, err := h.useCase.GetCharacterMechs(charID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(mechs)
+		return
+	}
+
 	userIDStr := r.URL.Query().Get("user_id")
 	userID, err := uuid.Parse(userIDStr)
 	if err != nil {

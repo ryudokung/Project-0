@@ -38,10 +38,10 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 
 ### 2.1 User Success
 - **Zero-Friction Entry:** Players can start playing within seconds using Google/Email without needing a crypto wallet or gas fees.
-- **The "Aha!" Moment:** Players receive a high-quality AI-generated Mech or Item for the first time, experiencing the thrill of unique visual ownership and social prestige.
+- **The "Aha!" Moment:** Players receive a high-quality AI-generated Ship or Item for the first time, experiencing the thrill of unique visual ownership and social prestige.
 - **Emotional Outcome:** A deep sense of "Collection Pride" and "Social Dominance," especially for rare seasonal assets that trigger envy in other players.
 - **Immersion:** Players feel like "Operatives" and "Commanders" caught in an intense, dark narrative where every mission advances a gripping plot.
-- **Visual Pride:** Players feel a "Gasp" moment when they see their unique, high-fidelity AI-generated Mech for the first time—a design that is uniquely theirs and visually stunning.
+- **Visual Pride:** Players feel a "Gasp" moment when they see their unique, high-fidelity AI-generated Vehicle for the first time—a design that is uniquely theirs and visually stunning.
 
 ### 2.2 Business Success
 - **Aggressive Early Revenue:** Maximizing revenue through a tiered Season Pass model (Standard and Season Pass+).
@@ -50,7 +50,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 
 ### 2.3 Technical Success
 - **AI Generation Efficiency:** Implementing a "Time-Gated Assembly" system to manage GPU load and prevent spamming.
-- **Hybrid 2D/3D Immersion:** Delivering High-Fidelity AI assets (2D) for visual storytelling while using **WebGPU + React Three Fiber** for an immersive 3D Cockpit and Hangar experience.
+- **Hybrid 2D/3D Immersion:** Delivering High-Fidelity AI assets (2D) for visual storytelling while using **WebGPU + React Three Fiber** for a global 3D space background and an immersive 3D Cockpit and Hangar experience.
 - **Design Intelligence:** Utilizing [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/) standards to ensure professional-grade aesthetics, including Glassmorphism, Bento Grids, and industry-specific color palettes for a premium feel.
 - **Modular NFT Ownership:** Utilizing **ERC-6551 (Token Bound Accounts)** to allow Mechs to "own" their equipment, simplifying marketplace trading and inventory management.
 - **Hybrid State Management (V2O):** Implementing a "Virtual-to-On-chain" model where gameplay and asset creation are off-chain by default (Server-side), with on-chain minting required only for trading or permanent storage.
@@ -66,7 +66,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
     - **Social Login:** Google/Email via Privy (Primary Web2.5 path).
     - **Account Binding:** Seamlessly upgrade Guest -> Traditional/Social without losing progress.
     - **Late-Binding Wallet:** Link an external wallet (MetaMask, etc.) only when ready to mint NFTs.
-- **Player Identity:** Start as a **Void Scavenger** with a **Resonance Suit** and a **Starter Ship**. Players must complete a character creation process (Name, Gender, Appearance) before receiving their first ship.
+- **Player Identity:** Start as a **Void Scavenger** with a **Resonance Suit** and a **Starter Ship**. Players must complete a **Character Creation** process (Name, Gender, Face, Hair) before receiving their first ship. This identity is tied to a **Character** instance, allowing for multiple characters per user.
 - **Mothership Engineering Philosophy:** Motherships are defined by two independent, non-linear systems:
     1. **Teleport System (Dimensional Tech):** For instant travel across dangerous sectors. High energy cost and instability. Some ships cannot install this due to structural mass.
     2. **Atmospheric Entry System (Structural Tech):** For safe landing on planets. Manages heat and gravity. Independent of Teleport capabilities.
@@ -95,7 +95,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 ## 4. User Journeys
 
 ### 4.1 Journey 1: Somchai - The Grinder (The Foundation)
-Somchai is a dedicated player who enjoys steady progress. He starts for free, farming basic resources like "Scrap Metal" and "Energy" through daily exploration. After two weeks of consistent effort, he gathers enough materials to initiate his first "Mech Assembly." He experiences a 24-hour waiting period, simulating the engineering process. When complete, he receives a unique AI-generated Mech with a "Digital Gold" camo—a rare find that he proudly showcases in Discord, validating his hard work and encouraging him to aim for higher-tier upgrades.
+Somchai is a dedicated player who enjoys steady progress. He starts for free, farming basic resources like "Scrap Metal" and "Energy" through daily exploration with his **Starter Ship**. After two weeks of consistent effort, he gathers enough materials to initiate his first "Mech Assembly." He experiences a 24-hour waiting period, simulating the engineering process. When complete, he receives a unique AI-generated Mech with a "Digital Gold" camo—a rare find that he proudly showcases in Discord, validating his hard work and encouraging him to aim for higher-tier upgrades.
 
 ### 4.2 Journey 2: Alex - The Discord Socialite (The Catalyst)
 Alex thrives on community engagement and being "first." He monitors the `#star-discovery` channel for real-time alerts. When a new "Abandoned Planet" is detected, he rallies his guild. Using his **Season Pass+** 2x Exploration Buff, his team reaches the planet first. After defeating the Raid Boss, Alex receives a "Mysterious Blueprint." He chooses the **USDT Premium Build** to ensure the highest quality AI generation. He shares the live "Assembly Status" link in Discord, building hype until a high-fidelity "Light-Wing Mech" is revealed, cementing his status as a community leader.

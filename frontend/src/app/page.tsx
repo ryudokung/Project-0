@@ -10,17 +10,20 @@ import { usePrivy } from "@privy-io/react-auth";
 
 export default function Home() {
   const router = useRouter();
-  const { authenticated } = usePrivy();
   const { user: backendUser, isLoading: isSyncing } = useAuthSync();
 
   useEffect(() => {
-    if (authenticated && !isSyncing && backendUser) {
-      router.push('/hangar');
+    if (!isSyncing && backendUser) {
+      if (!backendUser.active_character_id) {
+        router.push('/character-creation');
+      } else {
+        router.push('/hangar');
+      }
     }
-  }, [authenticated, isSyncing, backendUser, router]);
+  }, [isSyncing, backendUser, router]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-zinc-50 font-sans dark:bg-black text-black dark:text-white">
+    <div className="flex min-h-screen flex-col items-center font-sans text-white">
       <header className="w-full max-w-7xl flex justify-between items-center p-6">
         <div className="flex items-center gap-2">
           <div className="relative h-8 w-8">
@@ -34,11 +37,11 @@ export default function Home() {
       <main className="flex flex-col items-center justify-center w-full max-w-7xl px-6 flex-1">
         <div className="flex flex-col items-center gap-8 text-center mb-20">
           <h1 className="text-5xl font-bold tracking-tighter sm:text-7xl uppercase italic">
-            Mothership <span className="text-pink-500">Gacha</span>
+            PROJECT-<span className="text-pink-500">0</span>
           </h1>
-          <p className="max-w-[600px] text-zinc-600 dark:text-zinc-400 md:text-xl font-light tracking-wide">
+          <p className="max-w-[600px] text-zinc-400 md:text-xl font-light tracking-wide">
             The next generation of AI-driven, Web3-powered space exploration and combat. 
-            Deploy your fleet, upgrade your tech, and conquer the void.
+            Create your pilot, command your fleet, and conquer the void.
           </p>
           <div className="flex gap-4">
             <LoginButton />
@@ -49,7 +52,7 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-pink-500/10 to-transparent pointer-events-none" />
       </main>
       
-      <footer className="py-10 text-sm text-zinc-500">
+      <footer className="py-10 text-sm text-zinc-600">
         <p>© 2024 Project-0. All rights reserved.</p>
       </footer>
     </div>

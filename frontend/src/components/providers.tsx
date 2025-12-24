@@ -29,9 +29,6 @@ export default function Providers({children}: {children: ReactNode}) {
   return (
     <PrivyProvider
       appId={appId}
-      onSuccess={() => {
-        router.push('/hangar');
-      }}
       config={{
         // Customize Privy's appearance and login methods
         appearance: {

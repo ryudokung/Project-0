@@ -26,7 +26,7 @@ export default function GachaPage() {
     setResults(null);
     
     try {
-      const res = await fetch('http://localhost:8080/api/v1/gacha/pull', { 
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/gacha/pull`, { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

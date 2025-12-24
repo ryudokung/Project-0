@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { explorationService, Sector, SubSector, PlanetLocation } from '@/services/exploration';
-import { useAuthSync } from '@/hooks/useAuthSync';
+import { useAuthSync } from '@/hooks/use-auth-sync';
 
 type GameState = 'HANGAR' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'ENCOUNTER' | 'DEBRIEF';
 type EncounterType = 'COMBAT' | 'RESOURCE' | 'NARRATIVE' | 'ANCHOR';

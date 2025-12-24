@@ -7,6 +7,7 @@ import (
 
 type PilotStats struct {
 	UserID         uuid.UUID `json:"user_id"`
+	CharacterID    uuid.UUID `json:"character_id"`
 	ResonanceLevel int       `json:"resonance_level"`
 	ResonanceExp   int       `json:"resonance_exp"`
 	XP             int       `json:"xp"`

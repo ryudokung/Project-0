@@ -6,9 +6,9 @@ import (
 )
 
 type Repository interface {
-	GetPilotStats(userID uuid.UUID) (*PilotStats, error)
+	GetPilotStats(charID uuid.UUID) (*PilotStats, error)
 	UpdatePilotStats(stats *PilotStats) error
-	InitializePilot(userID uuid.UUID) error
+	InitializePilot(charID uuid.UUID) error
 	GetGachaStats(userID uuid.UUID) (*GachaStats, error)
 	UpdateGachaStats(stats *GachaStats) error
 }
@@ -21,12 +21,12 @@ func NewRepository(db *sql.DB) Repository {
 	return &gameRepository{db: db}
 }
 
-func (r *gameRepository) GetPilotStats(userID uuid.UUID) (*PilotStats, error) {
-	query := `SELECT user_id, resonance_level, resonance_exp, xp, rank, current_o2, current_fuel, updated_at FROM pilot_stats WHERE user_id = $1`
-	row := r.db.QueryRow(query, userID)
+func (r *gameRepository) GetPilotStats(charID uuid.UUID) (*PilotStats, error) {
+	query := `SELECT user_id, character_id, resonance_level, resonance_exp, xp, rank, current_o2, current_fuel, updated_at FROM pilot_stats WHERE character_id = $1`
+	row := r.db.QueryRow(query, charID)
 
 	var s PilotStats
-	err := row.Scan(&s.UserID, &s.ResonanceLevel, &s.ResonanceExp, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.UpdatedAt)
+	err := row.Scan(&s.UserID, &s.CharacterID, &s.ResonanceLevel, &s.ResonanceExp, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -37,32 +37,27 @@ func (r *gameRepository) UpdatePilotStats(s *PilotStats) error {
 	query := `
 		UPDATE pilot_stats 
 		SET resonance_level = $1, resonance_exp = $2, xp = $3, rank = $4, current_o2 = $5, current_fuel = $6, updated_at = CURRENT_TIMESTAMP
-		WHERE user_id = $7
+		WHERE character_id = $7
 	`
-	_, err := r.db.Exec(query, s.ResonanceLevel, s.ResonanceExp, s.XP, s.Rank, s.CurrentO2, s.CurrentFuel, s.UserID)
+	_, err := r.db.Exec(query, s.ResonanceLevel, s.ResonanceExp, s.XP, s.Rank, s.CurrentO2, s.CurrentFuel, s.CharacterID)
 	return err
 }
 
-func (r *gameRepository) InitializePilot(userID uuid.UUID) error {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	// Initialize Pilot Stats
-	_, err = tx.Exec(`INSERT INTO pilot_stats (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING`, userID)
+func (r *gameRepository) InitializePilot(charID uuid.UUID) error {
+	// We need to find the user_id for this character_id
+	var userID uuid.UUID
+	err := r.db.QueryRow("SELECT user_id FROM characters WHERE id = $1", charID).Scan(&userID)
 	if err != nil {
 		return err
 	}
 
-	// Initialize Gacha Stats
-	_, err = tx.Exec(`INSERT INTO gacha_stats (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING`, userID)
-	if err != nil {
-		return err
-	}
-
-	return tx.Commit()
+	query := `
+		INSERT INTO pilot_stats (user_id, character_id, resonance_level, resonance_exp, xp, rank, current_o2, current_fuel)
+		VALUES ($1, $2, 0, 0, 0, 1, 100.0, 100.0)
+		ON CONFLICT (character_id) DO NOTHING
+	`
+	_, err = r.db.Exec(query, userID, charID)
+	return err
 }
 
 func (r *gameRepository) GetGachaStats(userID uuid.UUID) (*GachaStats, error) {
