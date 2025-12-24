@@ -60,7 +60,13 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 ## 3. Product Scope
 
 ### 3.1 MVP - Minimum Viable Product
-- **Player Identity:** Start as a **Void Scavenger** with a **Resonance Suit** and **Striker Mech**.
+- **Multi-Auth Identity System (Web2.5 Hybrid):**
+    - **Guest Login:** Play immediately with a single click. Identity tied to `guest_id` (LocalStorage).
+    - **Traditional Login:** Signup/Login with Username, Email, and Password.
+    - **Social Login:** Google/Email via Privy (Primary Web2.5 path).
+    - **Account Binding:** Seamlessly upgrade Guest -> Traditional/Social without losing progress.
+    - **Late-Binding Wallet:** Link an external wallet (MetaMask, etc.) only when ready to mint NFTs.
+- **Player Identity:** Start as a **Void Scavenger** with a **Resonance Suit** and a **Starter Ship**. Players must complete a character creation process (Name, Gender, Appearance) before receiving their first ship.
 - **Mothership Engineering Philosophy:** Motherships are defined by two independent, non-linear systems:
     1. **Teleport System (Dimensional Tech):** For instant travel across dangerous sectors. High energy cost and instability. Some ships cannot install this due to structural mass.
     2. **Atmospheric Entry System (Structural Tech):** For safe landing on planets. Manages heat and gravity. Independent of Teleport capabilities.
@@ -221,6 +227,9 @@ Project-0 operates as a "Closed-Loop Premium Economy." USDT flows into the syste
 - **FR2:** ระบบสามารถสร้าง Embedded Wallet ให้กับผู้เล่นใหม่โดยอัตโนมัติหลังการเข้าสู่ระบบ
 - **FR3:** ผู้เล่นสามารถเชื่อมต่อ MetaMask Wallet เพื่อใช้งานในระดับ Power User ได้
 - **FR4:** ระบบสามารถผูกบัญชี Discord เข้ากับบัญชีผู้เล่นเพื่อรับการแจ้งเตือนได้
+- **FR41:** หลังจาก Login ครั้งแรก ผู้เล่นต้องสร้างตัวละคร (Character Creation) โดยกำหนดชื่อตัวละคร (แยกจาก Username), เพศ, และรูปลักษณ์ (หน้าตา, ทรงผม)
+- **FR42:** ระบบตัวละครต้องรองรับการมีหลายตัวละครต่อหนึ่งบัญชี (Character Instances) เพื่อรองรับการสลับตัวละครหลักจากระบบกาชาในอนาคต
+- **FR43:** หน้า Hangar ต้องแสดง **Pilot ID Badge** ที่ระบุรูป Avatar, ชื่อตัวละคร, และ Rank/Level ของตัวละครที่ใช้งานอยู่
 
 ### 9.2 Exploration & Discovery
 - **FR5:** ระบบ Multi-Stage Exploration (Mothership -> Mech -> Pilot EVA) ที่บังคับใช้ประเภท Vehicle และอุปกรณ์ต่างกันตามระยะทางและสภาพแวดล้อม
@@ -363,7 +372,8 @@ Project-0 operates as a "Closed-Loop Premium Economy." USDT flows into the syste
 
 ### 11.3 Pilot Identity & Customization
 - **Pilot Gear Aesthetics:** ไม่ใช่แค่หุ่นที่เท่ แต่นักบิน (Pilot) ก็มีชุดเกราะและอาวุธ (Swords/Guns) ที่ดีไซน์มาอย่างประณีต
-- **Dynamic Posing:** ในหน้าโปรไฟล์ นักบินจะยืนโพสต์ท่าคู่กับ Mech คู่ใจในสภาพแวดล้อมที่ AI เจนให้ตามดาวที่ผู้เล่นไปสำรวจล่าสุด
+- **Appearance Customization:** ระบบเริ่มต้นรองรับการเลือกหน้าตาและทรงผมแบบ Pixel Art หรือ Icon เพื่อสร้างเอกลักษณ์เฉพาะตัว
+- **Dynamic Posing:** ในหน้าโปรไฟล์ นักบินจะยืนโพสต์ท่าคู่กับยาน (Ship) หรือ Mech คู่ใจในสภาพแวดล้อมที่ AI เจนให้ตามดาวที่ผู้เล่นไปสำรวจล่าสุด
 
 ## 12. Non-Functional Requirements
 

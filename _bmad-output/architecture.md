@@ -34,7 +34,8 @@ This document captures the architectural decisions for Project-0, a Crypto Web G
 Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (Generative Art), and real-time gaming mechanics. The architecture must handle high-stakes financial transactions (USDT) while maintaining an immersive, story-driven user experience.
 
 ### 2.2 Key Architectural Challenges
-- **Identity Management (Web2.5):** Using `privy_did` as the primary user identifier to support non-wallet logins while allowing late-binding of Ethereum addresses.
+- **Identity Management (Web2.5):** Using `user_id` (UUID) as the primary key to support multiple auth methods (Guest, Traditional, Social) while allowing late-binding of Ethereum addresses.
+- **Character-Centric Design:** Decoupling user identity from game characters to support multiple character instances (Gacha) and personalized onboarding.
 - **Hybrid State Consistency:** Ensuring 100% alignment between off-chain AI generation and on-chain NFT minting.
 - **Economic Integrity:** Implementing a transparent, self-balancing difficulty adjustment mechanism (Bitcoin-style).
 - **Scalability:** Supporting 10,000 concurrent users with real-time updates and load-adaptive AI processing.
@@ -60,15 +61,18 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 - **Decision:** Use **Modular Monolith** with **Clean Architecture**.
 - **Rationale:** Provides the best balance between development speed (MVP) and future scalability. Allows for clear separation of concerns while avoiding the operational overhead of Microservices in the early stages.
 
-#### ADR 003: Identity & Onboarding (Web2.5)
-- **Decision:** Use **Privy DID** as the primary key for users.
-- **Rationale:** Decouples user identity from wallet addresses, enabling social login (Google/Email) and allowing users to link/change wallets without losing game progress.
+#### ADR 003: Identity & Onboarding (Web2.5 Hybrid)
+- **Decision:** Use a **Multi-Auth Identity System** with `user_id` (UUID) as the primary key and a separate **Character System**.
+- **Rationale:** Maximizes user acquisition by offering zero-friction entry (Guest) while providing a path to permanent accounts (Traditional/Social) and Web3 ownership (Wallet). The character system allows for personalized onboarding and future Gacha-based character acquisition.
 - **Key Implementation Details:**
+    - `users` table supports multiple auth methods: `privy_did`, `guest_id`, `username` + `password_hash`.
+    - `active_character_id` in `users` table points to the currently selected character.
+    - **Character Creation Flow:** New users are redirected to a creation screen to set `name`, `gender`, and `appearance` (Face/Hair).
+    - **Character Instances:** A `characters` table stores all characters owned by a user, allowing for future Gacha characters.
+    - **Account Upgrade Flow:** Logic to link a `privy_did` or `password_hash` to an existing `guest_id` record, preserving all characters and assets.
+- **Key Implementation Details (Legacy):**
     - `users` table uses `privy_did` (Unique) for lookups.
     - `wallet_address` is nullable and updated via a secure "Link Wallet" flow.
-    - JWT claims include `user_id` (UUID) for internal authorization.
-- **Key Implementation Details:**
-    - Domain-driven folder structure (e.g., `internal/ai`, `internal/blockchain`).
     - Shared kernel for common types and utilities.
     - In-process communication via interfaces to allow future extraction into Microservices.
 
@@ -230,15 +234,27 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 #### 1. User Entity
 *   `id`: UUID (Primary Key)
 *   `wallet_address`: string (Unique, Indexed)
-*   `username`: string
+*   `username`: string (Login identifier)
+*   `active_character_id`: UUID (FK to Character)
 *   `credits`: decimal (In-game currency)
 *   `last_login`: timestamp
 
-#### 2. Mech (NFT) Entity
+#### 2. Character Entity
+*   `id`: UUID (Primary Key)
+*   `user_id`: UUID (FK to User)
+*   `name`: string (In-game display name)
+*   `gender`: string (MALE, FEMALE, NON_BINARY)
+*   `face_id`: string (Appearance ID)
+*   `hair_id`: string (Appearance ID)
+*   `level`: integer
+*   `xp`: integer
+*   `is_starter`: boolean (True for the initial character)
+
+#### 3. Mech (NFT) Entity
 *   `id`: UUID (Primary Key)
 *   `token_id`: uint256 (On-chain ID, Nullable until minted)
 *   `owner_id`: UUID (FK to User)
-*   `vehicle_type`: enum (MECH, TANK, SHIP) - แยกประเภทตาม PRD
+*   `vehicle_type`: enum (MECH, TANK, SHIP) - Starter vehicle is a **SHIP**
 *   `class`: enum (STRIKER, GUARDIAN, SCOUT, ARTILLERY) - สำหรับกลยุทธ์ใน Combat Mode
 *   `image_url`: string (AI Generated URL)
 *   `stats`: JSONB (HP, Attack, Defense, Speed, Energy) - ใช้ JSONB เพื่อความยืดหยุ่น
