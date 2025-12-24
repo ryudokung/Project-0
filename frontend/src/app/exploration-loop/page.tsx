@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { explorationService, Sector, SubSector, PlanetLocation } from '@/services/exploration';
 
 type GameState = 'HANGAR' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'ENCOUNTER' | 'DEBRIEF';
 type BeadType = 'COMBAT' | 'RESOURCE' | 'NARRATIVE' | 'ANCHOR';
@@ -15,48 +16,6 @@ interface MothershipUpgrades {
   hackingModule: boolean;
   radarLevel: number;
   scannerLevel: number;
-}
-
-interface PlanetLocation {
-  id: string;
-  name: string;
-  description: string;
-  rewards: string[];
-  requirements: string[];
-  allowedModes: DeploymentMode[];
-  requiresAtmosphere: boolean;
-  suitability: {
-    pilot: number;
-    mech: number;
-  };
-  coordinates: { x: number; y: number };
-}
-
-interface SubSector {
-  id: string;
-  type: POIType;
-  name: string;
-  description: string;
-  rewards: string[];
-  requirements: string[];
-  allowedModes: DeploymentMode[];
-  requiresAtmosphere: boolean;
-  suitability: {
-    pilot: number; // 0-100
-    mech: number;  // 0-100
-  };
-  coordinates: { x: number; y: number };
-  locations?: PlanetLocation[]; // Nested locations for PLANET type
-}
-
-interface Sector {
-  id: string;
-  name: string;
-  description: string;
-  difficulty: 'LOW' | 'MEDIUM' | 'HIGH';
-  coordinates: { x: number; y: number };
-  color: string;
-  subSectors: SubSector[];
 }
 
 interface Bead {
@@ -92,9 +51,11 @@ export default function ExplorationLoop() {
   
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [sectors, setSectors] = useState<Sector[]>([]);
   const [selectedSector, setSelectedSector] = useState<Sector | null>(null);
   const [selectedSubSector, setSelectedSubSector] = useState<SubSector | null>(null);
   const [selectedPlanetLocation, setSelectedPlanetLocation] = useState<PlanetLocation | null>(null);
+  const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   
@@ -111,16 +72,31 @@ export default function ExplorationLoop() {
 
   const [currentMode, setCurrentMode] = useState<DeploymentMode>('PILOT');
 
+  // Fetch Universe Map
+  useEffect(() => {
+    const fetchMap = async () => {
+      try {
+        const data = await explorationService.getUniverseMap();
+        setSectors(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch universe map:', error);
+        setLoading(false);
+      }
+    };
+    fetchMap();
+  }, []);
+
   // Derived mode based on selection
   useEffect(() => {
     if (selectedVehicle) {
-      setCurrentMode(selectedVehicle.type);
+      setCurrentMode(selectedVehicle.type as DeploymentMode);
     } else {
       setCurrentMode('PILOT');
     }
   }, [selectedVehicle]);
 
-  const canDeploy = (target: { allowedModes: DeploymentMode[], requiresAtmosphere: boolean }) => {
+  const canDeploy = (target: { allowedModes: string[], requiresAtmosphere: boolean }) => {
     // Check Mode
     const modeAllowed = target.allowedModes.includes(currentMode);
     
@@ -138,157 +114,6 @@ export default function ExplorationLoop() {
     });
   };
 
-  const sectors: Sector[] = [
-    {
-      id: '1',
-      name: 'SOL GATE',
-      description: 'The industrial gateway to the system. Relatively safe but heavily monitored.',
-      difficulty: 'LOW',
-      coordinates: { x: 15, y: 20 },
-      color: 'blue',
-      subSectors: [
-        {
-          id: '1-1',
-          type: 'STATION',
-          name: 'Outpost 01',
-          description: 'A standard refueling station for independent scavengers.',
-          rewards: ['Scrap Metal', 'Fuel Isotopes'],
-          requirements: [],
-          allowedModes: ['PILOT', 'SPEEDER'],
-          requiresAtmosphere: false,
-          suitability: { pilot: 100, mech: 20 },
-          coordinates: { x: 40, y: 30 }
-        },
-        {
-          id: '1-2',
-          type: 'WRECK',
-          name: 'Old Freighter',
-          description: 'A derelict cargo ship drifting near the gate.',
-          rewards: ['Scrap Metal', 'O2 Crystals'],
-          requirements: [],
-          allowedModes: ['PILOT', 'EXOSUIT'],
-          requiresAtmosphere: false,
-          suitability: { pilot: 90, mech: 10 },
-          coordinates: { x: 60, y: 50 }
-        }
-      ]
-    },
-    {
-      id: '2',
-      name: 'IRON NEBULA',
-      description: 'A dense cloud of metallic dust and derelict warships. High gravity zones.',
-      difficulty: 'MEDIUM',
-      coordinates: { x: 45, y: 40 },
-      color: 'pink',
-      subSectors: [
-        {
-          id: '2-1',
-          type: 'WRECK',
-          name: 'Scrap Graveyard',
-          description: 'A massive cluster of destroyed freighter hulls.',
-          rewards: ['Scrap Metal', 'Neural Links'],
-          requirements: [],
-          allowedModes: ['PILOT', 'SPEEDER', 'EXOSUIT'],
-          requiresAtmosphere: false,
-          suitability: { pilot: 80, mech: 40 },
-          coordinates: { x: 30, y: 40 }
-        },
-        {
-          id: '2-2',
-          type: 'PLANET',
-          name: 'Krios Prime',
-          description: 'A frozen planetoid with hidden Syndicate bunkers.',
-          rewards: ['Fuel Isotopes', 'Neural Links'],
-          requirements: [],
-          allowedModes: ['MECH', 'TANK', 'HAULER'],
-          requiresAtmosphere: true,
-          suitability: { pilot: 20, mech: 90 },
-          coordinates: { x: 70, y: 60 },
-          locations: [
-            {
-              id: '2-2-1',
-              name: 'Bunker Alpha',
-              description: 'Deep underground storage facility.',
-              rewards: ['Neural Links', 'Scrap Metal'],
-              requirements: ['Hacking Module'],
-              allowedModes: ['PILOT', 'EXOSUIT'],
-              requiresAtmosphere: true,
-              suitability: { pilot: 90, mech: 10 },
-              coordinates: { x: 20, y: 30 }
-            },
-            {
-              id: '2-2-2',
-              name: 'Mining Rig 7',
-              description: 'Automated extraction site on the surface.',
-              rewards: ['Scrap Metal', 'Fuel Isotopes'],
-              requirements: ['Mining Drill'],
-              allowedModes: ['MECH', 'HAULER'],
-              requiresAtmosphere: true,
-              suitability: { pilot: 10, mech: 100 },
-              coordinates: { x: 60, y: 70 }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      id: '3',
-      name: 'NEON ABYSS',
-      description: 'A high-tech sector plagued by EMP storms and rogue AI signals.',
-      difficulty: 'HIGH',
-      coordinates: { x: 75, y: 30 },
-      color: 'red',
-      subSectors: [
-        {
-          id: '3-1',
-          type: 'STATION',
-          name: 'Data Hive',
-          description: 'A massive server farm drifting in a nebula.',
-          rewards: ['Neural Links', 'Void Shards'],
-          requirements: ['Hacking Module'],
-          allowedModes: ['PILOT', 'EXOSUIT'],
-          requiresAtmosphere: false,
-          suitability: { pilot: 100, mech: 0 },
-          coordinates: { x: 50, y: 50 }
-        }
-      ]
-    },
-    {
-      id: '4',
-      name: 'THE DEAD RIM',
-      description: 'The edge of known space. Ancient ruins and ghost signals.',
-      difficulty: 'EXTREME',
-      coordinates: { x: 50, y: 80 },
-      color: 'red',
-      subSectors: [
-        {
-          id: '4-1',
-          type: 'PLANET',
-          name: 'Vulcanis',
-          description: 'A high-gravity mining planet near a dying star.',
-          rewards: ['Void Shards', 'Ancient Tech'],
-          requirements: [],
-          allowedModes: ['MECH', 'TANK', 'SHIP'],
-          requiresAtmosphere: true,
-          suitability: { pilot: 5, mech: 95 },
-          coordinates: { x: 40, y: 30 },
-          locations: [
-            {
-              id: '4-1-1',
-              name: 'Magma Chamber',
-              description: 'Extreme heat zone with rare mineral deposits.',
-              rewards: ['Ancient Tech', 'Nexus Cores'],
-              requirements: ['Mining Drill'],
-              allowedModes: ['MECH', 'TANK'],
-              requiresAtmosphere: true,
-              suitability: { pilot: 0, mech: 100 },
-              coordinates: { x: 50, y: 50 }
-            }
-          ]
-        }
-      ]
-    }
-  ];
 
   // Fetch Real Vehicles from DB
   useEffect(() => {
@@ -298,15 +123,23 @@ export default function ExplorationLoop() {
         const data = await response.json();
         if (Array.isArray(data)) {
           // Map backend data to our Vehicle interface
-          const mappedVehicles = data.map((v: any) => ({
-            ...v,
-            type: v.vehicle_type || 'MECH' // Default to MECH if not specified
+          const mappedVehicles: Vehicle[] = data.map((m: any) => ({
+            id: m.id,
+            class: m.model,
+            type: (m.model.includes('TANK') ? 'TANK' : m.model.includes('SHIP') ? 'SHIP' : 'MECH') as DeploymentMode,
+            rarity: 'COMMON',
+            stats: {
+              hp: m.hp,
+              attack: m.attack,
+              defense: m.defense,
+              speed: m.speed
+            }
           }));
           setVehicles(mappedVehicles);
           if (mappedVehicles.length > 0) setSelectedVehicle(mappedVehicles[0]);
         }
-      } catch (err) {
-        console.error('Failed to fetch vehicles:', err);
+      } catch (error) {
+        console.error('Failed to fetch vehicles:', error);
         // Fallback mock vehicles for variety
         setVehicles([
           {
@@ -358,40 +191,10 @@ export default function ExplorationLoop() {
             image_url: 'https://images.unsplash.com/photo-1531259683007-016a7b628fc3?q=80&w=1000&auto=format&fit=crop'
           }
         ]);
-      } finally {
-        setLoading(false);
       }
     };
     fetchVehicles();
   }, []);
-
-  // Mock Data
-  const mockBeads: Bead[] = [
-    {
-      id: '1',
-      type: 'NARRATIVE',
-      title: 'The Awakening',
-      description: 'You wake up in the cold silence of your cockpit. The radar is flickering.',
-      visualPrompt: 'Tactical Noir style, a pilot waking up in a dark cockpit, flickering neon lights',
-      image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1000&auto=format&fit=crop'
-    },
-    {
-      id: '2',
-      type: 'COMBAT',
-      title: 'Scavenger Ambush',
-      description: 'A group of Iron Syndicate scavengers spotted your repair signal.',
-      visualPrompt: 'Tactical Noir style, a STRIKER mech fighting in an electromagnetic storm',
-      image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop'
-    },
-    {
-      id: '3',
-      type: 'RESOURCE',
-      title: 'Abandoned Cache',
-      description: 'You found a drifting cargo pod containing O2 canisters.',
-      visualPrompt: 'Tactical Noir style, a cargo pod floating in the void, neon highlights',
-      image: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1000&auto=format&fit=crop'
-    }
-  ];
 
   const startExploration = () => {
     setGameState('MAP');
@@ -404,66 +207,127 @@ export default function ExplorationLoop() {
     }
   };
 
-  const confirmDeployment = () => {
+  const confirmDeployment = async () => {
     if (!selectedSubSector) return;
     
     if (selectedSubSector.type === 'PLANET' && selectedSubSector.locations) {
       setGameState('PLANET_SURFACE');
       setSelectedPlanetLocation(null);
     } else {
-      setThreadTitle(`${selectedSector?.name} // ${selectedSubSector.name}`);
-      setGameState('EXPLORATION');
-      const firstBead = mockBeads[0];
-      setBeads([firstBead]);
-      setCurrentBead(firstBead);
-    }
-  };
-
-  const confirmPlanetDeployment = () => {
-    if (!selectedPlanetLocation) return;
-    setThreadTitle(`${selectedSector?.name} // ${selectedSubSector?.name} // ${selectedPlanetLocation.name}`);
-    setGameState('EXPLORATION');
-    const firstBead = mockBeads[0];
-    setBeads([firstBead]);
-    setCurrentBead(firstBead);
-  };
-
-  const advanceTimeline = () => {
-    if (isTransitioning) return;
-
-    const nextO2 = Math.max(0, o2 - 15);
-    const nextFuel = Math.max(0, fuel - 5);
-    
-    setO2(nextO2);
-    setFuel(nextFuel);
-
-    if (nextO2 <= 0) {
-      setGameState('DEBRIEF');
-      return;
-    }
-
-    // Randomly pick a bead (excluding the first one for variety)
-    const nextBead = mockBeads[Math.floor(Math.random() * (mockBeads.length - 1)) + 1];
-    
-    // Inject real mech class into the prompt
-    const realPrompt = nextBead.visualPrompt.replace('a STRIKER mech', `a ${selectedVehicle?.class || 'STRIKER'} ${selectedVehicle?.type.toLowerCase() || 'pilot'}`);
-    
-    const newBead = { 
-      ...nextBead, 
-      id: Math.random().toString(),
-      visualPrompt: realPrompt
-    };
-    
-    setBeads(prev => [...prev, newBead]);
-    setCurrentBead(newBead);
-
-    if (newBead.type === 'COMBAT') {
-      setIsTransitioning(true);
-      // Show the combat bead for a moment before switching to encounter
-      setTimeout(() => {
-        setGameState('ENCOUNTER');
+      try {
+        setIsTransitioning(true);
+        const userId = 'a58aa13f-f715-4137-bdf3-6ee44dd244ba'; // Mock user ID
+        const result = await explorationService.startExploration(
+          userId,
+          selectedSubSector.id,
+          selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
+        );
+        
+        setCurrentThreadId(result.thread.id);
+        setThreadTitle(`${selectedSector?.name} // ${selectedSubSector.name}`);
+        setGameState('EXPLORATION');
+        
+        const mappedBeads = result.beads.map((b: any) => ({
+          id: b.id,
+          type: b.type,
+          title: b.title,
+          description: b.description,
+          visualPrompt: b.visual_prompt,
+          image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1000&auto=format&fit=crop'
+        }));
+        
+        setBeads(mappedBeads);
+        setCurrentBead(mappedBeads[0]);
+      } catch (error) {
+        console.error('Failed to start exploration:', error);
+      } finally {
         setIsTransitioning(false);
-      }, 2000);
+      }
+    }
+  };
+
+  const confirmPlanetDeployment = async () => {
+    if (!selectedPlanetLocation || !selectedSubSector) return;
+    
+    try {
+      setIsTransitioning(true);
+      const userId = 'a58aa13f-f715-4137-bdf3-6ee44dd244ba'; // Mock user ID
+      const result = await explorationService.startExploration(
+        userId,
+        selectedSubSector.id,
+        selectedVehicle?.id || '00000000-0000-0000-0000-000000000000',
+        selectedPlanetLocation.id
+      );
+      
+      setCurrentThreadId(result.thread.id);
+      setThreadTitle(`${selectedSector?.name} // ${selectedSubSector?.name} // ${selectedPlanetLocation.name}`);
+      setGameState('EXPLORATION');
+      
+      const mappedBeads = result.beads.map((b: any) => ({
+        id: b.id,
+        type: b.type,
+        title: b.title,
+        description: b.description,
+        visualPrompt: b.visual_prompt,
+        image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1000&auto=format&fit=crop'
+      }));
+      
+      setBeads(mappedBeads);
+      setCurrentBead(mappedBeads[0]);
+    } catch (error) {
+      console.error('Failed to start planet exploration:', error);
+    } finally {
+      setIsTransitioning(false);
+    }
+  };
+
+  const advanceTimeline = async () => {
+    if (isTransitioning || !currentThreadId) return;
+
+    try {
+      setIsTransitioning(true);
+      
+      // Call backend to advance
+      const nextBeadData = await explorationService.advanceTimeline(
+        currentThreadId,
+        selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
+      );
+
+      const nextO2 = Math.max(0, o2 - 15);
+      const nextFuel = Math.max(0, fuel - 5);
+      
+      setO2(nextO2);
+      setFuel(nextFuel);
+
+      if (nextO2 <= 0) {
+        setGameState('DEBRIEF');
+        return;
+      }
+
+      const nextBead = {
+        id: nextBeadData.id,
+        type: nextBeadData.type,
+        title: nextBeadData.title,
+        description: nextBeadData.description,
+        visualPrompt: nextBeadData.visual_prompt,
+        image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop'
+      };
+      
+      setBeads(prev => [...prev, nextBead]);
+      setCurrentBead(nextBead);
+
+      if (nextBead.type === 'COMBAT') {
+        // Show the combat bead for a moment before switching to encounter
+        setTimeout(() => {
+          setGameState('ENCOUNTER');
+          setIsTransitioning(false);
+        }, 2000);
+      } else {
+        setIsTransitioning(false);
+      }
+    } catch (error) {
+      console.error('Failed to advance timeline:', error);
+      setIsTransitioning(false);
     }
   };
 
