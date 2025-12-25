@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project-0 Frontend
 
-## Getting Started
+This is the frontend for **Project-0**, a Tactical Noir AI-Powered Web Game. Built with Next.js 15, it uses a decoupled architecture with singleton systems and an EventBus to manage game logic.
 
-First, run the development server:
+## 🚀 Getting Started
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2.  **Environment Setup**:
+    Create a `.env.local` file (refer to `.env.example` if available) with your API endpoints and keys.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4.  **Build for Production**:
+    ```bash
+    npm run build
+    ```
 
-## Learn More
+## 🏗 Architecture
 
-To learn more about Next.js, take a look at the following resources:
+-   **Systems**: Located in `src/systems/`. These are singleton classes (e.g., `BastionSystem`, `ExplorationSystem`) that handle core game logic.
+-   **EventBus**: A global event emitter (`src/systems/EventBus.ts`) used for communication between systems and UI components.
+-   **Game Machine**: An XState state machine (`src/machines/gameMachine.ts`) that governs the high-level game states (Bastion, Map, Exploration, Combat).
+-   **Components**: React components in `src/components/game/` are designed to be "thin" view layers that react to system events.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠 Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+-   **Framework**: Next.js 15 (App Router)
+-   **State Management**: XState, React Context
+-   **Styling**: Tailwind CSS, Lucide React (Icons)
+-   **3D/Visuals**: React Three Fiber (R3F), Three.js
+-   **Communication**: Axios (API), EventBus (Internal)
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+Part of the [Project-0](../README.md) ecosystem.

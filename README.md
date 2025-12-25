@@ -35,8 +35,21 @@ Project-0 is not just a game; it's an evolving universe. Players take on the rol
 ## 🛠 Tech Stack
 - **Frontend**: Next.js 15+, **Decoupled Systems (EventBus + Singletons)**, **XState (Finite State Machine)**, **WebGPU**, **React Three Fiber (R3F)**, Tailwind CSS.
 - **Backend**: Go (Modular Monolith), Clean Architecture, Saga Pattern, **JWT Security Middleware**, **Atomic Concurrency Control**.
+- **Database**: PostgreSQL 16+, **Consolidated Schema (init.sql)**.
 - **Blockchain**: Base L2, **ERC-6551 (Token Bound Accounts)**, ERC-721.
 - **AI**: FLUX.1 via Fal.ai/Replicate, Structured Output.
+
+## 🚀 Getting Started
+
+### Backend Setup
+1.  Navigate to `backend/`.
+2.  Initialize the database using `backend/init.sql`. This file contains the complete schema, enums, and initial seed data (NPCs, Sectors).
+3.  Run the server: `go run cmd/api/main.go`.
+
+### Frontend Setup
+1.  Navigate to `frontend/`.
+2.  Install dependencies: `npm install`.
+3.  Run the development server: `npm run dev`.
 
 ## 🏗 Architecture Principles
 - **Security-First**: Every game mechanic is validated server-side. No client-side trust. Atomic database operations prevent race conditions and double-spending.

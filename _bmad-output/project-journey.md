@@ -8,15 +8,15 @@
 - **Old Way:** React Components จัดการ State กันเองผ่าน Props/Context ทำให้ Code ผูกติดกัน (Tightly Coupled) และขยายยาก
 - **New Way (Unity-like Systems):** 
     - **EventBus:** ใช้ระบบ Global Event ในการสื่อสารระหว่างส่วนต่างๆ (เช่น Combat จบ -> ส่ง Event -> Hangar อัปเดต)
-    - **Singleton Systems:** แยก Logic ออกจาก UI มาไว้ใน `CombatSystem`, `HangarSystem`, `GachaSystem`
-    - **XState (Game Machine):** ใช้ State Machine ควบคุม Flow ใหญ่ของเกม (Loading -> Menu -> Hangar -> Combat)
+    - **Singleton Systems:** แยก Logic ออกจาก UI มาไว้ใน `CombatSystem`, `BastionSystem`, `GachaSystem`
+    - **XState (Game Machine):** ใช้ State Machine ควบคุม Flow ใหญ่ของเกม (Loading -> Menu -> Bastion -> Combat)
     - **Result:** โค้ดสะอาดขึ้นมาก UI มีหน้าที่แค่ "แสดงผล" และ "ส่งคำสั่ง" ส่วน Logic อยู่ใน System ทั้งหมด
 
 ## 2. The Bastion: Beyond a Simple Menu
-เปลี่ยนจาก "Mothership" ที่เป็นแค่เมนูเลือกด่าน กลายเป็น **"The Bastion"** (ฐานทัพเคลื่อนที่)
+เปลี่ยนจาก "Hangar" ที่เป็นแค่เมนูเลือกด่าน กลายเป็น **"The Bastion"** (ฐานทัพเคลื่อนที่)
 
 - **Bridge View:** หน้าจอหลักที่จะเป็นศูนย์กลางความดื่มด่ำ (Immersion) เห็นวิวอวกาศและสถานะของยานแบบ Real-time
-- **Modular Hardpoints:** ยานมี Slot สำหรับติดตั้งอุปกรณ์ (Warp Drive, Shields, Turrets) ซึ่งส่งผลต่อการเล่นจริง
+- **Modular Hardpoints:** ยานแม่มี Slot สำหรับติดตั้งอุปกรณ์ (Warp Drive, Shields, Turrets) ซึ่งส่งผลต่อการเล่นจริง
 - **The Maintenance Hub:** เป็นที่ที่ผู้เล่นต้องกลับมาซ่อมแซมและปรับแต่งอุปกรณ์
 
 ## 3. The "Stage Change" NFT Model
@@ -42,10 +42,17 @@
 - **Dynamic Visual AI:** ใช้เทคโนโลยี IP-Adapter และ ControlNet เพื่อให้ AI สร้างภาพเหตุการณ์ที่ "หน้าตาเหมือนหุ่นของผู้เล่น" และ "สอดคล้องกับสภาพความเสียหาย (DDS)" ในขณะนั้น
 - **Result:** ทุกการสำรวจจะมีภาพประกอบที่เป็นเอกลักษณ์เฉพาะตัวของผู้เล่นคนนั้นจริงๆ
 
-## 6. Current Tech Stack
+## 6. Database Consolidation (Single Source of Truth)
+เราได้ทำการรวมโครงสร้างฐานข้อมูลทั้งหมด (Migrations) เข้ามาอยู่ใน `init.sql` เพียงไฟล์เดียว
+
+- **Unified Schema:** รวม Enums, Tables (Vehicles, Items, Pilots, Sectors) และ Seed Data เริ่มต้น
+- **NPC & World Building:** มีการใส่ข้อมูล SYSTEM_NPC และ Sector เริ่มต้น (SOL GATE) ไว้ใน Schema เลย
+- **Result:** ทำให้การ Setup สภาพแวดล้อมใหม่ (Development/Production) ทำได้รวดเร็วและแม่นยำ 100%
+
+## 7. Current Tech Stack
 - **Frontend:** Next.js 15, Framer Motion (Animations), Three.js (3D Elements), XState, TailwindCSS, **Decoupled Systems (EventBus + Singletons)**
 - **Backend:** Go (Clean Architecture), PostgreSQL, JWT Auth, Privy (Web3 Auth), **DDS Items System**
 - **AI Integration:** FLUX.1 (Image Gen), IP-Adapter (Consistency), ControlNet (Structure)
 
 ---
-*สถานะปัจจุบัน: เสร็จสิ้นการออกแบบโครงสร้างระบบ Items (DDS) และ Gameplay Technical Spec พร้อมเริ่ม Implement ระบบสำรวจ (Exploration Engine)*
+*สถานะปัจจุบัน: เสร็จสิ้นการ Refactor ใหญ่ (Hangar -> Bastion, Mech -> Vehicle) และการรวม Database Schema พร้อมสำหรับการพัฒนาฟีเจอร์ Gameplay ต่อไป*
