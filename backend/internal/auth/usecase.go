@@ -154,6 +154,12 @@ func (u *authUseCase) Login(req LoginRequest) (*LoginResponse, error) {
 
 	if user != nil {
 		u.repo.UpdateLastLogin(user.ID)
+		
+		// Populate ActiveCharacter if exists
+		if user.ActiveCharacterID != nil {
+			char, _ := u.repo.GetCharacterByID(*user.ActiveCharacterID)
+			user.ActiveCharacter = char
+		}
 	}
 
 	// Generate JWT
@@ -219,6 +225,12 @@ func (u *authUseCase) Signup(req SignupRequest) (*LoginResponse, error) {
 			return nil, err
 		}
 		// Game initialization now happens during Character Creation
+	}
+
+	// Populate ActiveCharacter if exists
+	if user.ActiveCharacterID != nil {
+		char, _ := u.repo.GetCharacterByID(*user.ActiveCharacterID)
+		user.ActiveCharacter = char
 	}
 
 	// Generate JWT
@@ -293,6 +305,12 @@ func (u *authUseCase) LinkWallet(userID uuid.UUID, walletAddress string) error {
 }
 
 func (u *authUseCase) CreateCharacter(userID uuid.UUID, req CreateCharacterRequest) (*Character, error) {
+	// Anti-Cheat: Check if user already has characters (limit 1 for now)
+	existing, _ := u.repo.GetCharactersByUserID(userID)
+	if len(existing) > 0 {
+		return nil, fmt.Errorf("user already has a character")
+	}
+
 	char := &Character{
 		ID:        uuid.New(),
 		UserID:    userID,

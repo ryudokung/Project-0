@@ -15,6 +15,7 @@ type Repository interface {
 	GetByCharacterID(charID uuid.UUID) ([]Mech, error)
 	Update(ctx context.Context, mech *Mech) error
 	UpdateStatus(id uuid.UUID, status MechStatus, tokenID string) error
+	UpdateHP(ctx context.Context, id uuid.UUID, newHP int) error
 
 	// Part operations
 	CreatePart(part *Part) error
@@ -167,6 +168,12 @@ func (r *mechRepository) GetByCharacterID(charID uuid.UUID) ([]Mech, error) {
 func (r *mechRepository) UpdateStatus(id uuid.UUID, status MechStatus, tokenID string) error {
 	query := `UPDATE mechs SET status = $1, token_id = $2 WHERE id = $3`
 	_, err := r.db.Exec(query, status, tokenID, id)
+	return err
+}
+
+func (r *mechRepository) UpdateHP(ctx context.Context, id uuid.UUID, newHP int) error {
+	query := `UPDATE mechs SET stats = jsonb_set(stats, '{hp}', $1::text::jsonb) WHERE id = $2`
+	_, err := r.db.ExecContext(ctx, query, newHP, id)
 	return err
 }
 

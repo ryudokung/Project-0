@@ -23,6 +23,7 @@ Project-0 is not just a game; it's an evolving universe. Players take on the rol
 
 ## ✨ Unique Selling Points
 - **AI-Generated Visual DNA:** Vehicles are synthesized by AI (FLUX.1) based on their specific NFT parts and stats.
+- **Security-First Architecture:** Every game mechanic is validated server-side. No client-side trust. Atomic database operations prevent race conditions and double-spending.
 - **Hybrid Narrative Architecture:** A unique blend of Director-fixed plot points ("Narrative Anchors") and AI-generated dynamic content, ensuring every player has a unique but cohesive story.
 - **Node-Based Exploration:** A "Tactical Noir" radar interface where you click to discover the universe.
 - **Showcase Engine:** A high-fidelity 3D hangar for "flexing" your unique assets to the community.
@@ -30,10 +31,15 @@ Project-0 is not just a game; it's an evolving universe. Players take on the rol
 - **Captain's Log:** A personal, AI-narrated history of your greatest victories and "First Discoveries."
 
 ## 🛠 Tech Stack
-- **Frontend:** Next.js 15+, **WebGPU**, **React Three Fiber (R3F)**, Tailwind CSS.
-- **Backend:** Go (Modular Monolith), Clean Architecture, Saga Pattern, **MCP**.
-- **Blockchain:** Base L2, **ERC-6551 (Token Bound Accounts)**, ERC-721.
-- **AI:** FLUX.1 via Fal.ai/Replicate, Structured Output.
+- **Frontend**: Next.js 15+, **XState (Finite State Machine)**, **WebGPU**, **React Three Fiber (R3F)**, Tailwind CSS, **Single-Page Game Loop (SPGL)**.
+- **Backend**: Go (Modular Monolith), Clean Architecture, Saga Pattern, **JWT Security Middleware**, **Atomic Concurrency Control**.
+- **Blockchain**: Base L2, **ERC-6551 (Token Bound Accounts)**, ERC-721.
+- **AI**: FLUX.1 via Fal.ai/Replicate, Structured Output.
+
+## 🏗 Architecture Principles
+- **Security-First**: Every game mechanic is validated server-side. No client-side trust. Atomic database operations prevent race conditions and double-spending.
+- **State-Driven UI**: The frontend uses **XState** to manage the game loop. This ensures the UI is always in a valid state and simplifies complex transitions between Hangar, Map, Exploration, and Combat.
+- **Unified Controller**: A single-page architecture (SPGL) provides a seamless, immersive experience without page reloads.
 
 ## 📖 The Technical Bibles
 The project is governed by 8 core design documents:

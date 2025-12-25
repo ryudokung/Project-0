@@ -7,10 +7,14 @@ import (
 
 type Repository interface {
 	GetPilotStats(charID uuid.UUID) (*PilotStats, error)
+	GetActivePilotStats(userID uuid.UUID) (*PilotStats, error)
 	UpdatePilotStats(stats *PilotStats) error
 	InitializePilot(charID uuid.UUID) error
+	InitializeGachaStats(userID uuid.UUID) error
 	GetGachaStats(userID uuid.UUID) (*GachaStats, error)
 	UpdateGachaStats(stats *GachaStats) error
+	ConsumeFreePull(userID uuid.UUID) (bool, error)
+	ConsumeResources(charID uuid.UUID, o2, fuel float64) (bool, error)
 }
 
 type gameRepository struct {
@@ -24,6 +28,23 @@ func NewRepository(db *sql.DB) Repository {
 func (r *gameRepository) GetPilotStats(charID uuid.UUID) (*PilotStats, error) {
 	query := `SELECT user_id, character_id, resonance_level, resonance_exp, xp, rank, current_o2, current_fuel, updated_at FROM pilot_stats WHERE character_id = $1`
 	row := r.db.QueryRow(query, charID)
+
+	var s PilotStats
+	err := row.Scan(&s.UserID, &s.CharacterID, &s.ResonanceLevel, &s.ResonanceExp, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.UpdatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return &s, err
+}
+
+func (r *gameRepository) GetActivePilotStats(userID uuid.UUID) (*PilotStats, error) {
+	query := `
+		SELECT ps.user_id, ps.character_id, ps.resonance_level, ps.resonance_exp, ps.xp, ps.rank, ps.current_o2, ps.current_fuel, ps.updated_at 
+		FROM pilot_stats ps
+		JOIN users u ON ps.character_id = u.active_character_id
+		WHERE u.id = $1
+	`
+	row := r.db.QueryRow(query, userID)
 
 	var s PilotStats
 	err := row.Scan(&s.UserID, &s.CharacterID, &s.ResonanceLevel, &s.ResonanceExp, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.UpdatedAt)
@@ -60,6 +81,16 @@ func (r *gameRepository) InitializePilot(charID uuid.UUID) error {
 	return err
 }
 
+func (r *gameRepository) InitializeGachaStats(userID uuid.UUID) error {
+	query := `
+		INSERT INTO gacha_stats (user_id, pity_relic_count, pity_singularity_count, total_pulls)
+		VALUES ($1, 0, 0, 0)
+		ON CONFLICT (user_id) DO NOTHING
+	`
+	_, err := r.db.Exec(query, userID)
+	return err
+}
+
 func (r *gameRepository) GetGachaStats(userID uuid.UUID) (*GachaStats, error) {
 	query := `SELECT user_id, pity_relic_count, pity_singularity_count, total_pulls, last_free_pull_at, updated_at FROM gacha_stats WHERE user_id = $1`
 	row := r.db.QueryRow(query, userID)
@@ -80,4 +111,32 @@ func (r *gameRepository) UpdateGachaStats(s *GachaStats) error {
 	`
 	_, err := r.db.Exec(query, s.PityRelicCount, s.PitySingularityCount, s.TotalPulls, s.LastFreePullAt, s.UserID)
 	return err
+}
+
+func (r *gameRepository) ConsumeFreePull(userID uuid.UUID) (bool, error) {
+	query := `
+		UPDATE gacha_stats 
+		SET last_free_pull_at = CURRENT_TIMESTAMP 
+		WHERE user_id = $1 AND (last_free_pull_at IS NULL OR last_free_pull_at < CURRENT_TIMESTAMP - INTERVAL '24 hours')
+	`
+	res, err := r.db.Exec(query, userID)
+	if err != nil {
+		return false, err
+	}
+	rows, _ := res.RowsAffected()
+	return rows > 0, nil
+}
+
+func (r *gameRepository) ConsumeResources(charID uuid.UUID, o2, fuel float64) (bool, error) {
+	query := `
+		UPDATE pilot_stats 
+		SET current_o2 = current_o2 - $1, current_fuel = current_fuel - $2 
+		WHERE character_id = $3 AND current_o2 >= $1 AND current_fuel >= $2
+	`
+	res, err := r.db.Exec(query, o2, fuel, charID)
+	if err != nil {
+		return false, err
+	}
+	rows, _ := res.RowsAffected()
+	return rows > 0, nil
 }

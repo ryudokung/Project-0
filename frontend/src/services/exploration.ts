@@ -1,4 +1,6 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL 
+  ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1` 
+  : 'http://localhost:8080/api/v1';
 
 export interface PlanetLocation {
   id: string;
@@ -92,6 +94,25 @@ export interface PilotStats {
   updated_at: string;
 }
 
+export interface Encounter {
+  id: string;
+  type: 'COMBAT' | 'RESOURCE' | 'STORY' | 'REST';
+  title: string;
+  description: string;
+  visualPrompt: string;
+  image: string;
+  enemy_id?: string;
+}
+
+interface BackendEncounter {
+  id: string;
+  type: 'COMBAT' | 'RESOURCE' | 'STORY' | 'REST';
+  title: string;
+  description: string;
+  visual_prompt: string;
+  enemy_id?: string;
+}
+
 export interface ExplorationStartResponse {
   expedition: {
     id: string;
@@ -103,18 +124,39 @@ export interface ExplorationStartResponse {
     description: string;
     goal: string;
   };
-  encounters: any[];
+  encounters: Encounter[];
   pilot_stats: PilotStats;
 }
 
 export interface AdvanceTimelineResponse {
-  encounter: any;
+  encounter: Encounter;
   pilot_stats: PilotStats;
 }
 
+interface BackendExplorationStartResponse {
+  expedition: any;
+  encounters: BackendEncounter[];
+  pilot_stats: PilotStats;
+}
+
+interface BackendAdvanceTimelineResponse {
+  encounter: BackendEncounter;
+  pilot_stats: PilotStats;
+}
+
+const getAuthHeaders = () => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('project0_token') : null;
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+  };
+};
+
 export const explorationService = {
   async getUniverseMap(): Promise<Sector[]> {
-    const response = await fetch(`${API_BASE_URL}/exploration/universe-map`);
+    const response = await fetch(`${API_BASE_URL}/exploration/universe-map`, {
+      headers: getAuthHeaders(),
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch universe map');
     }
@@ -163,33 +205,54 @@ export const explorationService = {
   async startExploration(userId: string, subSectorId: string, vehicleId: string, planetLocationId?: string): Promise<ExplorationStartResponse> {
     const response = await fetch(`${API_BASE_URL}/exploration/start`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ 
-        user_id: userId, 
         sub_sector_id: subSectorId, 
         vehicle_id: vehicleId,
         planet_location_id: planetLocationId
       }),
     });
     if (!response.ok) {
-      throw new Error('Failed to start exploration');
+      const errorText = await response.text();
+      console.error('Exploration start failed:', errorText);
+      throw new Error(`Failed to start exploration: ${errorText}`);
     }
-    return response.json();
+    const data: BackendExplorationStartResponse = await response.json();
+    return {
+      ...data,
+      encounters: data.encounters.map(e => ({
+        id: e.id,
+        type: e.type,
+        title: e.title,
+        description: e.description,
+        visualPrompt: e.visual_prompt,
+        enemy_id: e.enemy_id,
+        image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1000&auto=format&fit=crop'
+      }))
+    };
   },
 
   async advanceTimeline(expeditionId: string, vehicleId: string): Promise<AdvanceTimelineResponse> {
     const response = await fetch(`${API_BASE_URL}/exploration/advance`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ expedition_id: expeditionId, vehicle_id: vehicleId }),
     });
     if (!response.ok) {
       throw new Error('Failed to advance timeline');
     }
-    return response.json();
+    const data: BackendAdvanceTimelineResponse = await response.json();
+    return {
+      pilot_stats: data.pilot_stats,
+      encounter: {
+        id: data.encounter.id,
+        type: data.encounter.type,
+        title: data.encounter.title,
+        description: data.encounter.description,
+        visualPrompt: data.encounter.visual_prompt,
+        enemy_id: data.encounter.enemy_id,
+        image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop'
+      }
+    };
   }
 };

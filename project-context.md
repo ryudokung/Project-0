@@ -42,6 +42,7 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 - [epics-stories.md](_bmad-output/epics-stories.md): Implementation Roadmap.
 
 ## Critical Implementation Rules
+- **Security-First Development:** Security is NOT an afterthought. Every new feature must implement server-side ownership verification, input validation, and protection against race conditions (Atomic updates).
 - **Saga Pattern:** All multi-step transactions (Assembly, Discovery) must use the Saga Pattern with idempotency keys.
 - **Clean Architecture:** Go backend must follow Clean Architecture (Entities, Use Cases, Repository, Delivery).
 - **Dockerized Environment:** All services must be runnable via `docker-compose up`.
@@ -54,8 +55,40 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 - [x] Interactive TUI/CLI for Combat Testing
 - [x] Expedition & Encounters Database Schema (Stars, Nodes, Sessions)
 - [x] Visual DNA Aggregator (Mech + Environment Prompt Logic)
+- [x] Single-Page Game Loop (SPGL) Architecture (Frontend State Machine)
+- [x] JWT Security Middleware & Ownership Verification
+- [x] Anti-Cheat & Race Condition Prevention (Atomic SQL Updates)
+- [x] Real Combat Integration (NPC Seeding & Exploration Wiring)
 - [ ] Exploration UseCase (Node selection & Event handling)
 - [ ] AI Image Generation Integration (FLUX.1)
+
+## Recent Technical Updates (December 2025)
+### 1. Game Engine Architecture (Decoupled Systems)
+- **Architecture:** Refactored the frontend into a "Game Engine" pattern using a global **Event Bus** (`EventBus.ts`) and **Singleton Systems** (e.g., `ExplorationSystem.ts`).
+- **Core Components:**
+    - **Event Bus (`EventBus.ts`)**: Acts as the central nervous system. Components and systems communicate via asynchronous events, reducing direct dependencies and preventing "prop drilling".
+    - **Singleton Systems**: Domain-specific logic (e.g., `ExplorationSystem`, `CombatSystem`) is encapsulated in standalone classes. These systems manage their own internal state and interact with the backend, emitting events when data changes.
+    - **Reactive UI Layer**: React components are treated as a "View" layer. They subscribe to events from the Event Bus to update their local state and trigger system methods in response to user interactions.
+    - **XState Orchestration**: A finite state machine (`gameMachine.ts`) manages the high-level game flow, ensuring that transitions between stages (e.g., Hangar to Exploration) are valid and consistent.
+- **Benefits:** Decouples game logic from React UI components, allowing for easier scaling, better testability, and a more "Unity-like" development experience.
+
+### 2. Authentication & Onboarding (Web2.5)
+- **Auth Flow:** Implemented a hybrid authentication system. Initial login is via **Guest ID** (Local Storage) or **Social Login** (Email/Google via Privy).
+- **Wallet Strategy:** Wallet linking is **NOT** required for initial login. It is treated as an optional step for later stages, specifically for minting virtual assets into on-chain NFTs.
+- **Pilot Registration:** New users must complete a "Pilot Registration" (Character Creation) which initializes their `pilot_stats` and assigns a starter vehicle in the database.
+
+### 3. Security & Anti-Cheat (Hardening)
+- **JWT Middleware:** Implemented a robust authentication layer in Go to protect all sensitive API routes.
+- **Ownership Verification:** The backend now verifies ownership of Mechs and Expeditions for every action (Combat, Exploration).
+- **Server-Authoritative State:** HP and Resource (O2/Fuel) tracking moved to the server to prevent client-side manipulation.
+- **Combat Integrity:** Added checks to prevent skipping combat encounters or attacking destroyed targets.
+
+### 3. Concurrency & Race Conditions
+- **Atomic SQL Updates:** Implemented `UPDATE ... WHERE` patterns for Gacha pulls and Resource consumption to prevent "Double Spend" and race conditions during high-frequency requests.
+
+### 4. Real Combat Integration
+- **NPC Seeding:** Integrated real NPC enemy data into the exploration loop.
+- **End-to-End Wiring:** Connected the exploration `enemy_id` directly to the combat engine, enabling persistent damage and loot potential.
 
 ## Directory Structure
 - `/backend`: Go source code.

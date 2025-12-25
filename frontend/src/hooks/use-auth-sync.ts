@@ -95,6 +95,25 @@ export function useAuthSync() {
     }
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const localToken = localStorage.getItem("project0_token");
+    if (localToken) {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`, {
+          headers: {
+            "Authorization": `Bearer ${localToken}`,
+          },
+        });
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error("Error refreshing user:", error);
+      }
+    }
+  }, []);
+
   const logout = useCallback(() => {
     setBackendToken(null);
     setUser(null);
@@ -169,5 +188,5 @@ export function useAuthSync() {
     syncWithBackend();
   }, [ready, authenticated, getAccessToken, privyUser]);
 
-  return { backendToken, user, isLoading: !ready || isLoading, guestLogin, traditionalLogin, signup, logout };
+  return { backendToken, user, isLoading: !ready || isLoading, guestLogin, traditionalLogin, signup, logout, refreshUser };
 }

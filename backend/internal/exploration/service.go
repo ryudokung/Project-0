@@ -3,6 +3,7 @@ package exploration
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"strings"
 
 	"github.com/google/uuid"
@@ -102,18 +103,20 @@ type Expedition struct {
 	UserID           uuid.UUID  `json:"user_id"`
 	SubSectorID      uuid.UUID  `json:"sub_sector_id"`
 	PlanetLocationID *uuid.UUID `json:"planet_location_id"`
-	VehicleID        uuid.UUID  `json:"vehicle_id"`
+	VehicleID        *uuid.UUID `json:"vehicle_id"`
 	Title            string     `json:"title"`
 	Description      string     `json:"description"`
 	Goal             string     `json:"goal"`
 }
 
 type Encounter struct {
-	ID          uuid.UUID `json:"id"`
-	Type        NodeType  `json:"type"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	VisualPrompt string    `json:"visual_prompt"`
+	ID           uuid.UUID  `json:"id"`
+	Type         NodeType   `json:"type"`
+	Title        string     `json:"title"`
+	Description  string     `json:"description"`
+	VisualPrompt string     `json:"visual_prompt"`
+	EnemyID      *uuid.UUID `json:"enemy_id,omitempty"`
+	CreatedAt    string     `json:"created_at"`
 }
 
 type Service struct {
@@ -127,13 +130,29 @@ func NewService(repo Repository, mechRepo mech.Repository, gameRepo game.Reposit
 }
 
 func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSectorID uuid.UUID, planetLocationID *uuid.UUID, vehicleID uuid.UUID) (*Expedition, error) {
+	// 0. Verify Vehicle Ownership (if vehicle is provided)
+	var vID *uuid.UUID
+	if vehicleID != uuid.Nil {
+		m, err := s.mechRepo.GetByID(ctx, vehicleID)
+		if err != nil {
+			return nil, fmt.Errorf("error fetching vehicle: %v", err)
+		}
+		if m == nil {
+			return nil, fmt.Errorf("vehicle not found")
+		}
+		if m.OwnerID != userID {
+			return nil, fmt.Errorf("unauthorized: you do not own this vehicle")
+		}
+		vID = &vehicleID
+	}
+
 	// 1. Create Expedition
 	expedition := &Expedition{
 		ID:               uuid.New(),
 		UserID:           userID,
 		SubSectorID:      subSectorID,
 		PlanetLocationID: planetLocationID,
-		VehicleID:        vehicleID,
+		VehicleID:        vID,
 		Title:            "The Silent Signal",
 		Description:      "Investigating a mysterious signal in the sector.",
 		Goal:             "Locate the source of the signal.",
@@ -144,7 +163,7 @@ func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSec
 	}
 
 	// 2. Generate First Encounter
-	_, err := s.StringNewEncounter(ctx, expedition.ID, vehicleID)
+	_, err := s.GenerateNewEncounter(ctx, expedition.ID, vehicleID)
 	if err != nil {
 		return nil, err
 	}
@@ -152,41 +171,61 @@ func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSec
 	return expedition, nil
 }
 
-// StringNewEncounter generates a new procedural event (Encounter) based on the current Expedition context
-func (s *Service) StringNewEncounter(ctx context.Context, expeditionID uuid.UUID, mechID uuid.UUID) (*Encounter, error) {
+// GenerateNewEncounter generates a new procedural event (Encounter) based on the current Expedition context
+func (s *Service) GenerateNewEncounter(ctx context.Context, expeditionID uuid.UUID, mechID uuid.UUID) (*Encounter, error) {
 	// 1. Fetch Context Data
 	expedition, err := s.repo.GetExpeditionByID(expeditionID)
 	if err != nil {
 		return nil, err
 	}
+	
+	// Anti-Cheat: Check if last encounter is resolved (Race Condition / Skip Combat)
+	lastEncounters, _ := s.repo.GetEncountersByExpeditionID(expeditionID)
+	if len(lastEncounters) > 0 {
+		last := lastEncounters[len(lastEncounters)-1]
+		if last.Type == NodeCombat && last.EnemyID != nil {
+			enemy, _ := s.mechRepo.GetByID(ctx, *last.EnemyID)
+			if enemy != nil && enemy.Stats.HP > 0 {
+				return nil, fmt.Errorf("current combat encounter not resolved")
+			}
+		}
+	}
+
 	m, err := s.mechRepo.GetByID(ctx, mechID)
 	if err != nil {
 		return nil, err
 	}
-	parts, err := s.mechRepo.GetPartsByMechID(mechID)
+	
+	var parts []mech.Part
+	if m != nil {
+		parts, err = s.mechRepo.GetPartsByMechID(mechID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	
+	// If mechID is zero UUID, m will be nil (Pilot Only mode)
+	// We use the expedition's UserID to get the active pilot stats
+	pilot, err := s.gameRepo.GetActivePilotStats(expedition.UserID)
 	if err != nil {
 		return nil, err
 	}
-	pilot, err := s.gameRepo.GetPilotStats(m.OwnerID)
-	if err != nil {
-		return nil, err
+
+	// Anti-Cheat: Check Resources
+	if pilot != nil && pilot.CurrentO2 <= 0 {
+		return nil, fmt.Errorf("insufficient oxygen to advance")
 	}
 
 	// 2. Determine Encounter Type based on Expedition and Pilot Stats
 	encounterType := NodeCombat
 	if pilot != nil {
-		// Consume Resources
-		pilot.CurrentO2 -= 15.0
-		pilot.CurrentFuel -= 5.0
-		if pilot.CurrentO2 < 0 {
-			pilot.CurrentO2 = 0
-		}
-		if pilot.CurrentFuel < 0 {
-			pilot.CurrentFuel = 0
-		}
-		
-		if err := s.gameRepo.UpdatePilotStats(pilot); err != nil {
+		// Atomic Resource Consumption (Anti-Cheat / Race Condition)
+		success, err := s.gameRepo.ConsumeResources(pilot.CharacterID, 15.0, 5.0)
+		if err != nil {
 			return nil, err
+		}
+		if !success {
+			return nil, fmt.Errorf("insufficient resources to advance")
 		}
 
 		if pilot.CurrentO2 < 30 {
@@ -220,12 +259,26 @@ func (s *Service) StringNewEncounter(ctx context.Context, expeditionID uuid.UUID
 	node := &Node{EnvironmentDescription: env}
 	prompt := s.GenerateVisualPrompt(m, parts, node)
 
+	var enemyID *uuid.UUID
+	if encounterType == NodeCombat {
+		// Assign a random seeded enemy ID
+		enemies := []string{
+			"e0000000-0000-0000-0000-000000000001",
+			"e0000000-0000-0000-0000-000000000002",
+			"e0000000-0000-0000-0000-000000000003",
+		}
+		selected := enemies[rand.Intn(len(enemies))]
+		uid := uuid.MustParse(selected)
+		enemyID = &uid
+	}
+
 	encounter := &Encounter{
 		ID:           uuid.New(),
 		Type:         encounterType,
 		Title:        title,
 		Description:  desc,
 		VisualPrompt: prompt,
+		EnemyID:      enemyID,
 	}
 
 	// 5. Save to Repository
@@ -248,9 +301,13 @@ func (s *Service) GenerateVisualPrompt(m *mech.Mech, parts []mech.Part, node *No
 	}
 
 	// 2. Combine with Node Environment
-	prompt := fmt.Sprintf("Tactical Noir style, a %s mech with %s features, standing in a %s environment, cinematic lighting, high detail",
-		m.Class,
-		strings.Join(dnaKeywords, ", "),
+	mechDesc := "Pilot in EVA suit"
+	if m != nil {
+		mechDesc = fmt.Sprintf("a %s mech with %s features", m.Class, strings.Join(dnaKeywords, ", "))
+	}
+
+	prompt := fmt.Sprintf("Tactical Noir style, %s, standing in a %s environment, cinematic lighting, high detail",
+		mechDesc,
 		node.EnvironmentDescription,
 	)
 

@@ -13,11 +13,15 @@ This document defines the technical implementation of core gameplay pillars, ens
 
 ### 2.2 Exploration Stages
 - **Module:** `internal/exploration`
-- **Frontend Tech:** React Three Fiber (Three.js) for seamless 3D Cockpit and EVA sequences.
-- **Stages:**
-    - **Near-Space (Debris Field):** Mothership only. Collect salvage from space debris. Low risk.
-    - **Deep-Space (Star Systems):** Mothership + Mechs/Aircraft. High risk, requires advanced Ships.
-    - **Planetary Surface:** Mothership (Atmospheric Entry) + Mechs/Aircraft + Pilot EVA.
+- **Frontend Tech:** **Single-Page Game Loop** with Framer Motion for stage transitions. React Three Fiber (Three.js) for the Hangar Showcase and Cockpit HUD.
+- **Stages (State-Driven):**
+    - **HANGAR:** Pilot and Vehicle management. Showcase engine for "Flexing" assets.
+    - **MAP (Universe Map):** Sector-level navigation.
+    - **LOCATION_SCAN:** Sub-sector scanning for Points of Interest (Wrecks, Stations, Planets).
+    - **PLANET_SURFACE:** Tactical objective selection for planetary missions.
+    - **EXPLORATION (The Loop):** Core encounter progression, O2/Fuel management, and AI narrative generation.
+    - **COMBAT:** Turn-based tactical simulation.
+    - **DEBRIEF:** Mission summary and loot distribution.
 - **Vehicle Roles:**
     - **Mech:** Best for heavy resource extraction and high-durability ground combat.
     - **Aircraft:** Best for rapid scouting, aerial superiority, and high-evasion hit-and-run tactics.
@@ -30,7 +34,7 @@ This document defines the technical implementation of core gameplay pillars, ens
         - If an accident occurs, trigger **AI Event Generation** (context-aware narrative).
         - Calculate combat/loot/exploration results (including hidden elite threats).
     5. **Return:** Update unit durability (including accident damage), distribute loot, and generate AI Combat Log.
-    6. **Visualization:** Trigger 3D sequence: Mothership Transit -> Accident/Entry Sequence -> Cockpit Zoom -> Pilot EVA.
+    6. **Visualization:** Trigger **Seamless Stage Transitions**: Hangar -> Map -> Scan -> Exploration Loop. Cockpit HUD remains persistent to maintain immersion.
 
 ### 2.3 Salvage & Research
 - **Module:** `internal/salvage`

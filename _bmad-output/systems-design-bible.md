@@ -10,7 +10,7 @@ Exploration is governed by the interaction between the Pilot's resources and the
     *   **Generation Logic:** The AI checks the Pilot's current **O2** and **Fuel**.
     *   **Low Resources:** Triggers "Resource Encounters" (e.g., finding an O2 tank) or "High-Stakes Narrative Encounters" (e.g., a desperate gamble).
     *   **High Resources:** Triggers "Combat Encounters" or "Lore Encounters" to progress the story.
-3.  **Visual DNA Synthesis:** Every Encounter generates a unique visual prompt combining the Mech's parts and the current environment, providing a "Visual Reveal" for the player.
+3.  **Visual DNA Synthesis:** Every Encounter generates a unique visual prompt combining the Vehicle's parts and the current environment, providing a "Visual Reveal" for the player.
 
 ## 2. Materials & Resource Economy
 

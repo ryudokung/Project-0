@@ -51,6 +51,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 ### 2.3 Technical Success
 - **AI Generation Efficiency:** Implementing a "Time-Gated Assembly" system to manage GPU load and prevent spamming.
 - **Hybrid 2D/3D Immersion:** Delivering High-Fidelity AI assets (2D) for visual storytelling while using **WebGPU + React Three Fiber** for a global 3D space background and an immersive 3D Cockpit and Hangar experience.
+- **Single-Page Game Loop (Unified Controller):** Moving away from traditional web routing (`/hangar`, `/explore`) to a unified, state-driven game controller. This ensures seamless transitions, persistent audio/state, and a true "Game Client" feel.
 - **Design Intelligence:** Utilizing [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/) standards to ensure professional-grade aesthetics, including Glassmorphism, Bento Grids, and industry-specific color palettes for a premium feel.
 - **Modular NFT Ownership:** Utilizing **ERC-6551 (Token Bound Accounts)** to allow Mechs to "own" their equipment, simplifying marketplace trading and inventory management.
 - **Hybrid State Management (V2O):** Implementing a "Virtual-to-On-chain" model where gameplay and asset creation are off-chain by default (Server-side), with on-chain minting required only for trading or permanent storage.
@@ -79,6 +80,8 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 - **Void Signals (Gacha):** A "Hoyoverse-style" pull system for high-tier assets with a pity mechanism.
 - **Seasonal Temporal Wormholes:** Limited-time exploration zones requiring specific gear compatibility, offering exclusive "Lost Tech" and "Rare DNA Fragments."
 - **Complex Combat Engine:** Stat-based battle system integrating vehicle attributes (Mothership, Mech, Aircraft, Pilot) and AI-generated item "Options."
+    - **Real Combat Integration:** Transitioning from placeholder combat to a functional system where encounters are linked to real backend data.
+    - **Backend Enemy Seeding:** A system to generate and persist specific NPC enemies (e.g., Striker, Guardian, Scout) within combat encounters, allowing for persistent enemy stats and unique loot tables.
 - **Monetization Engine:** Season Pass, Void Signals, and Minting fees for "Void-Touched" (Premium) items.
 - **Discord Integration:** Real-time alerts for star discoveries and achievement broadcasting.
 

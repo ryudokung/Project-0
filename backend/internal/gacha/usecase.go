@@ -34,20 +34,28 @@ func (u *gachaUseCase) Pull(req GachaPullRequest) (*GachaPullResponse, error) {
 		return nil, err
 	}
 	if stats == nil {
-		return nil, fmt.Errorf("gacha stats not found for user")
+		// Auto-initialize if missing for existing users
+		if err := u.gameRepo.InitializeGachaStats(req.UserID); err != nil {
+			return nil, fmt.Errorf("failed to initialize gacha stats: %w", err)
+		}
+		stats, err = u.gameRepo.GetGachaStats(req.UserID)
+		if err != nil || stats == nil {
+			return nil, fmt.Errorf("gacha stats not found after initialization")
+		}
 	}
 
 	// Check Daily Signal
 	if req.PullType == DailySignal {
-		if stats.LastFreePullAt != nil {
-			now := time.Now()
-			if now.Sub(*stats.LastFreePullAt) < 24*time.Hour {
-				return nil, fmt.Errorf("daily signal already used. next pull available in %v", 24*time.Hour-now.Sub(*stats.LastFreePullAt))
-			}
+		success, err := u.gameRepo.ConsumeFreePull(req.UserID)
+		if err != nil {
+			return nil, err
 		}
-		now := time.Now()
-		stats.LastFreePullAt = &now
-		req.Count = 1 // Daily signal is always 1 pull
+		if !success {
+			return nil, fmt.Errorf("daily signal already used or not yet available")
+		}
+		// Refresh stats after consumption to get correct pity counts
+		stats, _ = u.gameRepo.GetGachaStats(req.UserID)
+		req.Count = 1
 	}
 
 	results := make([]GachaResult, 0, req.Count)

@@ -6,17 +6,17 @@
 *Focus: Survival, Learning, and First Ownership.*
 
 - **The Seamless Entry:** Player joins the universe instantly via Social Login. No wallet setup required to start the journey.
-- **The Initial Hook:** Player wakes up in a cold, dark void, wearing only a basic **Pilot Spacesuit** with limited O2 and a standard-issue **Pistol**. They are floating near a small, nondescript **Mothership** that is powered down.
-- **Starter Quest: "Signal Lost":** The Mothership's Radar is broken. The player must perform a manual EVA (Extra-Vehicular Activity) to find Scrap from nearby debris to repair the Radar and unlock the mission board.
-- **The Awakening:** The first official mission. The player uses a basic **Exosuit** (not a full Mech yet) to enter a nearby derelict wreck.
-- **The "Aha!" Moment:** Finding the first Rare NFT part and seeing the AI synthesize it onto their Exosuit or first Vehicle in the Hangar.
-- **Goal:** Repair the Mothership's core systems and build the first full-scale Vehicle (Mech or Speeder).
+- **The Initial Hook:** Player wakes up in a cold, dark void, wearing only a basic **Pilot Spacesuit** with limited O2. They are floating near their **FS-01 Starter Ship**, which is currently in low-power mode.
+- **Starter Quest: "Signal Lost":** The ship's Radar is malfunctioning. The player must perform a manual EVA (Extra-Vehicular Activity) to find Scrap from nearby debris to repair the Radar and unlock the mission board.
+- **The Awakening:** The first official mission. The player uses their **Starter Ship** to navigate to a nearby derelict wreck.
+- **The "Aha!" Moment:** Finding the first Rare NFT part and seeing the AI synthesize it onto their Ship or first Mech in the Hangar.
+- **Goal:** Repair the Mothership's core systems and build the first full-scale Mech or specialized Ship.
 - **Emotional State:** Vulnerability, isolation, and the drive to survive.
 
 ## 2. Phase 2: The Skilled Mercenary (Mid Game)
 *Focus: Optimization, Versatility, and Risk Management.*
 
-- **Progression:** Player unlocks **Tanks** and **Ships**. They start choosing missions based on the "Vehicle Archetype" needed.
+- **Progression:** Player unlocks **Mechs**, **Tanks**, and advanced **Ships**. They start choosing missions based on the "Vehicle Archetype" needed.
 - **Dynamic Style:** Player collects parts from different factions (e.g., an *Iron Syndicate* Chassis with *Void Cult* Weapons) to create a unique hybrid style.
 - **The "Flex" Point:** Sharing a highly customized build that combines multiple faction aesthetics.
 - **New Mechanic:** Unlocking **Quantum Teleportation** to bypass risky atmospheric entries.
@@ -34,13 +34,15 @@
 - **Emotional State:** Personal satisfaction and a sense of legacy.
 
 ## 4. The "Operative" Daily Loop (Session Journey)
-1. **Briefing:** Check the "Context Patch" for new world events.
-2. **Maintenance:** Repair and refuel using Scrap from yesterday's run.
-3. **Execution:** High-stakes mission (Combat or EVA).
-4. **Salvage:** The thrill of the "Reveal" (What did I find?).
-5. **Showcase:** Update the Hangar "Flex" build and share progress.
+The daily loop is a seamless, single-page experience that maintains immersion from start to finish:
+1. **Hangar Briefing:** Check the "Context Patch" and manage Pilot/Vehicle stats.
+2. **Universe Navigation:** Select a Sector and scan for high-value POIs.
+3. **Execution:** Enter the **Exploration Loop**. Advance through AI-generated encounters.
+4. **Combat/Salvage:** Engage in tactical combat and extract rare NFT components.
+5. **Debrief & Showcase:** Return to the Hangar to synthesize new parts and share the "Flex" build.
 
 ## 5. Emotional Milestones (The "Gasp" Moments)
+- **The Seamless Transition:** The feeling of "launching" from the Hangar into the Universe Map without a single loading screen.
 - **The First Synthesis:** Seeing the AI combine mismatched parts into a cool, cohesive design.
 - **The Near-Death Escape:** Successfully extracting from an EVA mission with 5% O2 left.
 - **The Rare Drop:** Seeing the "Legendary Gold" glow during a salvage reveal.

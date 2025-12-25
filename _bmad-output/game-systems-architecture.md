@@ -9,10 +9,12 @@ To support a high-fidelity, real-time 3D experience with complex modular assets,
 
 ## 2. Core Game Loop & State Management
 
-### 2.1 The "Hot Path" (60 FPS Performance)
-- **Frontend (WebGPU + R3F):** Uses a lightweight **ECS (Entity Component System)** pattern for managing 3D entities (Mechs, VFX, UI).
-- **State Synchronization:** The frontend maintains a "Local Mirror" of the game state, updated via WebSockets from the Go Backend.
-- **Interpolation:** Smooths out network latency for real-time visualization of combat and exploration.
+### 2.1 Single-Page Game Loop (Unified Controller)
+- **Architecture:** The entire game experience is managed by a single React entry point (`/play`), acting as a **Unified Game Controller**.
+- **State Machine:** Uses a centralized state machine to manage `GameStage` transitions (Hangar -> Map -> Exploration -> Combat).
+- **Immersion:** Eliminates page reloads, allowing for persistent background audio, seamless visual transitions (Framer Motion), and consistent state sharing (O2, Fuel, Pilot Stats) across all stages.
+- **Frontend (WebGPU + R3F):** Uses a lightweight **ECS (Entity Component System)** pattern for managing 3D entities (Ships, Mechs, VFX, UI) within the unified scene.
+- **State Synchronization:** The frontend maintains a "Local Mirror" of the game state, updated via WebSockets or REST from the Go Backend.
 
 ### 2.2 Backend Game Logic (Go)
 - **Tick-less Simulation:** Since combat is asynchronous auto-resolve, the backend runs a discrete simulation rather than a continuous tick loop.
@@ -26,16 +28,16 @@ To support a high-fidelity, real-time 3D experience with complex modular assets,
 1. **Metadata Extraction:** Backend reads the `ERC-6551` Token Bound Account to list all equipped NFT parts.
 2. **Visual DNA Mapping:** Each NFT part has a "Visual DNA" string in its metadata (e.g., `V-DNA: CHROME_GLOW_01`).
 3. **Prompt Construction:** The AI Integration Service assembles a master prompt:
-   - `Base: [Mech Chassis V-DNA]`
-   - `Addon: [Left Arm V-DNA] + [Right Arm V-DNA]`
+   - `Base: [Vehicle Chassis/Fuselage V-DNA]`
+   - `Addon: [Weapon/Engine V-DNA] + [Shield/Wing V-DNA]`
    - `Context: [Environment] + [Damage State]`
 4. **AI Generation (FLUX.1):** Generates the high-fidelity "Master Image."
 5. **3D Asset Mapping:** The frontend maps the V-DNA to specific 3D models and shaders in the React Three Fiber scene.
 
 ### 3.2 Showcase System (Hangar & Profile)
-- **Dynamic Lighting:** Uses WebGPU's advanced compute shaders for real-time reflections on the Mech's surface.
+- **Dynamic Lighting:** Uses WebGPU's advanced compute shaders for real-time reflections on the vehicle's surface.
 - **Photo Mode Engine:** A dedicated R3F scene with adjustable camera parameters (FOV, Aperture, Bloom) to capture the "Perfect Flex."
-- **Public API:** Allows external sites (or the Hall of Fame) to fetch and render the 3D model of a player's Mech.
+- **Public API:** Allows external sites (or the Hall of Fame) to fetch and render the 3D model of a player's vehicle.
 
 ---
 

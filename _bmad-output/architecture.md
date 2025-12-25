@@ -34,6 +34,7 @@ This document captures the architectural decisions for Project-0, a Crypto Web G
 Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (Generative Art), and real-time gaming mechanics. The architecture must handle high-stakes financial transactions (USDT) while maintaining an immersive, story-driven user experience.
 
 ### 2.2 Key Architectural Challenges
+- **Security-First Mindset:** In a Web2.5 environment with real-world value, every feature must be designed with security as a core requirement. This includes mandatory server-side validation, ownership checks, and atomic operations to prevent exploitation.
 - **Identity Management (Web2.5):** Using `user_id` (UUID) as the primary key to support multiple auth methods (Guest, Traditional, Social) while allowing late-binding of Ethereum addresses.
 - **Character-Centric Design:** Decoupling user identity from game characters to support multiple character instances (Gacha) and personalized onboarding.
 - **Hybrid State Consistency:** Ensuring 100% alignment between off-chain AI generation and on-chain NFT minting.
@@ -47,7 +48,7 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 - **Decision:** Use **Saga Pattern (Orchestration-based)**.
 - **Rationale:** Essential for managing long-running, multi-step processes across heterogeneous systems (Go Backend, Fal.ai API, Base L2 Smart Contracts).
 - **Key Implementation Details:**
-    - Centralized Orchestrator in Go to manage the "Mech Assembly" state machine.
+    - Centralized Orchestrator in Go to manage the **"Vehicle Assembly"** state machine (Ships, Mechs, Tanks).
     - Mandatory **Idempotency Keys** for all external service calls to prevent duplicate transactions.
     - Compensating transactions (e.g., credit refunds) for failed steps in the assembly pipeline.
     - **New Sagas:**
@@ -67,9 +68,40 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 - **Key Implementation Details:**
     - `users` table supports multiple auth methods: `privy_did`, `guest_id`, `username` + `password_hash`.
     - `active_character_id` in `users` table points to the currently selected character.
-    - **Character Creation Flow:** New users are redirected to a creation screen to set `name`, `gender`, and `appearance` (Face/Hair).
-    - **Character Instances:** A `characters` table stores all characters owned by a user, allowing for future Gacha characters.
+    - **Character Creation Flow:** New users are redirected to a creation screen to set `name` and `gender` (Male/Female).
+    - **Starter Asset:** Every new character is automatically assigned a **Starter Ship (FS-01)** to enable immediate exploration.
+    - **Wallet Strategy:** Wallet linking is **NOT** required for initial login. It is an optional step for later stages (e.g., minting virtual assets to on-chain NFTs).
     - **Account Upgrade Flow:** Logic to link a `privy_did` or `password_hash` to an existing `guest_id` record, preserving all characters and assets.
+
+#### ADR 004: Decoupled Game Engine Architecture
+- **Decision:** Implement a **Decoupled Game Engine** pattern using a global **Event Bus** and **Singleton Systems**.
+- **Rationale:** Traditional React state management becomes brittle as game complexity grows. Decoupling game logic from UI components allows for better testability, easier maintenance, and a more "Unity-like" development experience.
+- **Key Implementation Details:**
+    - **Event Bus (`EventBus.ts`)**: Centralized, type-safe event system for cross-component communication.
+    - **Singleton Systems**: Standalone logic classes (e.g., `ExplorationSystem.ts`) that manage game state and API interactions.
+    - **XState Machine (`gameMachine.ts`)**: Controls high-level game stages (Landing -> Character Creation -> Hangar -> Exploration).
+    - **React UI Layer**: Functional components that listen to events and trigger system methods.
+    - **Persistent HUD:** Global HUD elements remain mounted across stage transitions to maintain visual continuity.
+
+#### ADR 005: Real Combat Integration & Enemy Seeding
+- **Decision:** Implement a data-driven combat system where encounters are linked to persistent NPC entities in the database.
+- **Rationale:** Moving beyond random placeholders allows for meaningful progression, specific enemy types with unique behaviors, and a foundation for a complex loot/reward system based on the specific enemy defeated.
+- **Key Implementation Details:**
+    - **Schema Update:** Added `enemy_id` (UUID) to the `encounters` table to link combat nodes to specific NPC Mechs.
+    - **NPC Seeding:** A migration script seeds the database with a set of "SYSTEM_NPC" owned Mechs (e.g., Striker, Guardian, Scout) to serve as initial opponents.
+    - **Service Logic:** The `ExplorationService` now assigns a random `enemy_id` from the NPC pool when generating a `COMBAT` encounter.
+    - **Frontend Integration:** The `UnifiedGameController` passes the `enemy_id` to the `CombatStage` component, which then uses the `CombatService` to simulate a battle against that specific entity.
+
+#### ADR 006: Security, Anti-Cheat & Concurrency Control
+- **Decision:** Implement server-authoritative validation, JWT-based identity, and atomic database updates.
+- **Rationale:** In a Web2.5 game with real-world value (NFTs/Credits), client-side trust is zero. We must prevent common cheats like "Double Spending" resources, skipping combat encounters, or manipulating HP.
+- **Key Implementation Details:**
+    - **JWT Middleware:** All protected routes require a valid JWT, with `user_id` injected into the request context for secure ownership checks.
+    - **Ownership Verification:** Every action (e.g., `SimulateAttack`, `StartExploration`) verifies that the user owns the Mechs or Expeditions involved.
+    - **Atomic SQL Updates:** Uses `UPDATE ... WHERE` with interval/resource checks (e.g., `last_free_pull_at < NOW() - INTERVAL '24 hours'`) to prevent race conditions without complex locking.
+    - **Server-Authoritative State:** HP and Resources (O2/Fuel) are updated and validated on the server. Advancing in exploration is blocked if the current combat encounter is not resolved.
+
+#### ADR 003: Identity & Onboarding (Web2.5 Hybrid) (Legacy)
 - **Key Implementation Details (Legacy):**
     - `users` table uses `privy_did` (Unique) for lookups.
     - `wallet_address` is nullable and updated via a secure "Link Wallet" flow.

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/ryudokung/Project-0/backend/internal/auth/constants"
 	"github.com/ryudokung/Project-0/backend/internal/game"
 )
 
@@ -68,11 +69,17 @@ func (h *Handler) GetUniverseMap(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) StartExploration(w http.ResponseWriter, r *http.Request) {
+	// 0. Get User from Context (Security)
+	userID, ok := r.Context().Value(constants.UserIDKey).(uuid.UUID)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var req struct {
-		UserID           uuid.UUID  `json:"user_id"`
 		SubSectorID      uuid.UUID  `json:"sub_sector_id"`
 		PlanetLocationID *uuid.UUID `json:"planet_location_id"`
-		VehicleID        uuid.UUID  `json:"vehicle_id"`
+		VehicleID        *uuid.UUID `json:"vehicle_id"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -80,7 +87,12 @@ func (h *Handler) StartExploration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expedition, err := h.service.StartExploration(r.Context(), req.UserID, req.SubSectorID, req.PlanetLocationID, req.VehicleID)
+	vID := uuid.Nil
+	if req.VehicleID != nil {
+		vID = *req.VehicleID
+	}
+
+	expedition, err := h.service.StartExploration(r.Context(), userID, req.SubSectorID, req.PlanetLocationID, vID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -94,7 +106,7 @@ func (h *Handler) StartExploration(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Fetch pilot stats
-	pilotStats, err := h.service.gameRepo.GetPilotStats(expedition.UserID)
+	pilotStats, err := h.service.gameRepo.GetActivePilotStats(expedition.UserID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -115,6 +127,13 @@ func (h *Handler) StartExploration(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdvanceTimeline(w http.ResponseWriter, r *http.Request) {
+	// 0. Get User from Context (Security)
+	userID, ok := r.Context().Value(constants.UserIDKey).(uuid.UUID)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var req struct {
 		ExpeditionID uuid.UUID `json:"expedition_id"`
 		VehicleID    uuid.UUID `json:"vehicle_id"`
@@ -125,20 +144,31 @@ func (h *Handler) AdvanceTimeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encounter, err := h.service.StringNewEncounter(r.Context(), req.ExpeditionID, req.VehicleID)
+	// 1. Verify Expedition Ownership (Anti-Cheat)
+	expedition, err := h.service.repo.GetExpeditionByID(req.ExpeditionID)
+	if err != nil {
+		http.Error(w, "Expedition not found", http.StatusNotFound)
+		return
+	}
+	if expedition.UserID != userID {
+		http.Error(w, "You do not own this expedition", http.StatusForbidden)
+		return
+	}
+
+	encounter, err := h.service.GenerateNewEncounter(r.Context(), req.ExpeditionID, req.VehicleID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Fetch updated pilot stats
-	expedition, err := h.service.repo.GetExpeditionByID(req.ExpeditionID)
+	expedition, err = h.service.repo.GetExpeditionByID(req.ExpeditionID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
-	pilotStats, err := h.service.gameRepo.GetPilotStats(expedition.UserID)
+	pilotStats, err := h.service.gameRepo.GetActivePilotStats(expedition.UserID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

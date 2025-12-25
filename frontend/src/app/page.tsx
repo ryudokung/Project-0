@@ -1,60 +1,357 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { LoginButton } from "@/components/login-button";
-import { MechCard } from "@/components/mech-card";
-import { useAuthSync } from "@/hooks/use-auth-sync";
-import { usePrivy } from "@privy-io/react-auth";
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useMachine } from '@xstate/react';
+import { gameMachine } from '@/machines/gameMachine';
+import { Sector, SubSector, PlanetLocation } from '@/services/exploration';
+import { explorationSystem } from '@/systems/ExplorationSystem';
+import { hangarSystem, HangarState } from '@/systems/HangarSystem';
+import { universeSystem, UniverseState } from '@/systems/UniverseSystem';
+import { gameEvents, GAME_EVENTS } from '@/systems/EventBus';
+import { useAuthSync } from '@/hooks/use-auth-sync';
 
-export default function Home() {
-  const router = useRouter();
-  const { user: backendUser, isLoading: isSyncing } = useAuthSync();
+// Components
+import LandingStage from '@/components/game/LandingStage';
+import CharacterCreationStage from '@/components/game/CharacterCreationStage';
+import Hangar from '@/components/game/Hangar';
+import UniverseMap from '@/components/game/UniverseMap';
+import LocationScan from '@/components/game/LocationScan';
+import PlanetSurface from '@/components/game/PlanetSurface';
+import ExplorationLoop from '@/components/game/ExplorationLoop';
+import CombatStage from '@/components/game/CombatStage';
+import GachaStage from '@/components/game/GachaStage';
+import NotificationSystem from '@/components/game/NotificationSystem';
 
+type GameStage = 'LANDING' | 'CHARACTER_CREATION' | 'HANGAR' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'COMBAT' | 'DEBRIEF' | 'GACHA';
+type DeploymentMode = 'PILOT' | 'SPEEDER' | 'MECH' | 'TANK' | 'SHIP' | 'EXOSUIT' | 'HAULER';
+
+interface MothershipUpgrades {
+  atmosphericEntry: boolean;
+  quantumGate: boolean;
+  miningDrill: boolean;
+  hackingModule: boolean;
+  radarLevel: number;
+  scannerLevel: number;
+}
+
+export default function UnifiedGamePage() {
+  const { user, backendToken, isLoading: authLoading } = useAuthSync();
+  const [state, send] = useMachine(gameMachine);
+  const { 
+    o2, fuel, activeEnemyId, encounters, currentEncounter, 
+    expeditionTitle, vehicles, selectedVehicle, selectedSector, 
+    selectedSubSector, selectedPlanetLocation, currentExpeditionId 
+  } = state.context;
+  
+  const [sectors, setSectors] = useState<Sector[]>([]);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // Mothership & Inventory
+  const [inventory, setInventory] = useState<string[]>(['Basic O2 Tank']);
+  const [upgrades, setUpgrades] = useState<MothershipUpgrades>({
+    atmosphericEntry: false,
+    quantumGate: false,
+    miningDrill: false,
+    hackingModule: false,
+    radarLevel: 1,
+    scannerLevel: 1
+  });
+
+  // Sync User to Machine
   useEffect(() => {
-    if (!isSyncing && backendUser) {
-      if (!backendUser.active_character_id) {
-        router.push('/character-creation');
-      } else {
-        router.push('/hangar');
+    if (user) {
+      send({ type: 'UPDATE_USER', user });
+    }
+  }, [user, send]);
+
+  // Handle Initial Stage based on Auth
+  useEffect(() => {
+    if (!authLoading) {
+      send({ type: 'AUTH_READY' });
+    }
+  }, [authLoading, send]);
+
+  // System Listeners
+  useEffect(() => {
+    const unsubUniverse = gameEvents.on(GAME_EVENTS.UNIVERSE_UPDATED, (state: UniverseState) => {
+      setSectors(state.sectors);
+    });
+
+    const unsubHangar = gameEvents.on(GAME_EVENTS.HANGAR_UPDATED, (state: HangarState) => {
+      if (state.mechs.length > 0) {
+        const mappedVehicles = state.mechs.map((m: any) => ({
+          id: m.id,
+          class: m.model,
+          type: (m.model.includes('TANK') ? 'TANK' : m.model.includes('SHIP') ? 'SHIP' : 'MECH') as DeploymentMode,
+          rarity: 'COMMON',
+          stats: { hp: m.hp, attack: m.attack, defense: m.defense, speed: m.speed }
+        }));
+        send({ type: 'UPDATE_VEHICLES', vehicles: mappedVehicles });
+      }
+    });
+
+    // Initial Fetch
+    universeSystem.fetchMap();
+    if (user?.active_character_id || user?.id) {
+      hangarSystem.refreshMechs(user.active_character_id || user.id);
+    }
+
+    return () => {
+      unsubUniverse();
+      unsubHangar();
+    };
+  }, [user?.id, user?.active_character_id, send]);
+
+  const canDeploy = (target: { allowedModes: string[], requiresAtmosphere: boolean }) => {
+    const currentMode = selectedVehicle ? selectedVehicle.type : 'PILOT';
+    const modeAllowed = target.allowedModes.includes(currentMode);
+    const entryAllowed = !target.requiresAtmosphere || upgrades.atmosphericEntry || upgrades.quantumGate;
+    return modeAllowed && entryAllowed;
+  };
+
+  const meetsRequirements = (reqs: string[] = []) => {
+    return reqs.every(r => {
+      if (r === 'Mining Drill') return upgrades.miningDrill;
+      if (r === 'Hacking Module') return upgrades.hackingModule;
+      return inventory.includes(r);
+    });
+  };
+
+  const confirmDeployment = async () => {
+    if (!selectedSubSector || !user?.id) return;
+    
+    if (selectedSubSector.type === 'PLANET' && selectedSubSector.locations) {
+      send({ type: 'CONFIRM_DEPLOYMENT', isPlanet: true });
+    } else {
+      try {
+        setIsTransitioning(true);
+        const result = await explorationSystem.startMission(
+          user.id,
+          selectedSubSector,
+          selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
+        );
+        
+        send({ type: 'UPDATE_STATS', ...result });
+        send({ type: 'CONFIRM_DEPLOYMENT', isPlanet: false });
+      } catch (error) {
+        console.error('Failed to start exploration:', error);
+      } finally {
+        setIsTransitioning(false);
       }
     }
-  }, [isSyncing, backendUser, router]);
+  };
+
+  const confirmPlanetDeployment = async () => {
+    if (!selectedPlanetLocation || !selectedSubSector || !user?.id) return;
+    
+    try {
+      setIsTransitioning(true);
+      const result = await explorationSystem.startMission(
+        user.id,
+        selectedSubSector,
+        selectedVehicle?.id || '00000000-0000-0000-0000-000000000000',
+        selectedPlanetLocation.id
+      );
+      
+      send({ type: 'UPDATE_STATS', ...result });
+      send({ type: 'CONFIRM_DEPLOYMENT' });
+    } catch (error) {
+      console.error('Failed to start planet exploration:', error);
+    } finally {
+      setIsTransitioning(false);
+    }
+  };
+
+  const advanceTimeline = async () => {
+    if (isTransitioning || !currentExpeditionId) return;
+
+    try {
+      setIsTransitioning(true);
+      const { encounter, stats } = await explorationSystem.advance(
+        currentExpeditionId,
+        selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
+      );
+      
+      send({ 
+        type: 'UPDATE_STATS', 
+        o2: stats?.current_o2 || o2,
+        fuel: stats?.current_fuel || fuel,
+        encounters: [...encounters, encounter],
+        currentEncounter: encounter,
+        expeditionId: currentExpeditionId,
+        title: expeditionTitle
+      });
+
+      if (stats?.current_o2 <= 0) {
+        send({ type: 'MISSION_END' });
+        setIsTransitioning(false);
+        return;
+      }
+
+      if (encounter.type === 'COMBAT') {
+        setTimeout(() => {
+          send({ type: 'ENTER_COMBAT', enemyId: encounter.enemy_id || null });
+          setIsTransitioning(false);
+        }, 2000);
+      } else {
+        setIsTransitioning(false);
+      }
+    } catch (error) {
+      console.error('Failed to advance timeline:', error);
+      setIsTransitioning(false);
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="h-screen w-screen bg-black flex items-center justify-center text-white font-mono">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin" />
+          <div className="text-xs uppercase tracking-[0.2em] animate-pulse">Synchronizing Neural Link...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex min-h-screen flex-col items-center font-sans text-white">
-      <header className="w-full max-w-7xl flex justify-between items-center p-6">
-        <div className="flex items-center gap-2">
-          <div className="relative h-8 w-8">
-            <Image className="dark:invert" src="/next.svg" alt="Logo" fill />
-          </div>
-          <span className="font-bold tracking-tighter text-xl">PROJECT-0</span>
-        </div>
-        <LoginButton />
-      </header>
+    <main className="relative h-screen w-screen overflow-hidden bg-black text-zinc-100 font-mono">
+      <AnimatePresence mode="wait">
+        {state.matches('landing') && (
+          <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+            <LandingStage onStart={() => send({ type: 'START' })} />
+          </motion.div>
+        )}
 
-      <main className="flex flex-col items-center justify-center w-full max-w-7xl px-6 flex-1">
-        <div className="flex flex-col items-center gap-8 text-center mb-20">
-          <h1 className="text-5xl font-bold tracking-tighter sm:text-7xl uppercase italic">
-            PROJECT-<span className="text-pink-500">0</span>
-          </h1>
-          <p className="max-w-[600px] text-zinc-400 md:text-xl font-light tracking-wide">
-            The next generation of AI-driven, Web3-powered space exploration and combat. 
-            Create your pilot, command your fleet, and conquer the void.
-          </p>
-          <div className="flex gap-4">
-            <LoginButton />
-          </div>
-        </div>
+        {state.matches('characterCreation') && (
+          <motion.div key="char-creation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+            <CharacterCreationStage onSuccess={() => send({ type: 'SUCCESS' })} />
+          </motion.div>
+        )}
 
-        {/* Decorative Elements */}
-        <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-pink-500/10 to-transparent pointer-events-none" />
-      </main>
-      
-      <footer className="py-10 text-sm text-zinc-600">
-        <p>© 2024 Project-0. All rights reserved.</p>
-      </footer>
-    </div>
+        {state.matches('hangar') && (
+          <motion.div key="hangar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+            <Hangar 
+              onDeploy={() => send({ type: 'DEPLOY' })} 
+              onGacha={() => send({ type: 'OPEN_GACHA' })}
+            />
+          </motion.div>
+        )}
+
+        {state.matches('gacha') && (
+          <motion.div key="gacha" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+            <GachaStage onBack={() => send({ type: 'BACK' })} />
+          </motion.div>
+        )}
+
+        {state.matches('map') && (
+          <motion.div key="map" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+            <UniverseMap 
+              sectors={sectors}
+              selectedSector={selectedSector}
+              onSelectSector={(sector) => send({ type: 'SELECT_SECTOR', sector })}
+              onScanSector={() => send({ type: 'SCAN' })}
+              onBack={() => send({ type: 'BACK' })}
+              selectedVehicleClass={selectedVehicle?.class}
+            />
+          </motion.div>
+        )}
+
+        {state.matches('locationScan') && selectedSector && (
+          <motion.div key="location-scan" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+            <LocationScan 
+              selectedSector={selectedSector}
+              selectedSubSector={selectedSubSector}
+              onSelectSubSector={(subSector) => send({ type: 'SELECT_SUBSECTOR', subSector })}
+              onConfirmDeployment={confirmDeployment}
+              onBack={() => send({ type: 'BACK' })}
+              selectedVehicle={selectedVehicle}
+              onSelectVehicle={(vehicle) => send({ type: 'SELECT_VEHICLE', vehicle })}
+              upgrades={upgrades}
+              inventory={inventory}
+              canDeploy={canDeploy}
+              meetsRequirements={meetsRequirements}
+            />
+          </motion.div>
+        )}
+
+        {state.matches('planetSurface') && selectedSubSector && (
+          <motion.div key="planet-surface" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+            <PlanetSurface 
+              selectedSubSector={selectedSubSector}
+              selectedPlanetLocation={selectedPlanetLocation}
+              onSelectPlanetLocation={(location) => send({ type: 'SELECT_PLANET_LOCATION', location })}
+              onConfirmDeployment={confirmPlanetDeployment}
+              onBack={() => send({ type: 'BACK' })}
+              vehicles={vehicles}
+              selectedVehicle={selectedVehicle}
+              onSelectVehicle={(vehicle) => send({ type: 'SELECT_VEHICLE', vehicle })}
+              inventory={inventory}
+              canDeploy={canDeploy}
+              meetsRequirements={meetsRequirements}
+            />
+          </motion.div>
+        )}
+
+        {state.matches('exploration') && (
+          <motion.div key="exploration" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+            <ExplorationLoop 
+              expeditionTitle={expeditionTitle}
+              o2={o2}
+              fuel={fuel}
+              encounters={encounters}
+              currentEncounter={currentEncounter}
+              isTransitioning={isTransitioning}
+              onAdvance={advanceTimeline}
+              onEnterCombat={(enemyId) => {
+                send({ type: 'ENTER_COMBAT', enemyId });
+              }}
+            />
+          </motion.div>
+        )}
+
+        {state.matches('combat') && (
+          <motion.div key="combat" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+            <CombatStage 
+              attackerId={selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'}
+              enemyId={activeEnemyId || ''}
+              onCombatEnd={(result) => {
+                console.log('Combat ended:', result);
+                send({ type: 'COMBAT_END' });
+              }}
+            />
+          </motion.div>
+        )}
+
+        {state.matches('debrief') && (
+          <motion.div key="debrief" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full flex flex-col items-center justify-center p-8">
+            <div className="max-w-2xl w-full border border-zinc-800 p-12 bg-zinc-900/10 backdrop-blur-md">
+              <h2 className="text-4xl font-black italic mb-8 tracking-tighter">MISSION DEBRIEF</h2>
+              <div className="space-y-4 mb-12">
+                <div className="flex justify-between border-b border-zinc-900 pb-2">
+                  <span className="text-zinc-500 uppercase text-xs">Distance Traveled</span>
+                  <span className="font-bold">{encounters.length} Encounters</span>
+                </div>
+                <div className="flex justify-between border-b border-zinc-900 pb-2">
+                  <span className="text-zinc-500 uppercase text-xs">Combat Encounters</span>
+                  <span className="font-bold text-red-500">{encounters.filter(e => e.type === 'COMBAT').length}</span>
+                </div>
+              </div>
+              <button 
+                onClick={() => send({ type: 'RETURN' })}
+                className="w-full border border-white py-4 font-black uppercase tracking-tighter hover:bg-white hover:text-black transition-all"
+              >
+                Return to Mothership
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <NotificationSystem />
+
+      {/* SCANLINES EFFECT */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-50 bg-[length:100%_2px,3px_100%]" />
+    </main>
   );
 }

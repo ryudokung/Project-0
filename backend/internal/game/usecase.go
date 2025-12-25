@@ -7,6 +7,7 @@ import (
 
 type UseCase interface {
 	InitializeNewCharacter(userID, charID uuid.UUID) error
+	InitializeGachaStats(userID uuid.UUID) error
 }
 
 type gameUseCase struct {
@@ -27,7 +28,12 @@ func (u *gameUseCase) InitializeNewCharacter(userID, charID uuid.UUID) error {
 		return err
 	}
 
-	// 2. Assign Starter Gear (Ship)
+	// 2. Initialize Gacha Stats for the user (if not already)
+	if err := u.repo.InitializeGachaStats(userID); err != nil {
+		return err
+	}
+
+	// 3. Assign Starter Gear (Ship)
 	starterShip := mech.Mech{
 		ID:          uuid.New(),
 		OwnerID:     userID,
@@ -49,4 +55,8 @@ func (u *gameUseCase) InitializeNewCharacter(userID, charID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func (u *gameUseCase) InitializeGachaStats(userID uuid.UUID) error {
+	return u.repo.InitializeGachaStats(userID)
 }

@@ -85,8 +85,8 @@ func initialModel(db *sql.DB) model {
 	dMech, _ := mechRepo.GetByID(ctx, ids[1])
 	aParts, _ := mechRepo.GetPartsByMechID(ids[0])
 	dParts, _ := mechRepo.GetPartsByMechID(ids[1])
-	aPilot, _ := gameRepo.GetPilotStats(aMech.OwnerID)
-	dPilot, _ := gameRepo.GetPilotStats(dMech.OwnerID)
+	aPilot, _ := gameRepo.GetActivePilotStats(aMech.OwnerID)
+	dPilot, _ := gameRepo.GetActivePilotStats(dMech.OwnerID)
 
 	aStats := combatService.MapMechToUnitStats(aMech, aParts, aPilot)
 	dStats := combatService.MapMechToUnitStats(dMech, dParts, dPilot)

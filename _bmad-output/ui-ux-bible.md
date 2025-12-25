@@ -43,17 +43,32 @@ The exploration interface is designed around the "Expedition and Encounters" mod
 - **The "Advance" Button:** The primary interaction. It displays the O2/Fuel cost for the next step.
 - **Dynamic Warnings:** If O2 is low, the HUD turns red, and the "Advance" button text changes to "DESPERATE MOVE," signaling that the AI is now more likely to generate high-stakes or resource-focused Encounters.
 
-## 5. User Journey: The "Click-to-Explore" Loop
+## 5. User Journey: The "Single-Page Game Loop"
 
 ### 5.1 Onboarding: "The Operative Recruitment"
 - **Login:** Minimalist screen with "Enter Project-0" via Google/Email. No wallet popup.
 - **Character Creation:** Immediate transition to the **Pilot Registration** screen.
+- **Selection:** Visual choice between **Male** or **Female** pilot using high-fidelity AI-generated portraits.
+- **UI Element:** Interactive cards that highlight on selection, with a grayscale-to-color transition effect.
+- **Transition:** Cinematic zoom-out from the pilot's profile to the full Hangar view.
     - **UI Style:** Bento Grid layout for selecting Gender, Face, and Hair.
     - **Visuals:** Real-time preview of the character's appearance.
 - **First Contact:** After registration, the player enters the Hangar where their **Starter Ship** is waiting.
 - **Late Binding:** A subtle "Link External Wallet" button in the Hangar settings or profile, framed as "Securing Assets to the Void-Chain."
 
-### 5.2 The Pilot ID Badge (Hangar UI)
+### 5.2 The Unified Play Page (The Loop)
+The entire game experience is contained within a single route (`/play`), managed by a central state machine:
+- **Seamless Transitions:** Using Framer Motion `AnimatePresence`, the UI morphs between stages (Hangar, Map, Exploration) without page reloads.
+- **Persistent HUD:** The Pilot ID Badge, O2 levels, and Fuel reserves remain visible or transition smoothly between stages, maintaining the "Cockpit" feel.
+- **Stage Flow:**
+    1. **Hangar:** Manage Pilot/Vehicle.
+    2. **Universe Map:** Select Sector.
+    3. **Location Scan:** Identify POIs.
+    4. **Exploration Loop:** Advance through encounters.
+    5. **Combat:** Tactical engagement.
+    6. **Debrief:** Return to Hangar.
+
+### 5.3 The Pilot ID Badge (Hangar UI)
 - **Visual:** A glassmorphic "ID Card" displayed in the Hangar.
 - **Details:** Shows Character Name, Rank, Gender, and a portrait based on the selected appearance.
 - **Functionality:** Serves as the primary entry point for Character Stats and Skill progression.

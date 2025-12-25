@@ -66,26 +66,29 @@ func main() {
 
 	// Routes
 	mux := http.NewServeMux()
+	
+	// Public Routes
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "OK")
 	})
 	mux.HandleFunc("/api/v1/auth/login", authHandler.Login)
 	mux.HandleFunc("/api/v1/auth/signup", authHandler.Signup)
-	mux.HandleFunc("/api/v1/auth/me", authHandler.GetMe)
-	mux.HandleFunc("/api/v1/auth/link-wallet", authHandler.LinkWallet)
-	mux.HandleFunc("/api/v1/auth/characters", authHandler.GetCharacters)
-	mux.HandleFunc("/api/v1/auth/characters/create", authHandler.CreateCharacter)
-	mux.HandleFunc("/api/v1/mechs/mint-starter", mechHandler.MintStarter)
-	mux.HandleFunc("/api/v1/mechs", mechHandler.ListMechs)
-	mux.HandleFunc("/api/v1/combat/simulate", combatHandler.SimulateAttack)
-	
-	// Gacha Routes
-	mux.HandleFunc("/api/v1/gacha/pull", gachaHandler.Pull)
-	
-	// Exploration Routes
 	mux.HandleFunc("/api/v1/exploration/universe-map", explorationHandler.GetUniverseMap)
-	mux.HandleFunc("/api/v1/exploration/start", explorationHandler.StartExploration)
-	mux.HandleFunc("/api/v1/exploration/advance", explorationHandler.AdvanceTimeline)
+	
+	// Protected Routes Middleware
+	authMiddleware := auth.Middleware(authUseCase)
+
+	// Protected Routes
+	mux.Handle("/api/v1/auth/me", authMiddleware(http.HandlerFunc(authHandler.GetMe)))
+	mux.Handle("/api/v1/auth/link-wallet", authMiddleware(http.HandlerFunc(authHandler.LinkWallet)))
+	mux.Handle("/api/v1/auth/characters", authMiddleware(http.HandlerFunc(authHandler.GetCharacters)))
+	mux.Handle("/api/v1/auth/characters/create", authMiddleware(http.HandlerFunc(authHandler.CreateCharacter)))
+	mux.Handle("/api/v1/mechs/mint-starter", authMiddleware(http.HandlerFunc(mechHandler.MintStarter)))
+	mux.Handle("/api/v1/mechs", authMiddleware(http.HandlerFunc(mechHandler.ListMechs)))
+	mux.Handle("/api/v1/combat/attack", authMiddleware(http.HandlerFunc(combatHandler.SimulateAttack)))
+	mux.Handle("/api/v1/gacha/pull", authMiddleware(http.HandlerFunc(gachaHandler.Pull)))
+	mux.Handle("/api/v1/exploration/start", authMiddleware(http.HandlerFunc(explorationHandler.StartExploration)))
+	mux.Handle("/api/v1/exploration/advance", authMiddleware(http.HandlerFunc(explorationHandler.AdvanceTimeline)))
 
 	// Simple CORS Middleware
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

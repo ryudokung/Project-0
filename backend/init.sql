@@ -23,11 +23,29 @@ END $$;
 -- Users Table
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    wallet_address VARCHAR(42) UNIQUE NOT NULL,
+    privy_did VARCHAR(255) UNIQUE,
+    wallet_address VARCHAR(42) UNIQUE,
     username VARCHAR(50),
+    email VARCHAR(255) UNIQUE,
+    password_hash TEXT,
+    guest_id VARCHAR(255) UNIQUE,
+    auth_type VARCHAR(20) DEFAULT 'SOCIAL',
     credits DECIMAL(18, 8) DEFAULT 0,
+    active_character_id UUID,
     last_login TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Characters Table
+CREATE TABLE IF NOT EXISTS characters (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id),
+    name VARCHAR(100) NOT NULL,
+    gender VARCHAR(20),
+    face_index INTEGER DEFAULT 0,
+    hair_index INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Mechs (NFTs) Table
@@ -35,6 +53,7 @@ CREATE TABLE IF NOT EXISTS mechs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     token_id NUMERIC(78, 0) UNIQUE, -- Supports uint256
     owner_id UUID REFERENCES users(id),
+    character_id UUID REFERENCES characters(id),
     vehicle_type vehicle_type NOT NULL,
     class vehicle_class NOT NULL,
     image_url TEXT,
@@ -65,7 +84,8 @@ CREATE TABLE IF NOT EXISTS parts (
 
 -- Pilot Stats (Neural Resonance & Resources)
 CREATE TABLE IF NOT EXISTS pilot_stats (
-    user_id UUID PRIMARY KEY REFERENCES users(id),
+    user_id UUID REFERENCES users(id),
+    character_id UUID PRIMARY KEY REFERENCES characters(id),
     resonance_level INTEGER DEFAULT 0,
     resonance_exp INTEGER DEFAULT 0,
     xp INTEGER DEFAULT 0,
@@ -156,6 +176,7 @@ CREATE TABLE IF NOT EXISTS encounters (
     description TEXT,
     visual_prompt TEXT,
     image_url TEXT,
+    enemy_id UUID,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -215,6 +236,7 @@ CREATE TABLE IF NOT EXISTS gacha_stats (
     pity_relic_count INTEGER DEFAULT 0,
     pity_singularity_count INTEGER DEFAULT 0,
     total_pulls INTEGER DEFAULT 0,
+    last_free_pull_at TIMESTAMP WITH TIME ZONE,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -132,13 +132,13 @@ func (r *explorationRepository) GetExpeditionByID(id uuid.UUID) (*Expedition, er
 }
 
 func (r *explorationRepository) SaveEncounter(b *Encounter, expeditionID uuid.UUID) error {
-	query := `INSERT INTO encounters (id, expedition_id, type, title, description, visual_prompt) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := r.db.Exec(query, b.ID, expeditionID, b.Type, b.Title, b.Description, b.VisualPrompt)
+	query := `INSERT INTO encounters (id, expedition_id, type, title, description, visual_prompt, enemy_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	_, err := r.db.Exec(query, b.ID, expeditionID, b.Type, b.Title, b.Description, b.VisualPrompt, b.EnemyID)
 	return err
 }
 
 func (r *explorationRepository) GetEncountersByExpeditionID(expeditionID uuid.UUID) ([]Encounter, error) {
-	query := `SELECT id, type, title, description, visual_prompt FROM encounters WHERE expedition_id = $1 ORDER BY created_at ASC`
+	query := `SELECT id, type, title, description, visual_prompt, enemy_id FROM encounters WHERE expedition_id = $1 ORDER BY created_at ASC`
 	rows, err := r.db.Query(query, expeditionID)
 	if err != nil {
 		return nil, err
@@ -148,7 +148,7 @@ func (r *explorationRepository) GetEncountersByExpeditionID(expeditionID uuid.UU
 	var encounters []Encounter
 	for rows.Next() {
 		var b Encounter
-		if err := rows.Scan(&b.ID, &b.Type, &b.Title, &b.Description, &b.VisualPrompt); err != nil {
+		if err := rows.Scan(&b.ID, &b.Type, &b.Title, &b.Description, &b.VisualPrompt, &b.EnemyID); err != nil {
 			return nil, err
 		}
 		encounters = append(encounters, b)

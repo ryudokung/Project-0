@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/ryudokung/Project-0/backend/internal/auth/constants"
 )
 
 type Handler struct {
@@ -47,20 +48,15 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMe(w http.ResponseWriter, r *http.Request) {
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) <= 7 || authHeader[:7] != "Bearer " {
+	// Get user from context (Security)
+	userID, ok := r.Context().Value(constants.UserIDKey).(uuid.UUID)
+	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	tokenString := authHeader[7:]
-	user, err := h.useCase.ValidateToken(tokenString)
+	user, err := h.useCase.GetMe(userID)
 	if err != nil {
-		http.Error(w, "Unauthorized: "+err.Error(), http.StatusUnauthorized)
-		return
-	}
-
-	if user == nil {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
 	}
@@ -97,8 +93,14 @@ func (h *Handler) LinkWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get user from context (Security)
+	userID, ok := r.Context().Value(constants.UserIDKey).(uuid.UUID)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var req struct {
-		UserID        string `json:"user_id"`
 		WalletAddress string `json:"wallet_address"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -106,13 +108,7 @@ func (h *Handler) LinkWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uid, err := uuid.Parse(req.UserID)
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	if err := h.useCase.LinkWallet(uid, req.WalletAddress); err != nil {
+	if err := h.useCase.LinkWallet(userID, req.WalletAddress); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -127,15 +123,9 @@ func (h *Handler) CreateCharacter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get user from token
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) <= 7 || authHeader[:7] != "Bearer " {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-	tokenString := authHeader[7:]
-	user, err := h.useCase.ValidateToken(tokenString)
-	if err != nil {
+	// Get user from context (Security)
+	userID, ok := r.Context().Value(constants.UserIDKey).(uuid.UUID)
+	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -146,7 +136,7 @@ func (h *Handler) CreateCharacter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	char, err := h.useCase.CreateCharacter(user.ID, req)
+	char, err := h.useCase.CreateCharacter(userID, req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -157,20 +147,14 @@ func (h *Handler) CreateCharacter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetCharacters(w http.ResponseWriter, r *http.Request) {
-	// Get user from token
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" || len(authHeader) <= 7 || authHeader[:7] != "Bearer " {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-	tokenString := authHeader[7:]
-	user, err := h.useCase.ValidateToken(tokenString)
-	if err != nil {
+	// Get user from context (Security)
+	userID, ok := r.Context().Value(constants.UserIDKey).(uuid.UUID)
+	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	chars, err := h.useCase.GetCharacters(user.ID)
+	chars, err := h.useCase.GetCharacters(userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/ryudokung/Project-0/backend/internal/auth/constants"
 	"github.com/ryudokung/Project-0/backend/internal/mech"
 	"github.com/ryudokung/Project-0/backend/internal/game"
 )
@@ -32,6 +33,13 @@ type BattleRequest struct {
 func (h *Handler) SimulateAttack(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// 0. Get User from Context (Security)
+	userID, ok := r.Context().Value(constants.UserIDKey).(uuid.UUID)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -63,6 +71,12 @@ func (h *Handler) SimulateAttack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Ownership Check (Anti-Cheat)
+	if attacker.OwnerID != userID {
+		http.Error(w, "You do not own this mech", http.StatusForbidden)
+		return
+	}
+
 	defender, err := h.mechRepo.GetByID(r.Context(), defenderUUID)
 	if err != nil {
 		http.Error(w, "Error fetching defender: "+err.Error(), http.StatusInternalServerError)
@@ -73,13 +87,19 @@ func (h *Handler) SimulateAttack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if defender is already dead (Anti-Cheat/Race Condition)
+	if defender.Stats.HP <= 0 {
+		http.Error(w, "Target is already destroyed", http.StatusBadRequest)
+		return
+	}
+
 	// 2. Fetch Parts (Equipped)
 	attackerParts, _ := h.mechRepo.GetPartsByMechID(attackerUUID)
 	defenderParts, _ := h.mechRepo.GetPartsByMechID(defenderUUID)
 
 	// 3. Fetch Pilot Stats (for Resonance bonus)
-	attackerPilot, _ := h.gameRepo.GetPilotStats(attacker.OwnerID)
-	defenderPilot, _ := h.gameRepo.GetPilotStats(defender.OwnerID)
+	attackerPilot, _ := h.gameRepo.GetActivePilotStats(attacker.OwnerID)
+	defenderPilot, _ := h.gameRepo.GetActivePilotStats(defender.OwnerID)
 
 	// 4. Map to Combat Stats
 	attackerStats := h.service.MapMechToUnitStats(attacker, attackerParts, attackerPilot)
@@ -87,6 +107,21 @@ func (h *Handler) SimulateAttack(w http.ResponseWriter, r *http.Request) {
 
 	// 5. Execute Attack
 	result := h.service.ExecuteAttack(attackerStats, defenderStats, DamageType(req.DamageType))
+
+	// 6. Persist State (Anti-Cheat)
+	newHP := defender.Stats.HP - result.FinalDamage
+	if newHP < 0 {
+		newHP = 0
+	}
+	
+	err = h.mechRepo.UpdateHP(r.Context(), defenderUUID, newHP)
+	if err != nil {
+		http.Error(w, "Failed to update defender HP", http.StatusInternalServerError)
+		return
+	}
+
+	// Update local stats for response
+	defenderStats.HP = newHP
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{

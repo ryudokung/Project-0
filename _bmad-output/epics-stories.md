@@ -13,22 +13,22 @@
 - **Story 2.1 (Initiate Assembly):** As a player, I want to spend resources/USDT to start building a Mech/Ship.
 - **Story 2.2 (AI Generation):** As a system, I want to generate unique visuals using FLUX.1 based on the vehicle type and class.
 - **Story 2.3 (HITL Approval):** As an admin, I want to approve AI-generated images before they are minted as NFTs.
-- **Story 2.4 (On-chain Minting):** As a player, I want my approved Mech to be minted on Base L2 automatically.
+- **Story 2.4 (On-chain Minting):** As a player, I want my approved Vehicle to be minted on Base L2 automatically.
 
 ## Epic 3: Deep Space Exploration & Narrative
 **Goal:** Create the multi-stage exploration loop driven by an intense narrative.
 
 - **Story 3.1 (Mothership Transit):** As a player, I want to travel to star systems while managing fuel and scanner range.
 - **Story 3.2 (Atmospheric Entry):** As a player, I want to experience a high-stakes entry sequence with potential AI-generated accidents.
-- **Story 3.3 (Pilot EVA):** As a player, I want to exit my Mech for precision salvage, knowing that death means losing everything from the run.
+- **Story 3.3 (Pilot EVA):** As a player, I want to exit my Vehicle for precision salvage, knowing that death means losing everything from the run.
 - **Story 3.4 (Narrative Patches):** As a player, I want to experience new story chapters delivered via "Context Patches."
 
 ## Epic 4: Tactical Combat & Visual Flex
 **Goal:** Implement the stat-based battle engine with high-fidelity 3D visualizations.
 
-- **Story 4.1 (Battle Engine):** As a player, I want to engage in combat where my Mech's stats and "Options" determine the outcome.
+- **Story 4.1 (Battle Engine):** As a player, I want to engage in combat where my Vehicle's stats and "Options" determine the outcome.
 - **Story 4.2 (3D Cockpit HUD):** As a player, I want to see the battle unfold through an immersive 3D Cockpit HUD with real-time damage effects.
-- **Story 4.3 (Showcase & Flex):** As a player, I want to showcase my unique Mech in a high-fidelity 3D Hangar to other players.
+- **Story 4.3 (Showcase & Flex):** As a player, I want to showcase my unique Vehicle in a high-fidelity 3D Hangar to other players.
 
 ## Epic 5: Galactic Economy & Social Prestige
 **Goal:** Manage monetization, difficulty adjustment, and social validation.

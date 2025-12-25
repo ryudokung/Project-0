@@ -79,7 +79,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "n":
 			// String a new encounter
 			ctx := context.Background()
-			encounter, err := m.service.StringNewEncounter(ctx, m.expedition.ID, m.mechID)
+			encounter, err := m.service.GenerateNewEncounter(ctx, m.expedition.ID, m.mechID)
 			if err != nil {
 				m.err = err
 				return m, nil

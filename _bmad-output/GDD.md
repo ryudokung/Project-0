@@ -21,7 +21,8 @@ Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game. Player
 ## 2. Gameplay Systems
 
 ### 2.1 The Core Loop (The "Heartbeat")
-1.  **Onboarding (Identity):** Create a Pilot Character (Name, Gender, Appearance).
+The game utilizes a **Unified Game Controller** (Single Page Architecture) to manage transitions between states without page reloads.
+1.  **Onboarding (Identity):** Create a Pilot Character (Name, Gender: Male/Female).
 2.  **Hangar (Preparation):** Customize Ship/Mech, repair damage, and refuel.
 3.  **Scanner (Risk Assessment):** Probe star systems for loot and threats.
 4.  **Transit (The Journey):** Travel to the target, surviving atmospheric entry.
@@ -44,6 +45,8 @@ Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game. Player
 
 ### 3.2 Combat Mechanics
 - **Asynchronous Auto-Resolve with 3D Visualization:** Strategic depth meets cinematic flair.
+- **Real Combat Integration:** Combat encounters are now driven by real backend data. When a player enters a `COMBAT` node during exploration, the system identifies a specific `enemy_id` linked to a seeded NPC Mech.
+- **NPC Enemy Seeding:** The backend maintains a pool of NPC Mechs (e.g., "Iron Syndicate Striker", "Void Guardian") with unique stats (HP, Attack, Defense, Speed).
 - **Elemental Triangle:** Kinetic > Energy > Explosive > Kinetic.
 - **Visual Wear & Tear:** Real-time damage visualization on specific NFT parts.
 
@@ -79,6 +82,7 @@ Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game. Player
 ---
 
 ## 5. UI/UX Design (Pro Max Standards)
+- **Unified Game Controller:** A single-page architecture that manages `GameStage` (HANGAR, MAP, EXPLORATION, COMBAT) with fluid Framer Motion transitions.
 - **HUD/Cockpit:** Glassmorphism for an immersive "Inside the Helmet" feel.
 - **Dashboard:** Bento Grid layout for clear resource management.
 - **Visual DNA:** Seasonal themes (e.g., Cyber-Samurai) that define the aesthetic.

@@ -1,0 +1,53 @@
+
+> frontend@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.100.106:3000
+- Environments: .env.local
+
+✓ Starting...
+✓ Ready in 840ms
+ GET /exploration-loop 200 in 1357ms (compile: 941ms, render: 416ms)
+ HEAD /exploration-loop 200 in 44ms (compile: 8ms, render: 36ms)
+ HEAD /exploration-loop 200 in 34ms (compile: 11ms, render: 23ms)
+ GET /exploration-loop 200 in 50ms (compile: 16ms, render: 34ms)
+ HEAD /exploration-loop 200 in 37ms (compile: 12ms, render: 25ms)
+ HEAD /exploration-loop 200 in 24ms (compile: 7ms, render: 17ms)
+ GET / 200 in 170ms (compile: 97ms, render: 73ms)
+ HEAD / 200 in 50ms (compile: 16ms, render: 35ms)
+ HEAD / 200 in 81ms (compile: 11ms, render: 70ms)
+ GET /hangar 200 in 83ms (compile: 68ms, render: 15ms)
+ GET /hangar 200 in 53ms (compile: 9ms, render: 45ms)
+ HEAD /hangar 200 in 48ms (compile: 9ms, render: 39ms)
+ HEAD /hangar 200 in 24ms (compile: 6ms, render: 18ms)
+ GET /gacha 200 in 160ms (compile: 151ms, render: 9ms)
+ GET /gacha 200 in 50ms (compile: 12ms, render: 38ms)
+ HEAD /gacha 200 in 46ms (compile: 13ms, render: 32ms)
+ HEAD /gacha 200 in 26ms (compile: 8ms, render: 18ms)
+ GET /gacha 200 in 25ms (compile: 6ms, render: 19ms)
+ HEAD /gacha 200 in 29ms (compile: 9ms, render: 20ms)
+ HEAD /gacha 200 in 23ms (compile: 8ms, render: 15ms)
+ GET /gacha 200 in 24ms (compile: 5ms, render: 19ms)
+ HEAD /gacha 200 in 28ms (compile: 9ms, render: 20ms)
+ HEAD /gacha 200 in 25ms (compile: 9ms, render: 17ms)
+ GET /gacha 200 in 192ms (compile: 105ms, render: 87ms)
+ GET /gacha 200 in 193ms (compile: 123ms, render: 70ms)
+ GET /gacha 200 in 187ms (compile: 177ms, render: 10ms)
+ GET /gacha 200 in 188ms (compile: 168ms, render: 20ms)
+ GET /gacha 200 in 240ms (compile: 183ms, render: 57ms)
+ GET /gacha 200 in 188ms (compile: 146ms, render: 42ms)
+ GET /gacha 200 in 88ms (compile: 4ms, render: 84ms)
+ GET /gacha 200 in 89ms (compile: 18ms, render: 70ms)
+ GET /gacha 200 in 63ms (compile: 4ms, render: 58ms)
+ GET /gacha 200 in 63ms (compile: 15ms, render: 48ms)
+ GET /gacha 200 in 63ms (compile: 26ms, render: 37ms)
+ GET /gacha 200 in 80ms (compile: 28ms, render: 52ms)
+ GET /gacha 200 in 88ms (compile: 29ms, render: 59ms)
+ GET /gacha 200 in 92ms (compile: 11ms, render: 81ms)
+ GET /gacha 200 in 52ms (compile: 5ms, render: 47ms)
+ GET /gacha 200 in 52ms (compile: 27ms, render: 25ms)
+ GET /gacha 200 in 53ms (compile: 16ms, render: 37ms)
+ GET /gacha 200 in 19ms (compile: 5ms, render: 13ms)
+✓ Compiled in 94ms
