@@ -229,13 +229,14 @@ CREATE TABLE IF NOT EXISTS encounters (
 
 CREATE TABLE IF NOT EXISTS nodes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    star_id UUID REFERENCES stars(id),
+    expedition_id UUID REFERENCES expeditions(id),
     name VARCHAR(100) NOT NULL,
     type node_type NOT NULL,
     environment_description TEXT, -- e.g., "Acid Rain Desert", "Neon Slums"
     difficulty_multiplier DECIMAL(3, 2) DEFAULT 1.0,
     position_index INTEGER NOT NULL, -- Order on the "Expedition"
-    metadata JSONB DEFAULT '{}', -- Enemy types, loot tables, etc.
+    choices JSONB DEFAULT '[]', -- Strategic choices for the node
+    is_resolved BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -357,11 +358,11 @@ ON CONFLICT (id) DO NOTHING;
 
 -- 3. Sample Universe Data (SOL GATE)
 INSERT INTO sectors (id, name, description, difficulty, coordinates_x, coordinates_y, color) 
-VALUES ('s0000000-0000-0000-0000-000000000001', 'SOL GATE', 'The industrial gateway to the system. Relatively safe but heavily monitored.', 'LOW', 15, 20, 'blue')
+VALUES ('a0000000-0000-0000-0000-000000000001', 'SOL GATE', 'The industrial gateway to the system. Relatively safe but heavily monitored.', 'LOW', 15, 20, 'blue')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO sub_sectors (id, sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y) 
-VALUES ('ss000000-0000-0000-0000-000000000001', 's0000000-0000-0000-0000-000000000001', 'STATION', 'Outpost 01', 'A standard refueling station for independent scavengers.', '{"Scrap Metal", "Fuel Isotopes"}', '{}', '{"PILOT", "VEHICLE"}', FALSE, 100, 20, 40, 30)
+VALUES ('b0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'STATION', 'Outpost 01', 'A standard refueling station for independent scavengers.', '{"Scrap Metal", "Fuel Isotopes"}', '{}', '{"PILOT", "VEHICLE"}', FALSE, 100, 20, 40, 30)
 ON CONFLICT (id) DO NOTHING;
 
 -- 4. Sample Narrative Expedition
