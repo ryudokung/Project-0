@@ -6,7 +6,7 @@ import { useMachine } from '@xstate/react';
 import { gameMachine } from '@/machines/gameMachine';
 import { Sector, SubSector, PlanetLocation } from '@/services/exploration';
 import { explorationSystem } from '@/systems/ExplorationSystem';
-import { hangarSystem, HangarState } from '@/systems/HangarSystem';
+import { bastionSystem, BastionState } from '@/systems/BastionSystem';
 import { universeSystem, UniverseState } from '@/systems/UniverseSystem';
 import { gameEvents, GAME_EVENTS } from '@/systems/EventBus';
 import { useAuthSync } from '@/hooks/use-auth-sync';
@@ -14,16 +14,17 @@ import { useAuthSync } from '@/hooks/use-auth-sync';
 // Components
 import LandingStage from '@/components/game/LandingStage';
 import CharacterCreationStage from '@/components/game/CharacterCreationStage';
-import Hangar from '@/components/game/Hangar';
+import Bastion from '@/components/game/Bastion';
 import UniverseMap from '@/components/game/UniverseMap';
 import LocationScan from '@/components/game/LocationScan';
 import PlanetSurface from '@/components/game/PlanetSurface';
 import ExplorationLoop from '@/components/game/ExplorationLoop';
+import TimelineView from '@/components/game/TimelineView';
 import CombatStage from '@/components/game/CombatStage';
 import GachaStage from '@/components/game/GachaStage';
 import NotificationSystem from '@/components/game/NotificationSystem';
 
-type GameStage = 'LANDING' | 'CHARACTER_CREATION' | 'HANGAR' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'COMBAT' | 'DEBRIEF' | 'GACHA';
+type GameStage = 'LANDING' | 'CHARACTER_CREATION' | 'BASTION' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'COMBAT' | 'DEBRIEF' | 'GACHA';
 type DeploymentMode = 'PILOT' | 'SPEEDER' | 'MECH' | 'TANK' | 'SHIP' | 'EXOSUIT' | 'HAULER';
 
 interface MothershipUpgrades {
@@ -61,6 +62,7 @@ export default function UnifiedGamePage() {
   // Sync User to Machine
   useEffect(() => {
     if (user) {
+      console.log('Updating user in machine:', user);
       send({ type: 'UPDATE_USER', user });
     }
   }, [user, send]);
@@ -68,9 +70,16 @@ export default function UnifiedGamePage() {
   // Handle Initial Stage based on Auth
   useEffect(() => {
     if (!authLoading) {
-      send({ type: 'AUTH_READY' });
+      console.log('Auth ready, sending AUTH_READY:', user);
+      send({ type: 'AUTH_READY', user });
     }
-  }, [authLoading, send]);
+  }, [authLoading, user, send]);
+
+  // Log state changes
+  useEffect(() => {
+    console.log('Current Machine State:', state.value);
+    console.log('Current Context User:', state.context.user);
+  }, [state.value, state.context.user]);
 
   // System Listeners
   useEffect(() => {
@@ -78,15 +87,25 @@ export default function UnifiedGamePage() {
       setSectors(state.sectors);
     });
 
-    const unsubHangar = gameEvents.on(GAME_EVENTS.HANGAR_UPDATED, (state: HangarState) => {
-      if (state.mechs.length > 0) {
-        const mappedVehicles = state.mechs.map((m: any) => ({
-          id: m.id,
-          class: m.model,
-          type: (m.model.includes('TANK') ? 'TANK' : m.model.includes('SHIP') ? 'SHIP' : 'MECH') as DeploymentMode,
-          rarity: 'COMMON',
-          stats: { hp: m.hp, attack: m.attack, defense: m.defense, speed: m.speed }
-        }));
+    const unsubBastion = gameEvents.on(GAME_EVENTS.BASTION_UPDATED, (state: BastionState) => {
+      if (state.vehicles && state.vehicles.length > 0) {
+        const mappedVehicles = state.vehicles.map((m: any) => {
+          const vehicleClass = m.class || m.model || 'UNKNOWN';
+          const vehicleType = m.vehicle_type || (vehicleClass.includes('TANK') ? 'TANK' : vehicleClass.includes('SHIP') ? 'SHIP' : 'VEHICLE');
+          
+          return {
+            id: m.id,
+            class: vehicleClass,
+            type: vehicleType as DeploymentMode,
+            rarity: m.rarity || 'COMMON',
+            stats: m.stats || { 
+              hp: m.hp || 100, 
+              attack: m.attack || 10, 
+              defense: m.defense || 10, 
+              speed: m.speed || 10 
+            }
+          };
+        });
         send({ type: 'UPDATE_VEHICLES', vehicles: mappedVehicles });
       }
     });
@@ -94,12 +113,12 @@ export default function UnifiedGamePage() {
     // Initial Fetch
     universeSystem.fetchMap();
     if (user?.active_character_id || user?.id) {
-      hangarSystem.refreshMechs(user.active_character_id || user.id);
+      bastionSystem.refreshVehicles(user.active_character_id || user.id);
     }
 
     return () => {
       unsubUniverse();
-      unsubHangar();
+      unsubBastion();
     };
   }, [user?.id, user?.active_character_id, send]);
 
@@ -132,7 +151,11 @@ export default function UnifiedGamePage() {
           selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
         );
         
+        // Fetch Timeline
+        const timeline = await explorationSystem.getTimeline(result.expeditionId);
+        
         send({ type: 'UPDATE_STATS', ...result });
+        send({ type: 'UPDATE_TIMELINE', timeline });
         send({ type: 'CONFIRM_DEPLOYMENT', isPlanet: false });
       } catch (error) {
         console.error('Failed to start exploration:', error);
@@ -154,10 +177,33 @@ export default function UnifiedGamePage() {
         selectedPlanetLocation.id
       );
       
+      // Fetch Timeline
+      const timeline = await explorationSystem.getTimeline(result.expeditionId);
+      
       send({ type: 'UPDATE_STATS', ...result });
+      send({ type: 'UPDATE_TIMELINE', timeline });
       send({ type: 'CONFIRM_DEPLOYMENT' });
     } catch (error) {
       console.error('Failed to start planet exploration:', error);
+    } finally {
+      setIsTransitioning(false);
+    }
+  };
+
+  const resolveChoice = async (nodeId: string, choice: string) => {
+    if (isTransitioning) return;
+    try {
+      setIsTransitioning(true);
+      const updatedNode = await explorationSystem.resolveChoice(nodeId, choice);
+      send({ type: 'RESOLVE_NODE', node: updatedNode });
+
+      if (updatedNode.type === 'COMBAT') {
+        // For combat nodes, we might want to trigger combat stage
+        // For now, let's just simulate it or check if it's resolved
+        // send({ type: 'ENTER_COMBAT', enemyId: '...' });
+      }
+    } catch (error) {
+      console.error('Failed to resolve choice:', error);
     } finally {
       setIsTransitioning(false);
     }
@@ -219,7 +265,7 @@ export default function UnifiedGamePage() {
       <AnimatePresence mode="wait">
         {state.matches('landing') && (
           <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <LandingStage onStart={() => send({ type: 'START' })} />
+            <LandingStage onStart={() => send({ type: 'START', user })} />
           </motion.div>
         )}
 
@@ -229,9 +275,9 @@ export default function UnifiedGamePage() {
           </motion.div>
         )}
 
-        {state.matches('hangar') && (
-          <motion.div key="hangar" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <Hangar 
+        {state.matches('bastion') && (
+          <motion.div key="bastion" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+            <Bastion 
               onDeploy={() => send({ type: 'DEPLOY' })} 
               onGacha={() => send({ type: 'OPEN_GACHA' })}
             />
@@ -295,14 +341,13 @@ export default function UnifiedGamePage() {
 
         {state.matches('exploration') && (
           <motion.div key="exploration" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <ExplorationLoop 
+            <TimelineView 
               expeditionTitle={expeditionTitle}
               o2={o2}
               fuel={fuel}
-              encounters={encounters}
-              currentEncounter={currentEncounter}
-              isTransitioning={isTransitioning}
-              onAdvance={advanceTimeline}
+              timeline={state.context.timeline}
+              currentNode={state.context.currentNode}
+              onResolveChoice={resolveChoice}
               onEnterCombat={(enemyId) => {
                 send({ type: 'ENTER_COMBAT', enemyId });
               }}

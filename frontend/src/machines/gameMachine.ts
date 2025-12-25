@@ -1,5 +1,5 @@
 import { createMachine, assign } from 'xstate';
-import { Sector, SubSector, PlanetLocation, Encounter } from '@/services/exploration';
+import { Sector, SubSector, PlanetLocation, Encounter, Node } from '@/services/exploration';
 
 export interface GameContext {
   user: any | null;
@@ -8,6 +8,8 @@ export interface GameContext {
   activeEnemyId: string | null;
   encounters: Encounter[];
   currentEncounter: Encounter | null;
+  timeline: Node[];
+  currentNode: Node | null;
   expeditionTitle: string;
   currentExpeditionId: string | null;
   selectedSector: Sector | null;
@@ -27,6 +29,8 @@ export const gameMachine = createMachine({
     activeEnemyId: null,
     encounters: [],
     currentEncounter: null,
+    timeline: [],
+    currentNode: null,
     expeditionTitle: 'THE SILENT SIGNAL',
     currentExpeditionId: null,
     selectedSector: null,
@@ -35,13 +39,35 @@ export const gameMachine = createMachine({
     vehicles: [],
     selectedVehicle: null,
   } as GameContext,
+  on: {
+    UPDATE_USER: {
+      actions: assign({ user: ({ event }) => event.user })
+    }
+  },
   states: {
     initializing: {
       on: {
         AUTH_READY: [
-          { target: 'landing', guard: ({ context }) => !context.user },
-          { target: 'characterCreation', guard: ({ context }) => context.user && !context.user.active_character_id },
-          { target: 'hangar' }
+          { 
+            target: 'characterCreation', 
+            guard: ({ context, event }) => {
+              const u = event.user || context.user;
+              return u && !u.active_character_id;
+            },
+            actions: assign({ user: ({ context, event }) => event.user || context.user })
+          },
+          { 
+            target: 'bastion',
+            guard: ({ context, event }) => {
+              const u = event.user || context.user;
+              return u && !!u.active_character_id;
+            },
+            actions: assign({ user: ({ context, event }) => event.user || context.user })
+          },
+          { 
+            target: 'landing', 
+            actions: assign({ user: ({ event }) => event.user })
+          }
         ],
         UPDATE_USER: {
           actions: assign({ user: ({ event }) => event.user })
@@ -51,20 +77,68 @@ export const gameMachine = createMachine({
     landing: {
       on: {
         START: [
-          { target: 'characterCreation', guard: ({ context }) => context.user && !context.user.active_character_id },
-          { target: 'hangar', guard: ({ context }) => !!context.user },
+          { 
+            target: 'characterCreation', 
+            guard: ({ context, event }) => {
+              const u = event.user || context.user;
+              return u && !u.active_character_id;
+            },
+            actions: assign({ user: ({ context, event }) => event.user || context.user })
+          },
+          { 
+            target: 'bastion', 
+            guard: ({ context, event }) => {
+              const u = event.user || context.user;
+              return u && !!u.active_character_id;
+            },
+            actions: assign({ user: ({ context, event }) => event.user || context.user })
+          }
         ],
-        UPDATE_USER: {
-          actions: assign({ user: ({ event }) => event.user })
-        }
+        UPDATE_USER: [
+          { 
+            target: 'characterCreation', 
+            guard: ({ event }) => event.user && !event.user.active_character_id,
+            actions: assign({ user: ({ event }) => event.user })
+          },
+          { 
+            target: 'bastion', 
+            guard: ({ event }) => event.user && !!event.user.active_character_id,
+            actions: assign({ user: ({ event }) => event.user })
+          },
+          {
+            actions: assign({ user: ({ event }) => event.user })
+          }
+        ],
+        AUTH_READY: [
+          { 
+            target: 'characterCreation', 
+            guard: ({ event }) => event.user && !event.user.active_character_id,
+            actions: assign({ user: ({ event }) => event.user })
+          },
+          { 
+            target: 'bastion', 
+            guard: ({ event }) => event.user && !!event.user.active_character_id,
+            actions: assign({ user: ({ event }) => event.user })
+          }
+        ]
       }
     },
     characterCreation: {
       on: {
-        SUCCESS: 'hangar'
+        SUCCESS: 'bastion',
+        CHARACTER_CREATED: {
+          target: 'bastion',
+          actions: assign({ 
+            user: ({ context, event }) => ({ 
+              ...context.user, 
+              active_character_id: event.character.id,
+              active_character: event.character
+            }) 
+          })
+        }
       }
     },
-    hangar: {
+    bastion: {
       on: {
         DEPLOY: 'map',
         OPEN_GACHA: 'gacha',
@@ -78,7 +152,7 @@ export const gameMachine = createMachine({
     },
     gacha: {
       on: {
-        BACK: 'hangar'
+        BACK: 'bastion'
       }
     },
     map: {
@@ -87,7 +161,7 @@ export const gameMachine = createMachine({
           actions: assign({ selectedSector: ({ event }) => event.sector }),
           target: 'locationScan'
         },
-        BACK: 'hangar'
+        BACK: 'bastion'
       }
     },
     locationScan: {
@@ -129,6 +203,18 @@ export const gameMachine = createMachine({
             expeditionTitle: ({ event }) => event.title
           })
         },
+        UPDATE_TIMELINE: {
+          actions: assign({
+            timeline: ({ event }) => event.timeline,
+            currentNode: ({ event }) => event.currentNode || event.timeline.find((n: Node) => !n.is_resolved) || event.timeline[0]
+          })
+        },
+        RESOLVE_NODE: {
+          actions: assign({
+            currentNode: ({ event }) => event.node,
+            timeline: ({ context, event }) => context.timeline.map((n: Node) => n.id === event.node.id ? event.node : n)
+          })
+        },
         ENTER_COMBAT: {
           actions: assign({ activeEnemyId: ({ event }) => event.enemyId }),
           target: 'combat'
@@ -143,7 +229,7 @@ export const gameMachine = createMachine({
     },
     debrief: {
       on: {
-        RETURN: 'hangar'
+        RETURN: 'bastion'
       }
     }
   }

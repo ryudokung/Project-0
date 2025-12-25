@@ -56,6 +56,26 @@ export class ExplorationSystem {
       throw error;
     }
   }
+
+  async getTimeline(expeditionId: string) {
+    try {
+      return await explorationService.getTimeline(expeditionId);
+    } catch (error) {
+      gameEvents.emit(GAME_EVENTS.NOTIFICATION, { message: 'FAILED TO FETCH TIMELINE', type: 'ERROR' });
+      throw error;
+    }
+  }
+
+  async resolveChoice(nodeId: string, choice: string) {
+    try {
+      const result = await explorationService.resolveChoice(nodeId, choice);
+      gameEvents.emit(GAME_EVENTS.NOTIFICATION, { message: 'CHOICE RESOLVED', type: 'SUCCESS' });
+      return result;
+    } catch (error) {
+      gameEvents.emit(GAME_EVENTS.NOTIFICATION, { message: 'FAILED TO RESOLVE CHOICE', type: 'ERROR' });
+      throw error;
+    }
+  }
 }
 
 export const explorationSystem = ExplorationSystem.getInstance();

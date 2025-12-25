@@ -112,13 +112,13 @@ export default function PlanetSurface({
                       <div className="h-full bg-white" style={{ width: `${selectedPlanetLocation.suitability.pilot}%` }} />
                     </div>
                     <div className="flex justify-between text-[10px]">
-                      <span>Heavy Asset Power</span>
-                      <span className={selectedPlanetLocation.suitability.mech > 50 ? 'text-green-500' : 'text-red-500'}>
-                        {selectedPlanetLocation.suitability.mech}%
+                      <span>Vehicle Power</span>
+                      <span className={selectedPlanetLocation.suitability.vehicle > 50 ? 'text-green-500' : 'text-red-500'}>
+                        {selectedPlanetLocation.suitability.vehicle}%
                       </span>
                     </div>
                     <div className="w-full h-1 bg-zinc-900">
-                      <div className="h-full bg-pink-500" style={{ width: `${selectedPlanetLocation.suitability.mech}%` }} />
+                      <div className="h-full bg-pink-500" style={{ width: `${selectedPlanetLocation.suitability.vehicle}%` }} />
                     </div>
                   </div>
                 </div>

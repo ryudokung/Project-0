@@ -8,12 +8,13 @@
 - **Effects:** Scanlines, slight chromatic aberration, and HUD glitches when taking damage.
 - **Dynamic Background:** A global 3D space environment rendered with R3F, featuring a rotating Earth-like planet, floating space debris, and a deep starfield to maintain immersion across all application states.
 
-## 2. The Immersive Cockpit HUD (3D)
+## 2. The Immersive Cockpit & Bridge HUD (3D)
 Rendered using **WebGPU + R3F**, the HUD is part of the 3D world:
+- **The Bridge View:** The primary hub interface. A wide-angle viewport showing the Bastion's exterior and the current star system.
 - **Center:** Crosshair and Target Lock-on.
-- **Left Panel:** System Integrity (HP of each modular part).
+- **Left Panel:** System Integrity (HP of each modular part) with **DDS Condition Indicators**.
 - **Right Panel:** Radar (3D sphere showing enemy signatures).
-- **Bottom:** O2 Levels (for EVA) and Fuel Gauge (for Mothership).
+- **Bottom:** O2 Levels (for EVA) and Fuel Gauge (for The Bastion).
 - **Side Monitors:** Real-time AI Narrative logs and Pilot status.
 
 ## 3. The Showcase Engine (The "Flex" View)
@@ -41,7 +42,7 @@ The exploration interface is designed around the "Expedition and Encounters" mod
 
 ### 4.3 Resource-Driven Interaction
 - **The "Advance" Button:** The primary interaction. It displays the O2/Fuel cost for the next step.
-- **Dynamic Warnings:** If O2 is low, the HUD turns red, and the "Advance" button text changes to "DESPERATE MOVE," signaling that the AI is now more likely to generate high-stakes or resource-focused Encounters.
+- **DDS Alerts:** When an item enters "Damaged" or "Critical" status, the HUD triggers visual glitches, flickering lights, and warning sirens.
 
 ## 5. User Journey: The "Single-Page Game Loop"
 
@@ -57,16 +58,18 @@ The exploration interface is designed around the "Expedition and Encounters" mod
 - **Late Binding:** A subtle "Link External Wallet" button in the Hangar settings or profile, framed as "Securing Assets to the Void-Chain."
 
 ### 5.2 The Unified Play Page (The Loop)
-The entire game experience is contained within a single route (`/play`), managed by a central state machine:
-- **Seamless Transitions:** Using Framer Motion `AnimatePresence`, the UI morphs between stages (Hangar, Map, Exploration) without page reloads.
+The entire game experience is contained within a single route (`/play`), managed by a **Decoupled Systems Architecture**:
+- **EventBus Communication:** UI components are "dumb" views that subscribe to events from the **ExplorationSystem**, **CombatSystem**, and **BastionSystem**.
+- **Seamless Transitions:** Using Framer Motion `AnimatePresence`, the UI morphs between stages (Bridge, Hangar, Map, Exploration) without page reloads.
 - **Persistent HUD:** The Pilot ID Badge, O2 levels, and Fuel reserves remain visible or transition smoothly between stages, maintaining the "Cockpit" feel.
 - **Stage Flow:**
-    1. **Hangar:** Manage Pilot/Vehicle.
-    2. **Universe Map:** Select Sector.
-    3. **Location Scan:** Identify POIs.
-    4. **Exploration Loop:** Advance through encounters.
-    5. **Combat:** Tactical engagement.
-    6. **Debrief:** Return to Hangar.
+    1. **The Bastion (Bridge):** Command and Navigation.
+    2. **Hangar:** Manage Pilot/Vehicle & Repairs (DDS).
+    3. **Universe Map:** Select Sector.
+    4. **Location Scan:** Identify POIs.
+    5. **Exploration Loop:** Advance through encounters.
+    6. **Combat:** Tactical engagement.
+    7. **Debrief:** Return to The Bastion.
 
 ### 5.3 The Pilot ID Badge (Hangar UI)
 - **Visual:** A glassmorphic "ID Card" displayed in the Hangar.
@@ -94,8 +97,8 @@ The Gacha experience is designed to be high-tension and visually rewarding:
 - **The "Gasp" Moment:** For **Relic** or **Singularity** items, a full-screen splash art (AI-generated) is revealed with a dramatic sound effect and a "DNA Sequence" animation.
 - **Pity Tracker:** A subtle "Signal Strength" bar at the bottom shows how close the player is to a guaranteed high-tier drop.
 
-## 9. Mothership Systems HUD
-The Mothership interface must clearly distinguish between the two independent engineering paths:
+## 9. The Bastion Systems HUD
+The Bastion interface must clearly distinguish between the two independent engineering paths:
 
 ### 9.1 Teleport Interface (Dimensional)
 - **Visuals:** Distorted, "glitchy" blue/purple UI elements.

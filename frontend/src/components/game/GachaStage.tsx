@@ -38,7 +38,7 @@ export default function GachaStage({ onBack }: GachaStageProps) {
           onClick={onBack}
           className="text-zinc-500 hover:text-white transition-colors uppercase text-xs tracking-widest"
         >
-          [ Back to Hangar ]
+          [ Back to Bastion ]
         </button>
       </div>
 

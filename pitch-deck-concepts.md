@@ -3,27 +3,27 @@ Project-0 is not just a game; it's a living, breathing AI-driven ecosystem. We c
 
 ## 2. Core Pillars
 ### A. Modular NFT Assembly & Visual Synthesis
-- **True Ownership:** Players don't just own a "Mech"; they own individual NFT components (Railgun, Shield, Chassis, Pilot Suit) using **ERC-6551 (Token Bound Accounts)**.
+- **True Ownership:** Players don't just own a "Vehicle"; they own individual NFT components (Railgun, Shield, Chassis, Pilot Suit) using **ERC-6551 (Token Bound Accounts)**.
 - **AI Synthesis:** Our AI (FLUX.1) "reads" the metadata of all equipped NFTs and synthesizes them into a single, cohesive Master Image and 3D model.
 - **Visual Allure (The Hook):** We prioritize "Coolness" above all. Legendary assets feature unique VFX like energy wings, translucent armor, and animated textures that make them instant status symbols.
 - **Visual Wear & Tear & Repair:** Damage is applied to specific NFT components. A veteran Railgun NFT will show scorch marks, while a new Shield NFT remains pristine. Players must refine scrap to repair their gear, restoring its visual glory.
 
 ### B. Gameplay Loop: The Lone Explorer
-- **Personal Scale (1:1):** One Pilot, One Mech/Aircraft. This scale makes every mission feel personal and high-stakes.
+- **Personal Scale (1:1):** One Pilot, One Vehicle. This scale makes every mission feel personal and high-stakes.
 - **Multi-Stage Exploration:**
-    - **Mothership Phase:** Space travel and high-stakes Atmospheric Entry.
-    - **Mech/Aircraft Phase:** Surface combat and aerial superiority.
-    - **Pilot EVA Phase:** Exiting the vehicle for precision salvage. **High Stakes:** Pilot death leads to loss of loot and critical Mech damage.
-- **Hangar & Maintenance:** The "Return" phase where players debrief, refine resources, and repair their modular assets.
+    - **Mothership Phase:** Space travel and high-stakes Atmospheric Entry via **The Bastion**.
+    - **Vehicle Phase:** Surface combat and aerial superiority using Mechs, Tanks, or Ships.
+    - **Pilot Infiltration Phase:** Exiting the vehicle for precision salvage or stealth. **High Stakes:** Pilot death leads to loss of loot and critical Vehicle damage.
+- **Bastion Ops & Maintenance:** The "Return" phase where players debrief, refine resources, and repair their modular assets.
 - **Radar Scan & Risk Assessment:**
-    - Use the Mothership's Scanner to probe Threat Levels (Low to Extreme).
+    - Use the Bastion's Scanner to probe Threat Levels (Low to Extreme).
     - **Fog of War (Web2 Backend):** Radar can't see everything. Hidden elite threats are managed by the server to prevent cheating.
     - **Proceed at Own Risk:** Players can choose to ignore warnings, leading to AI-generated accidents via **Model Context Protocol (MCP)**.
 
 ### C. The Ultimate Goal: A Living World
 - **Continuous Evolution:** The creator gradually releases new "Context Patches"—new star systems, enemy factions, and lore—ensuring the universe is always expanding.
 - **Creator Studio (The God Mode):** A comprehensive backend suite for the creator to set "Visual DNA," deploy patches via drag-and-drop, and manage the live universe in real-time. Includes **Staging environments**, **Real-time Analytics**, and **One-click Rollbacks** for total control.
-- **Social Validation & Showcase:** Personalized Pilot Profiles where players can showcase their unique Mechs, NFTs, and legendary achievements to the community.
+- **Social Validation & Showcase:** Personalized Pilot Profiles where players can showcase their unique Vehicles, NFTs, and legendary achievements to the community.
 - **Viral Engagement:** Integrated sharing to X and Discord, with a dedicated Telegram bot to keep players connected to the evolving universe 24/7.
 - **Hall of Fame:** Immortalizing legendary players who achieve "First Discoveries" or survive the most dangerous patches.
 

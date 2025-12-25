@@ -23,13 +23,13 @@ date: '2025-12-21'
 ## 1. Executive Summary
 
 ### 1.1 Product Vision
-Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles and high entry barriers by utilizing a **Web2.5 Onboarding strategy** (Social Login first, Wallet later). It utilizes AI to generate unique, seasonal NFT assets (Mechs, Tanks, Ships) with genuine aesthetic and functional rarity. The game is an **Intense, Evolving Live-Service Universe** where the creator gradually releases a dark, gripping narrative, new star systems, and context-driven patches to keep the exploration loop fresh and meaningful.
+Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles and high entry barriers by utilizing a **Web2.5 Onboarding strategy** (Social Login first, Wallet later). It utilizes AI to generate unique, seasonal NFT assets (Vehicles, Tanks, Ships) with genuine aesthetic and functional rarity. The game is an **Intense, Evolving Live-Service Universe** where the creator gradually releases a dark, gripping narrative, new star systems, and context-driven patches to keep the exploration loop fresh and meaningful.
 
 ### 1.2 Project Classification
 - **Project Type:** Blockchain/Web3 & Web Application
 - **Domain:** Gaming & Fintech (Hybrid)
 - **Complexity:** High
-- **Key Differentiator:** AI-Powered Seasonal Rarity, Direct-to-System Hybrid Economy, and **Creator-Driven Narrative Evolution**.
+- **Key Differentiator:** AI-Powered Seasonal Rarity, Direct-to-System Hybrid Economy, and **Unified Vehicle & Pilot System**.
 
 ### 1.3 Strategic Alignment
 The project aligns with the goal of creating a long-term, sustainable ecosystem where players can enter for free, progress through effort (Grinding), and participate in a high-value collector's market driven by AI-generated scarcity and **continuous world expansion**.
@@ -38,7 +38,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 
 ### 2.1 User Success
 - **Zero-Friction Entry:** Players can start playing within seconds using Google/Email without needing a crypto wallet or gas fees.
-- **The "Aha!" Moment:** Players receive a high-quality AI-generated Ship or Item for the first time, experiencing the thrill of unique visual ownership and social prestige.
+- **The "Aha!" Moment:** Players receive a high-quality AI-generated Vehicle or Item for the first time, experiencing the thrill of unique visual ownership and social prestige.
 - **Emotional Outcome:** A deep sense of "Collection Pride" and "Social Dominance," especially for rare seasonal assets that trigger envy in other players.
 - **Immersion:** Players feel like "Operatives" and "Commanders" caught in an intense, dark narrative where every mission advances a gripping plot.
 - **Visual Pride:** Players feel a "Gasp" moment when they see their unique, high-fidelity AI-generated Vehicle for the first time—a design that is uniquely theirs and visually stunning.
@@ -50,10 +50,10 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 
 ### 2.3 Technical Success
 - **AI Generation Efficiency:** Implementing a "Time-Gated Assembly" system to manage GPU load and prevent spamming.
-- **Hybrid 2D/3D Immersion:** Delivering High-Fidelity AI assets (2D) for visual storytelling while using **WebGPU + React Three Fiber** for a global 3D space background and an immersive 3D Cockpit and Hangar experience.
-- **Single-Page Game Loop (Unified Controller):** Moving away from traditional web routing (`/hangar`, `/explore`) to a unified, state-driven game controller. This ensures seamless transitions, persistent audio/state, and a true "Game Client" feel.
+- **Hybrid 2D/3D Immersion:** Delivering High-Fidelity AI assets (2D) for visual storytelling while using **WebGPU + React Three Fiber** for a global 3D space background and an immersive 3D Cockpit and Bastion experience.
+- **Single-Page Game Loop (Unified Controller):** Moving away from traditional web routing (`/bastion`, `/explore`) to a unified, state-driven game controller. This ensures seamless transitions, persistent audio/state, and a true "Game Client" feel.
 - **Design Intelligence:** Utilizing [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/) standards to ensure professional-grade aesthetics, including Glassmorphism, Bento Grids, and industry-specific color palettes for a premium feel.
-- **Modular NFT Ownership:** Utilizing **ERC-6551 (Token Bound Accounts)** to allow Mechs to "own" their equipment, simplifying marketplace trading and inventory management.
+- **Modular NFT Ownership:** Utilizing **ERC-6551 (Token Bound Accounts)** to allow Vehicles to "own" their equipment, simplifying marketplace trading and inventory management.
 - **Hybrid State Management (V2O):** Implementing a "Virtual-to-On-chain" model where gameplay and asset creation are off-chain by default (Server-side), with on-chain minting required only for trading or permanent storage.
 - **System Resilience:** Using Saga patterns and distributed tracing to ensure 100% consistency between Web2 (AI/DB) and Web3 (On-chain) states.
 - **AI Contextual Intelligence:** Implementing **Model Context Protocol (MCP)** to provide the AI Narrative Engine with real-time game state for dynamic event generation.
@@ -68,18 +68,18 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
     - **Account Binding:** Seamlessly upgrade Guest -> Traditional/Social without losing progress.
     - **Late-Binding Wallet:** Link an external wallet (MetaMask, etc.) only when ready to mint NFTs.
 - **Player Identity:** Start as a **Void Scavenger** with a **Resonance Suit** and a **Starter Ship**. Players must complete a **Character Creation** process (Name, Gender, Face, Hair) before receiving their first ship. This identity is tied to a **Character** instance, allowing for multiple characters per user.
-- **Mothership Engineering Philosophy:** Motherships are defined by two independent, non-linear systems:
+- **Mothership Engineering Philosophy:** Motherships (The Bastion) are defined by two independent, non-linear systems:
     1. **Teleport System (Dimensional Tech):** For instant travel across dangerous sectors. High energy cost and instability. Some ships cannot install this due to structural mass.
     2. **Atmospheric Entry System (Structural Tech):** For safe landing on planets. Manages heat and gravity. Independent of Teleport capabilities.
     - **Strategic Choice:** Players choose between Speed (Teleport) vs. Safety (Entry) vs. Cost. Not a linear upgrade.
-- **Multi-Vehicle System:** Motherships, Mechs, Aircraft, and Pilot Gear with distinct gameplay roles.
+- **Unified Vehicle & Pilot System:** Motherships, Vehicles (Mechs, Tanks, Ships), and Pilot Gear with distinct gameplay roles.
 - **Engineering & Assembly System:** A story-driven crafting system (Synthesize) where asset generation requires resources, time, and engineers. Unlocked after the first mission.
 - **Tiered AI Assets:** 
     - **Tiers (T1 - T5):** Power levels.
     - **Rarity Classes:** Standard (White), Refined (Green), Prototype (Blue), Relic (Purple), Singularity (Gold).
 - **Void Signals (Gacha):** A "Hoyoverse-style" pull system for high-tier assets with a pity mechanism.
 - **Seasonal Temporal Wormholes:** Limited-time exploration zones requiring specific gear compatibility, offering exclusive "Lost Tech" and "Rare DNA Fragments."
-- **Complex Combat Engine:** Stat-based battle system integrating vehicle attributes (Mothership, Mech, Aircraft, Pilot) and AI-generated item "Options."
+- **Complex Combat Engine:** Stat-based battle system integrating vehicle attributes (Mothership, Vehicle, Pilot) and AI-generated item "Options."
     - **Real Combat Integration:** Transitioning from placeholder combat to a functional system where encounters are linked to real backend data.
     - **Backend Enemy Seeding:** A system to generate and persist specific NPC enemies (e.g., Striker, Guardian, Scout) within combat encounters, allowing for persistent enemy stats and unique loot tables.
 - **Monetization Engine:** Season Pass, Void Signals, and Minting fees for "Void-Touched" (Premium) items.

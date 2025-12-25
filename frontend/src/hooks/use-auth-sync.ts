@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { usePrivy } from "@privy-io/react-auth";
 
 export function useAuthSync() {
-  const { ready, authenticated, getAccessToken, user: privyUser, logout: privyLogout } = usePrivy();
   const [backendToken, setBackendToken] = useState<string | null>(null);
   const [user, setUser] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -118,65 +116,32 @@ export function useAuthSync() {
     setBackendToken(null);
     setUser(null);
     localStorage.removeItem("project0_token");
-    if (authenticated) {
-      privyLogout();
-    }
-  }, [authenticated, privyLogout]);
+  }, []);
 
   useEffect(() => {
     const syncWithBackend = async () => {
-      if (!ready) return;
-
       setIsLoading(true);
       try {
-        if (authenticated && privyUser) {
-          const privyToken = await getAccessToken();
-          const walletAddress = privyUser.wallet?.address;
-          const guestId = localStorage.getItem("project0_guest_id");
-          
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
-            method: "POST",
+        // Check if we have a local token
+        const localToken = localStorage.getItem("project0_token");
+        if (localToken) {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`, {
             headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${privyToken}`,
+              "Authorization": `Bearer ${localToken}`,
             },
-            body: JSON.stringify({
-              privy_did: privyUser.id,
-              wallet_address: walletAddress || "",
-              privy_token: privyToken,
-              guest_id: guestId,
-            }),
           });
-
           if (response.ok) {
-            const data = await response.json();
-            setBackendToken(data.token);
-            setUser(data.user);
-            localStorage.setItem("project0_token", data.token);
-            if (guestId) localStorage.removeItem("project0_guest_id");
-          }
-        } else {
-          // If not authenticated via Privy, check if we have a local token
-          const localToken = localStorage.getItem("project0_token");
-          if (localToken) {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`, {
-              headers: {
-                "Authorization": `Bearer ${localToken}`,
-              },
-            });
-            if (response.ok) {
-              const userData = await response.json();
-              setBackendToken(localToken);
-              setUser(userData);
-            } else {
-              localStorage.removeItem("project0_token");
-              setBackendToken(null);
-              setUser(null);
-            }
+            const userData = await response.json();
+            setBackendToken(localToken);
+            setUser(userData);
           } else {
+            localStorage.removeItem("project0_token");
             setBackendToken(null);
             setUser(null);
           }
+        } else {
+          setBackendToken(null);
+          setUser(null);
         }
       } catch (error) {
         console.error("Error syncing with backend:", error);
@@ -186,7 +151,7 @@ export function useAuthSync() {
     };
 
     syncWithBackend();
-  }, [ready, authenticated, getAccessToken, privyUser]);
+  }, []);
 
-  return { backendToken, user, isLoading: !ready || isLoading, guestLogin, traditionalLogin, signup, logout, refreshUser };
+  return { backendToken, user, isLoading, guestLogin, traditionalLogin, signup, logout, refreshUser };
 }

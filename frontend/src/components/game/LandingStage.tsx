@@ -1,31 +1,27 @@
 'use client';
 
 import Image from "next/image";
-import { LoginButton } from "@/components/login-button";
 import { useAuthSync } from "@/hooks/use-auth-sync";
-import { usePrivy } from "@privy-io/react-auth";
+import { useState } from "react";
 
 interface LandingStageProps {
   onStart: () => void;
 }
 
 export default function LandingStage({ onStart }: LandingStageProps) {
-  const { login: privyLogin, authenticated: privyAuthenticated } = usePrivy();
-  const { user, guestLogin, isLoading } = useAuthSync();
+  const { user, guestLogin, traditionalLogin, signup, isLoading } = useAuthSync();
+  const [showAuthForm, setShowAuthForm] = useState<'LOGIN' | 'SIGNUP' | null>(null);
+  const [showOptions, setShowOptions] = useState(false);
+  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
 
-  const handleStart = () => {
-    if (user) {
-      onStart();
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (showAuthForm === 'LOGIN') {
+      const res = await traditionalLogin(formData.username, formData.password);
+      if (res.success) onStart();
     } else {
-      guestLogin();
-    }
-  };
-
-  const handleNeuralLink = () => {
-    if (user) {
-      onStart();
-    } else {
-      privyLogin();
+      const res = await signup(formData.username, formData.email, formData.password);
+      if (res.success) onStart();
     }
   };
 
@@ -38,7 +34,12 @@ export default function LandingStage({ onStart }: LandingStageProps) {
           </div>
           <span className="font-bold tracking-tighter text-xl">PROJECT-0</span>
         </div>
-        <LoginButton />
+        {user && (
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">Operative: {user.username}</span>
+            <span className="text-[8px] text-pink-500 font-mono uppercase tracking-widest">Status: Online</span>
+          </div>
+        )}
       </header>
 
       <main className="flex flex-col items-center justify-center w-full max-w-7xl px-6 flex-1 z-10">
@@ -47,20 +48,35 @@ export default function LandingStage({ onStart }: LandingStageProps) {
             PROJECT-<span className="text-pink-500">0</span>
           </h1>
           <p className="max-w-[600px] text-zinc-400 md:text-xl font-light tracking-wide">
-            The next generation of AI-driven, Web3-powered space exploration and combat. 
+            The next generation of AI-driven space exploration and combat. 
             Create your pilot, command your fleet, and conquer the void.
           </p>
+          
           <div className="flex flex-col gap-4 items-center w-full max-w-xs">
-            <button 
-              onClick={handleStart}
-              disabled={isLoading}
-              className="w-full px-8 py-4 bg-white text-black font-black italic uppercase tracking-tighter hover:bg-gray-200 transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(255,255,255,0.2)] disabled:opacity-50"
-            >
-              {user ? "Enter the Void" : (isLoading ? "Initializing..." : "Quick Start (Guest)")}
-            </button>
-            
-            {!user && (
+            {user ? (
+              <button 
+                onClick={onStart}
+                className="w-full px-8 py-4 bg-white text-black font-black italic uppercase tracking-tighter hover:bg-gray-200 transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+              >
+                Enter the Void
+              </button>
+            ) : !showOptions ? (
+              <button 
+                onClick={() => setShowOptions(true)}
+                className="w-full px-8 py-4 bg-white text-black font-black italic uppercase tracking-tighter hover:bg-gray-200 transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+              >
+                Initialize Neural Link
+              </button>
+            ) : !showAuthForm ? (
               <>
+                <button 
+                  onClick={guestLogin}
+                  disabled={isLoading}
+                  className="w-full px-8 py-4 bg-white text-black font-black italic uppercase tracking-tighter hover:bg-gray-200 transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(255,255,255,0.2)] disabled:opacity-50"
+                >
+                  {isLoading ? "Initializing..." : "Guest Access"}
+                </button>
+                
                 <div className="flex items-center w-full gap-4">
                   <div className="h-[1px] bg-zinc-800 flex-1" />
                   <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">OR</span>
@@ -68,16 +84,86 @@ export default function LandingStage({ onStart }: LandingStageProps) {
                 </div>
 
                 <button 
-                  onClick={handleNeuralLink}
-                  className="w-full px-8 py-4 bg-pink-600 hover:bg-pink-500 text-white font-bold uppercase tracking-widest transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(236,72,153,0.4)]"
+                  onClick={() => setShowAuthForm('LOGIN')}
+                  className="w-full px-8 py-4 bg-zinc-900 hover:bg-zinc-800 text-white font-bold uppercase tracking-widest transition-all border border-zinc-800"
                 >
-                  Initialize Neural Link
+                  Operative Login
                 </button>
                 
-                <p className="text-[10px] text-zinc-500 uppercase tracking-[0.3em] text-center">
-                  Social Login (Google/Email/Wallet)
-                </p>
+                <button 
+                  className="w-full px-8 py-4 bg-pink-600/20 hover:bg-pink-600/30 text-pink-500 font-bold uppercase tracking-widest transition-all border border-pink-500/30 opacity-50 cursor-not-allowed"
+                  title="Social Login Coming Soon"
+                >
+                  Social Login
+                </button>
+                
+                <button 
+                  onClick={() => setShowOptions(false)}
+                  className="text-[10px] text-zinc-500 hover:text-white uppercase tracking-widest mt-2"
+                >
+                  Back
+                </button>
               </>
+            ) : (
+              <form onSubmit={handleAuthSubmit} className="w-full flex flex-col gap-4 bg-zinc-900/50 p-6 border border-zinc-800 backdrop-blur-md">
+                <h2 className="text-xl font-black italic uppercase tracking-tighter text-pink-500 mb-2">
+                  {showAuthForm === 'LOGIN' ? 'Neural Link Access' : 'New Operative Registration'}
+                </h2>
+                
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="USERNAME"
+                    className="w-full bg-black border border-zinc-800 p-3 text-xs font-mono text-white focus:border-pink-500 outline-none"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    required
+                  />
+                  {showAuthForm === 'SIGNUP' && (
+                    <input
+                      type="email"
+                      placeholder="EMAIL"
+                      className="w-full bg-black border border-zinc-800 p-3 text-xs font-mono text-white focus:border-pink-500 outline-none"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
+                  )}
+                  <input
+                    type="password"
+                    placeholder="PASSWORD"
+                    className="w-full bg-black border border-zinc-800 p-3 text-xs font-mono text-white focus:border-pink-500 outline-none"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-white text-black py-3 font-black uppercase tracking-tighter hover:bg-pink-500 hover:text-white transition-all"
+                >
+                  {isLoading ? 'Processing...' : (showAuthForm === 'LOGIN' ? 'Authorize' : 'Register')}
+                </button>
+
+                <div className="flex justify-between items-center mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAuthForm(showAuthForm === 'LOGIN' ? 'SIGNUP' : 'LOGIN')}
+                    className="text-[10px] text-zinc-500 hover:text-white uppercase tracking-widest"
+                  >
+                    {showAuthForm === 'LOGIN' ? 'Need an account?' : 'Already registered?'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAuthForm(null)}
+                    className="text-[10px] text-red-500 hover:text-red-400 uppercase tracking-widest"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             )}
           </div>
         </div>

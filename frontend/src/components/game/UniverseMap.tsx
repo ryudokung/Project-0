@@ -130,7 +130,7 @@ export default function UniverseMap({
             onClick={onBack}
             className="w-full border border-zinc-800 text-zinc-500 py-2 text-xs uppercase tracking-widest hover:text-white transition-all"
           >
-            Return to Hangar
+            Return to Bastion
           </button>
         </div>
       </div>

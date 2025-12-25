@@ -40,13 +40,13 @@ const getAuthHeaders = () => {
 };
 
 export const combatService = {
-  async simulateAttack(attackerMechId: string, defenderMechId: string, damageType: DamageType = 'KINETIC'): Promise<BattleResponse> {
+  async simulateAttack(attackerVehicleId: string, defenderVehicleId: string, damageType: DamageType = 'KINETIC'): Promise<BattleResponse> {
     const response = await fetch(`${API_BASE_URL}/combat/attack`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({
-        attacker_mech_id: attackerMechId,
-        defender_mech_id: defenderMechId,
+        attacker_vehicle_id: attackerVehicleId,
+        defender_vehicle_id: defenderVehicleId,
         damage_type: damageType,
       }),
     });

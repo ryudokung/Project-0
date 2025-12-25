@@ -12,7 +12,7 @@ export interface PlanetLocation {
   requiresAtmosphere: boolean;
   suitability: {
     pilot: number;
-    mech: number;
+    vehicle: number;
   };
   coordinates: { x: number; y: number };
 }
@@ -28,7 +28,7 @@ export interface SubSector {
   requiresAtmosphere: boolean;
   suitability: {
     pilot: number;
-    mech: number;
+    vehicle: number;
   };
   coordinates: { x: number; y: number };
   locations?: PlanetLocation[];
@@ -65,7 +65,7 @@ interface BackendSubSector {
   allowed_modes: string[];
   requires_atmosphere: boolean;
   suitability_pilot: number;
-  suitability_mech: number;
+  suitability_vehicle: number;
   coordinates_x: number;
   coordinates_y: number;
   locations?: BackendPlanetLocation[];
@@ -80,7 +80,7 @@ interface BackendPlanetLocation {
   allowed_modes: string[];
   requires_atmosphere: boolean;
   suitability_pilot: number;
-  suitability_mech: number;
+  suitability_vehicle: number;
   coordinates_x: number;
   coordinates_y: number;
 }
@@ -94,9 +94,30 @@ export interface PilotStats {
   updated_at: string;
 }
 
+export interface StrategicChoice {
+  label: string;
+  description: string;
+  requirements: string[];
+  success_chance: number;
+  rewards: string[];
+  risks: string[];
+}
+
+export interface Node {
+  id: string;
+  expedition_id: string;
+  name: string;
+  type: 'STANDARD' | 'RESOURCE' | 'COMBAT' | 'ANOMALY' | 'OUTPOST';
+  environment_description: string;
+  difficulty_multiplier: number;
+  position_index: number;
+  choices: StrategicChoice[];
+  is_resolved: boolean;
+}
+
 export interface Encounter {
   id: string;
-  type: 'COMBAT' | 'RESOURCE' | 'STORY' | 'REST';
+  type: string;
   title: string;
   description: string;
   visualPrompt: string;
@@ -181,7 +202,7 @@ export const explorationService = {
         requiresAtmosphere: ss.requires_atmosphere,
         suitability: {
           pilot: ss.suitability_pilot,
-          mech: ss.suitability_mech
+          vehicle: ss.suitability_vehicle
         },
         coordinates: { x: ss.coordinates_x, y: ss.coordinates_y },
         locations: ss.locations?.map(l => ({
@@ -194,7 +215,7 @@ export const explorationService = {
           requiresAtmosphere: l.requires_atmosphere,
           suitability: {
             pilot: l.suitability_pilot,
-            mech: l.suitability_mech
+            vehicle: l.suitability_vehicle
           },
           coordinates: { x: l.coordinates_x, y: l.coordinates_y }
         }))
@@ -220,7 +241,7 @@ export const explorationService = {
     const data: BackendExplorationStartResponse = await response.json();
     return {
       ...data,
-      encounters: data.encounters.map(e => ({
+      encounters: (data.encounters || []).map(e => ({
         id: e.id,
         type: e.type,
         title: e.title,
@@ -254,5 +275,23 @@ export const explorationService = {
         image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop'
       }
     };
+  },
+
+  async getTimeline(expeditionId: string): Promise<Node[]> {
+    const response = await fetch(`${API_BASE_URL}/exploration/timeline?expedition_id=${expeditionId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch timeline');
+    return response.json();
+  },
+
+  async resolveChoice(nodeId: string, choice: string): Promise<Node> {
+    const response = await fetch(`${API_BASE_URL}/exploration/resolve`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ node_id: nodeId, choice }),
+    });
+    if (!response.ok) throw new Error('Failed to resolve choice');
+    return response.json();
   }
 };

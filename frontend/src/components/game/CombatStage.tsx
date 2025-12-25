@@ -39,7 +39,7 @@ export default function CombatStage({
 
   const { attackerStats, defenderStats, combatLog, isProcessing, turn } = combatState;
 
-  const attackerName = "PLAYER_MECH";
+  const attackerName = "PLAYER_VEHICLE";
   const defenderName = "ENEMY_UNIT";
 
   const handleAttack = async (type: DamageType) => {

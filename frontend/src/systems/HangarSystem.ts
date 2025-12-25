@@ -27,9 +27,9 @@ class HangarSystem {
 
     try {
       const mechs = await mechService.getMechs(characterId);
-      this.state.mechs = mechs;
-      if (mechs.length > 0 && !this.state.selectedMechId) {
-        this.state.selectedMechId = mechs[0].id;
+      this.state.mechs = mechs || [];
+      if (this.state.mechs.length > 0 && !this.state.selectedMechId) {
+        this.state.selectedMechId = this.state.mechs[0].id;
       }
       gameEvents.emit(GAME_EVENTS.HANGAR_UPDATED, this.getState());
     } catch (error: any) {

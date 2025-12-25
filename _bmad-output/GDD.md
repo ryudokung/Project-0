@@ -7,7 +7,7 @@
 ## 1. Executive Summary
 
 ### 1.1 Game Concept
-Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game. Players begin their journey by creating a unique **Pilot Character**, starting with a **Starter Ship** to navigate the void. As they progress, they operate modular Mechs, Aircraft, and Tanks, all supported by a massive Mothership. The game blends deep customization (Modular NFTs) with a high-fidelity 3D experience (WebGPU) and a creator-driven evolving universe.
+Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game. Players begin their journey by creating a unique **Pilot Character**, starting with a **Starter Ship** to navigate the void. As they progress, they operate modular Mechs, Aircraft, and Tanks, all supported by **The Bastion**, their mobile command center. The game blends deep customization (Modular NFTs) with a high-fidelity 3D experience (WebGPU) and a creator-driven evolving universe.
 
 ### 1.2 Design Pillars (The "Samus" Touch)
 - **Intense Narrative (The Core):** A deep, dark, and gripping story that drives every mission. You aren't just exploring; you're surviving a complex plot.
@@ -21,16 +21,17 @@ Project-0 is a high-stakes, 1:1 scale Sci-Fi Exploration and Combat game. Player
 ## 2. Gameplay Systems
 
 ### 2.1 The Core Loop (The "Heartbeat")
-The game utilizes a **Unified Game Controller** (Single Page Architecture) to manage transitions between states without page reloads.
+The game utilizes a **Decoupled Systems Architecture** (EventBus + Singletons) to manage transitions between states without page reloads.
 1.  **Onboarding (Identity):** Create a Pilot Character (Name, Gender: Male/Female).
-2.  **Hangar (Preparation):** Customize Ship/Mech, repair damage, and refuel.
-3.  **Scanner (Risk Assessment):** Probe star systems for loot and threats.
-4.  **Transit (The Journey):** Travel to the target, surviving atmospheric entry.
-5.  **Combat/Salvage (The Action):** 1:1 Mech/Ship combat or Pilot EVA for rare tech.
-6.  **Return (The Debrief):** Refine salvaged scrap and upgrade the Mothership.
+2.  **The Bastion (Bridge View):** The primary hub for navigation, maintenance, and fleet management.
+3.  **Hangar (Preparation):** Customize Ship/Mech, repair damage using the **Deep Durability System (DDS)**, and refuel.
+4.  **Scanner (Risk Assessment):** Probe star systems for loot and threats.
+5.  **Transit (The Journey):** Travel to the target, surviving atmospheric entry.
+6.  **Combat/Salvage (The Action):** 1:1 Mech/Ship combat or Pilot EVA for rare tech.
+7.  **Return (The Debrief):** Refine salvaged scrap and upgrade The Bastion.
 
 ### 2.2 Multi-Stage Exploration
-- **Stage 1: Mothership (Strategic):** Managing fuel and scanner range.
+- **Stage 1: The Bastion (Strategic):** Managing fuel, scanner range, and modular hardpoints.
 - **Stage 2: Mech/Aircraft (Tactical):** Surface combat and aerial superiority.
 - **Stage 3: Pilot EVA (Precision):** High-risk, high-reward salvage on foot.
 
@@ -38,12 +39,18 @@ The game utilizes a **Unified Game Controller** (Single Page Architecture) to ma
 
 ## 3. Core Mechanics
 
-### 3.1 Modular NFT Assembly (ERC-6551)
+### 3.1 Modular NFT Assembly (ERC-6551) & Stage Change Model
 - Mechs are composed of **Chassis, Arms (Weapons), and Shields**.
+- **Stage Change:** Items start as Virtual assets in the database. Players can "Mint" them to become NFTs, making them tradeable while retaining all in-game stats and durability.
 - Each part is an individual NFT with AI-generated stats and visual traits.
 - **Visual Synthesis:** AI combines all equipped parts into a single, cohesive 3D/2D representation.
 
-### 3.2 Combat Mechanics
+### 3.2 Deep Durability System (DDS)
+- Items have 5 condition thresholds: **Pristine, Worn, Damaged, Critical, Broken**.
+- **Impact:** Lower durability reduces stats (Attack/Defense) and introduces visual glitches/smoke in the UI.
+- **Maintenance:** Players must use Scrap and Energy at The Bastion's Repair Station to restore items.
+
+### 3.3 Combat Mechanics
 - **Asynchronous Auto-Resolve with 3D Visualization:** Strategic depth meets cinematic flair.
 - **Real Combat Integration:** Combat encounters are now driven by real backend data. When a player enters a `COMBAT` node during exploration, the system identifies a specific `enemy_id` linked to a seeded NPC Mech.
 - **NPC Enemy Seeding:** The backend maintains a pool of NPC Mechs (e.g., "Iron Syndicate Striker", "Void Guardian") with unique stats (HP, Attack, Defense, Speed).
@@ -76,13 +83,15 @@ The game utilizes a **Unified Game Controller** (Single Page Architecture) to ma
 - Rewards players for sticking with their favorite gear.
 - High Sync = Passive buffs (Accuracy, Evasion).
 
-### 4.3 Mothership Tech Tree
+### 4.3 The Bastion Tech Tree
 - Upgrade Hangar (Repair speed), Lab (Crafting quality), and Scanner (Range).
+- Install modular components into Bastion Hardpoints (Warp Drive, Shields, Turrets).
 
 ---
 
 ## 5. UI/UX Design (Pro Max Standards)
-- **Unified Game Controller:** A single-page architecture that manages `GameStage` (HANGAR, MAP, EXPLORATION, COMBAT) with fluid Framer Motion transitions.
+- **Decoupled UI Layer:** React components subscribe to a global **EventBus**, ensuring a responsive and "Unity-like" experience.
+- **Bridge View:** An immersive 3D/2D viewport showing the Bastion's current location and status.
 - **HUD/Cockpit:** Glassmorphism for an immersive "Inside the Helmet" feel.
 - **Dashboard:** Bento Grid layout for clear resource management.
 - **Visual DNA:** Seasonal themes (e.g., Cyber-Samurai) that define the aesthetic.
@@ -90,6 +99,7 @@ The game utilizes a **Unified Game Controller** (Single Page Architecture) to ma
 ---
 
 ## 6. Technical Requirements (Cloud Dragonborn's Domain)
+- **Architecture:** Decoupled Systems (EventBus + Singleton Systems).
 - **Engine:** WebGPU + React Three Fiber for seamless 3D.
 - **Backend:** Go (Modular Monolith) with Saga Pattern for Web3 consistency.
 - **AI:** FLUX.1 for visual synthesis + MCP for real-time narrative.

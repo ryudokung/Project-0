@@ -4,36 +4,36 @@ import ShowcaseEngine from '@/components/game/ShowcaseEngine';
 import { useAuthSync } from '@/hooks/use-auth-sync';
 import { useEffect, useState } from 'react';
 import { LoginButton } from '@/components/login-button';
-import { hangarSystem, HangarState } from '@/systems/HangarSystem';
+import { bastionSystem, BastionState } from '@/systems/BastionSystem';
 import { gameEvents, GAME_EVENTS } from '@/systems/EventBus';
 
-interface HangarProps {
+interface BastionProps {
   onDeploy: () => void;
   onGacha: () => void;
 }
 
-export default function Hangar({ onDeploy, onGacha }: HangarProps) {
+export default function Bastion({ onDeploy, onGacha }: BastionProps) {
   const { user: backendUser } = useAuthSync();
-  const [hangarState, setHangarState] = useState<HangarState>(hangarSystem.getState());
+  const [bastionState, setBastionState] = useState<BastionState>(bastionSystem.getState());
 
   useEffect(() => {
-    const unsubscribe = gameEvents.on(GAME_EVENTS.HANGAR_UPDATED, (newState: HangarState) => {
-      setHangarState(newState);
+    const unsubscribe = gameEvents.on(GAME_EVENTS.BASTION_UPDATED, (newState: BastionState) => {
+      setBastionState(newState);
     });
 
     if (backendUser?.active_character_id || backendUser?.id) {
-      hangarSystem.refreshMechs(backendUser.active_character_id || backendUser.id);
+      bastionSystem.refreshVehicles(backendUser.active_character_id || backendUser.id);
     }
 
     return () => unsubscribe();
   }, [backendUser?.id, backendUser?.active_character_id]);
 
-  const mechs = hangarState.mechs || [];
-  const currentMech = mechs.find(m => m.id === hangarState.selectedMechId) || mechs[0];
+  const vehicles = bastionState.vehicles || [];
+  const currentVehicle = vehicles.find(v => v.id === bastionState.selectedVehicleId) || vehicles[0];
 
   return (
     <div className="relative w-full h-screen bg-black">
-      <ShowcaseEngine mechId={currentMech?.id || "MCH-001-ALPHA"} />
+      <ShowcaseEngine vehicleId={currentVehicle?.id || "VHC-001-ALPHA"} />
       
       {/* UI Overlay */}
       <div className="absolute top-8 left-8 z-10">
@@ -78,18 +78,18 @@ export default function Hangar({ onDeploy, onGacha }: HangarProps) {
             </div>
           )}
         </div>
-        {currentMech && (
+        {currentVehicle && (
           <div className="mt-4 flex gap-2">
-            {currentMech.is_void_touched && (
+            {currentVehicle.is_void_touched && (
               <span key="void-touched" className="px-2 py-1 bg-purple-900/50 border border-purple-500 text-purple-300 text-[10px] font-bold uppercase tracking-widest">
                 Void-Touched
               </span>
             )}
             <span key="tier" className="px-2 py-1 bg-zinc-900 border border-zinc-700 text-zinc-400 text-[10px] font-bold uppercase tracking-widest">
-              Tier {currentMech.tier || 1}
+              Tier {currentVehicle.tier || 1}
             </span>
             <span key="rarity" className="px-2 py-1 bg-zinc-900 border border-zinc-700 text-zinc-400 text-[10px] font-bold uppercase tracking-widest">
-              {currentMech.rarity}
+              {currentVehicle.rarity}
             </span>
           </div>
         )}

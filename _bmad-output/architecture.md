@@ -52,8 +52,8 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
     - Mandatory **Idempotency Keys** for all external service calls to prevent duplicate transactions.
     - Compensating transactions (e.g., credit refunds) for failed steps in the assembly pipeline.
     - **New Sagas:**
-        - `ColonyUpgradeSaga`: Resource deduction, timer management, and facility state update.
-        - `ExpeditionSaga`: Fuel consumption, encounter resolution, and loot/durability updates.
+        - **BastionUpgradeSaga**: Resource deduction, timer management, and facility state update.
+        - `ExpeditionSaga`: Fuel consumption, encounter resolution, and **Deep Durability (DDS)** updates.
         - `SalvageOperationSaga`: Unit capture processing (Sell/Research/Scrap) and inventory sync.
         - `StoryProgressionSaga`: Narrative milestone validation and fixed reward distribution.
         - `CombatSimulationSaga`: Turn-based simulation, durability deduction, and AI narrative trigger.
@@ -78,8 +78,8 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 - **Rationale:** Traditional React state management becomes brittle as game complexity grows. Decoupling game logic from UI components allows for better testability, easier maintenance, and a more "Unity-like" development experience.
 - **Key Implementation Details:**
     - **Event Bus (`EventBus.ts`)**: Centralized, type-safe event system for cross-component communication.
-    - **Singleton Systems**: Standalone logic classes (e.g., `ExplorationSystem.ts`) that manage game state and API interactions.
-    - **XState Machine (`gameMachine.ts`)**: Controls high-level game stages (Landing -> Character Creation -> Hangar -> Exploration).
+    - **Singleton Systems**: Standalone logic classes (e.g., `ExplorationSystem.ts`, `BastionSystem.ts`) that manage game state and API interactions.
+    - **XState Machine (`gameMachine.ts`)**: Controls high-level game stages (Landing -> Character Creation -> Bridge -> Hangar -> Exploration).
     - **React UI Layer**: Functional components that listen to events and trigger system methods.
     - **Persistent HUD:** Global HUD elements remain mounted across stage transitions to maintain visual continuity.
 
@@ -128,7 +128,7 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 ### 3.3 Blockchain Service
 - **หน้าที่:** สื่อสารกับ Base L2 Smart Contracts.
 - **Logic:** 
-    - **Virtual-to-On-chain (V2O) Bridge:** จัดการกระบวนการเปลี่ยนสถานะจาก Virtual Asset (Server-side) เป็น On-chain NFT เมื่อผู้เล่นกด Mint หรือต้องการขาย.
+    - **Stage Change NFT Model:** จัดการกระบวนการเปลี่ยนสถานะจาก Virtual Asset (Server-side) เป็น On-chain NFT เมื่อผู้เล่นกด Mint หรือต้องการขาย โดยยังคงรักษาค่า Durability และ Stats เดิมไว้.
     - **ERC-6551 (Token Bound Accounts):** ใช้มาตรฐาน ERC-6551 เพื่อให้ NFT หลัก (เช่น Mech Chassis) มี Wallet ของตัวเองสำหรับเก็บชิ้นส่วนอุปกรณ์ (Weapons, Shields) ทำให้การซื้อขายใน Marketplace ทำได้แบบยกชุด (Bundled Assets).
     - **Modular NFT Management:** จัดการการ Mint และโอน NFT แยกตามชิ้นส่วน.
     - **Metadata Sync:** อัปเดต Metadata ของ NFT แต่ละชิ้นตามสถานะความเสียหาย (Durability) ที่เกิดขึ้นจริง.
@@ -136,14 +136,15 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 ### 3.4 Game Engine Service
 - **หน้าที่:** ประมวลผล Logic ของเกมที่ไม่ต้องอยู่บน Chain ทั้งหมด.
 - **Logic:** 
+    - **Deep Durability System (DDS):** คำนวณความเสียหายของไอเทมตามการใช้งานและผลการต่อสู้ โดยแบ่งเป็น 5 ระดับ (Pristine, Worn, Damaged, Critical, Broken).
     - **Hybrid Energy Management:** คำนวณการใช้ Standard Energy (Free) และ Premium Energy (Paid) สำหรับการสำรวจ.
     - **Web2 Backend Fog of War:** ใช้ Server-side Validation ในการจัดการ Fog of War โดย Backend จะส่งข้อมูลเฉพาะสิ่งที่ผู้เล่น "มองเห็น" (ตามระยะ Scan) ไปยัง Client เท่านั้น เพื่อป้องกันการโกง (Map Hack) โดยใช้ **Go + PostgreSQL** เป็นหลัก.
     - **Hierarchical Map System:** จัดเก็บข้อมูลแผนที่แบบลำดับชั้น (Sectors -> Sub-Sectors -> Planet Locations) เพื่อรองรับการขยายตัวของจักรวาล.
     - **Expedition & Encounters:** ใช้ระบบ Expedition ในการบันทึกสถานะการสำรวจ และ Encounter สำหรับเหตุการณ์ย่อย เพื่อให้ผู้เล่นสามารถกลับมาเล่นต่อจากจุดเดิมได้ (Persistence).
-    - **Radar & Risk Assessment Logic:** คำนวณโอกาสรอดชีวิตและระดับความอันตราย (Threat Level) ตาม Scanner ของ Mothership.
+    - **Radar & Risk Assessment Logic:** คำนวณโอกาสรอดชีวิตและระดับความอันตราย (Threat Level) ตาม Scanner ของ The Bastion.
     - **AI Event Trigger:** หากเกิดอุบัติเหตุ ระบบจะส่งบริบท (Context) ผ่าน MCP ไปให้ AI Service เพื่อสร้างเหตุการณ์สุ่มที่สมจริง.
     - **Multi-Stage Exploration:** 
-        - **Space Travel:** บังคับใช้ `Ship` (Mothership).
+        - **Space Travel:** บังคับใช้ `Ship` (The Bastion).
         - **Orbital Approach & Atmospheric Entry:** ตรวจสอบเงื่อนไขการลงจอด (Atmospheric Shielding).
 
 ### 3.5 Frontend Design System ([UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/))
@@ -154,7 +155,7 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
     - **Animation:** ใช้ Framer Motion และ React Three Fiber สำหรับการเปลี่ยนผ่านที่ลื่นไหล (Seamless Transitions).
         - **Planetary Surface:** บังคับใช้ `Mech` ในการสำรวจและทำภารกิจ.
         - **Interior/Precision Salvage:** บังคับใช้ `Pilot` (Character) ในการลงจากหุ่นเพื่อเก็บไอเทมหายาก.
-    - **Combat Mode:** คำนวณผลการต่อสู้ตาม Stats ของ Mothership, Mech, และ Pilot.
+    - **Combat Mode:** คำนวณผลการต่อสู้ตาม Stats ของ The Bastion, Mech, และ Pilot.
     - **Star Discovery:** ระบบ Trigger สำหรับการขยายจักรวาลตามเงื่อนไขที่กำหนด.
 
 ### 3.5 Economy & Revenue Service
@@ -193,11 +194,11 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
     - **Resource Refining:** ระบบแปรรูป Scrap Metal ให้เป็นวัสดุซ่อมแซม (Repair Kits) หรือเชื้อเพลิง.
     - **Tech Tree:** การปลดล็อกความสามารถใหม่จากการวิจัยซากศัตรู.
 
-### 3.9 Hangar & Maintenance Service
-- **หน้าที่:** จัดการการซ่อมบำรุงหุ่นและยานพาหนะ.
+### 3.9 Bastion & Maintenance Service
+- **หน้าที่:** จัดการการซ่อมบำรุงหุ่นและยานพาหนะ ณ The Bastion.
 - **Logic:** 
-    - **Repair Logic:** การคำนวณทรัพยากรและเวลาที่ใช้ในการซ่อมแซมตามระดับความเสียหาย (Durability).
-    - **Refuel & O2 Management:** การเติมเชื้อเพลิงยานแม่และออกซิเจนให้นักบิน.
+    - **Repair Logic (DDS):** การคำนวณทรัพยากร (Scrap/Energy) ที่ใช้ในการซ่อมแซมตามระดับความเสียหาย (Durability Thresholds).
+    - **Refuel & O2 Management:** การเติมเชื้อเพลิง The Bastion และออกซิเจนให้นักบิน.
     - **Visual Restoration:** การอัปเดต Metadata เพื่อลบรอย Wear & Tear เมื่อมีการซ่อมแซมเต็มรูปแบบ.
 
 ### 3.10 Story & Narrative Service

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sector, SubSector } from '@/services/exploration';
-import { hangarSystem, HangarState } from '@/systems/HangarSystem';
+import { bastionSystem, BastionState } from '@/systems/BastionSystem';
 import { gameEvents, GAME_EVENTS } from '@/systems/EventBus';
 
 interface LocationScanProps {
@@ -33,16 +33,18 @@ export default function LocationScan({
   canDeploy,
   meetsRequirements
 }: LocationScanProps) {
-  const [hangarState, setHangarState] = useState<HangarState>(hangarSystem.getState());
+  const [bastionState, setBastionState] = useState<BastionState>(bastionSystem.getState());
 
   useEffect(() => {
-    const unsubscribe = gameEvents.on(GAME_EVENTS.HANGAR_UPDATED, (newState: HangarState) => {
-      setHangarState(newState);
+    const unsubscribe = gameEvents.on(GAME_EVENTS.BASTION_UPDATED, (newState: BastionState) => {
+      setBastionState(newState);
     });
     return () => unsubscribe();
   }, []);
 
-  const vehicles = hangarState.mechs;
+  const vehicles = bastionState.vehicles;
+
+  return (
     <div className="h-screen flex flex-col p-8 bg-black text-white font-mono">
       <div className="flex justify-between items-center mb-8">
         <div>
@@ -136,13 +138,13 @@ export default function LocationScan({
                       <div className="h-full bg-white" style={{ width: `${selectedSubSector.suitability.pilot}%` }} />
                     </div>
                     <div className="flex justify-between text-[10px]">
-                      <span>Heavy Asset Deployment</span>
-                      <span className={selectedSubSector.suitability.mech > 50 ? 'text-green-500' : 'text-red-500'}>
-                        {selectedSubSector.suitability.mech}%
+                      <span>Vehicle Deployment</span>
+                      <span className={selectedSubSector.suitability.vehicle > 50 ? 'text-green-500' : 'text-red-500'}>
+                        {selectedSubSector.suitability.vehicle}%
                       </span>
                     </div>
                     <div className="w-full h-1 bg-zinc-900">
-                      <div className="h-full bg-pink-500" style={{ width: `${selectedSubSector.suitability.mech}%` }} />
+                      <div className="h-full bg-pink-500" style={{ width: `${selectedSubSector.suitability.vehicle}%` }} />
                     </div>
                   </div>
                 </div>
@@ -161,20 +163,24 @@ export default function LocationScan({
                         </span>
                       </div>
                     </div>
-                    {vehicles.map((v, idx) => (
-                      <div 
-                        key={`vehicle-deploy-subsector-${v.id || idx}`}
-                        onClick={() => onSelectVehicle(v)}
-                        className={`p-2 border text-[10px] cursor-pointer transition-all ${selectedVehicle?.id === v.id ? 'border-pink-500 bg-pink-500/10' : 'border-zinc-800 hover:border-zinc-700'}`}
-                      >
-                        <div className="flex justify-between">
-                          <span className="font-bold">{v.class} ({v.type})</span>
-                          <span className={selectedSubSector.allowedModes.includes(v.type) ? 'text-green-500' : 'text-red-500'}>
-                            {selectedSubSector.allowedModes.includes(v.type) ? '✓' : '✗'}
-                          </span>
+                    {vehicles.map((v, idx) => {
+                      const vType = v.vehicle_type || v.type || 'VEHICLE';
+                      const vClass = v.class || v.model || 'UNKNOWN';
+                      return (
+                        <div 
+                          key={`vehicle-deploy-subsector-${v.id || idx}`}
+                          onClick={() => onSelectVehicle(v)}
+                          className={`p-2 border text-[10px] cursor-pointer transition-all ${selectedVehicle?.id === v.id ? 'border-pink-500 bg-pink-500/10' : 'border-zinc-800 hover:border-zinc-700'}`}
+                        >
+                          <div className="flex justify-between">
+                            <span className="font-bold">{vClass} ({vType})</span>
+                            <span className={selectedSubSector.allowedModes.includes(vType) ? 'text-green-500' : 'text-red-500'}>
+                              {selectedSubSector.allowedModes.includes(vType) ? '✓' : '✗'}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 

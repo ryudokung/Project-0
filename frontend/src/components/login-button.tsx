@@ -1,11 +1,9 @@
 'use client';
 
-import { usePrivy } from '@privy-io/react-auth';
 import { useAuthSync } from '@/hooks/use-auth-sync';
 import { useState } from 'react';
 
 export function LoginButton() {
-  const { login: privyLogin, authenticated: privyAuthenticated } = usePrivy();
   const { user, logout, guestLogin, traditionalLogin, signup, isLoading } = useAuthSync();
   const [showLocalForm, setShowLocalForm] = useState<'LOGIN' | 'SIGNUP' | null>(null);
   const [formData, setFormData] = useState({ username: '', email: '', password: '' });
@@ -39,38 +37,26 @@ export function LoginButton() {
   return (
     <div className="flex flex-col gap-4">
       {!showLocalForm ? (
-        <>
-          <button
-            onClick={guestLogin}
-            disabled={isLoading}
-            className="px-8 py-3 bg-white text-black font-black italic uppercase tracking-tighter hover:bg-gray-200 transition-all transform hover:-translate-y-1"
-          >
-            {isLoading ? 'Initializing...' : 'Quick Start (Guest)'}
-          </button>
-          
-          <button
-            onClick={privyLogin}
-            className="px-8 py-3 bg-indigo-600 text-white font-bold uppercase tracking-widest text-xs hover:bg-indigo-500 transition-all"
-          >
-            Social Login (Google/Email)
-          </button>
-
+        <div className="flex flex-col gap-2">
           <button
             onClick={() => setShowLocalForm('LOGIN')}
-            className="text-[10px] text-gray-500 hover:text-white font-mono uppercase tracking-widest text-center"
+            className="text-[10px] text-zinc-400 hover:text-white font-bold uppercase tracking-widest text-left"
           >
-            Traditional Login
+            Login
           </button>
-        </>
+          <button
+            onClick={() => setShowLocalForm('SIGNUP')}
+            className="text-[10px] text-zinc-400 hover:text-white font-bold uppercase tracking-widest text-left"
+          >
+            Signup
+          </button>
+        </div>
       ) : (
-        <form onSubmit={handleLocalSubmit} className="flex flex-col gap-2 bg-zinc-900 p-4 border border-zinc-800">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-2">
-            {showLocalForm === 'LOGIN' ? 'System Access' : 'New Operative'}
-          </h3>
+        <form onSubmit={handleLocalSubmit} className="flex flex-col gap-2 bg-zinc-900/50 p-4 border border-zinc-800">
           <input
             type="text"
-            placeholder="USERNAME"
-            className="bg-black border border-zinc-800 p-2 text-xs font-mono text-white focus:border-indigo-500 outline-none"
+            placeholder="Username"
+            className="bg-black border border-zinc-800 text-[10px] p-2 focus:outline-none focus:border-pink-500"
             value={formData.username}
             onChange={(e) => setFormData({ ...formData, username: e.target.value })}
             required
@@ -78,8 +64,8 @@ export function LoginButton() {
           {showLocalForm === 'SIGNUP' && (
             <input
               type="email"
-              placeholder="EMAIL"
-              className="bg-black border border-zinc-800 p-2 text-xs font-mono text-white focus:border-indigo-500 outline-none"
+              placeholder="Email"
+              className="bg-black border border-zinc-800 text-[10px] p-2 focus:outline-none focus:border-pink-500"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
@@ -87,32 +73,20 @@ export function LoginButton() {
           )}
           <input
             type="password"
-            placeholder="PASSWORD"
-            className="bg-black border border-zinc-800 p-2 text-xs font-mono text-white focus:border-indigo-500 outline-none"
+            placeholder="Password"
+            className="bg-black border border-zinc-800 text-[10px] p-2 focus:outline-none focus:border-pink-500"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             required
           />
-          <button
-            type="submit"
-            className="bg-indigo-600 text-white py-2 text-xs font-bold uppercase tracking-widest mt-2"
-          >
-            {showLocalForm === 'LOGIN' ? 'Authorize' : 'Register'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowLocalForm(showLocalForm === 'LOGIN' ? 'SIGNUP' : 'LOGIN')}
-            className="text-[9px] text-gray-500 hover:text-white uppercase tracking-widest mt-1"
-          >
-            {showLocalForm === 'LOGIN' ? 'Need an account?' : 'Already registered?'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowLocalForm(null)}
-            className="text-[9px] text-red-500 hover:text-red-400 uppercase tracking-widest mt-1"
-          >
-            Cancel
-          </button>
+          <div className="flex gap-2">
+            <button type="submit" className="flex-1 bg-white text-black text-[10px] font-bold py-2 uppercase">
+              {showLocalForm}
+            </button>
+            <button type="button" onClick={() => setShowLocalForm(null)} className="px-4 border border-zinc-800 text-[10px] uppercase">
+              Cancel
+            </button>
+          </div>
         </form>
       )}
     </div>

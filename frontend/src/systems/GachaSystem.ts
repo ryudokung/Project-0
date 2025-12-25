@@ -30,7 +30,7 @@ class GachaSystem {
       gameEvents.emit(GAME_EVENTS.GACHA_PULLED, this.getState());
       
       // Notify other systems that inventory might have changed
-      gameEvents.emit(GAME_EVENTS.HANGAR_UPDATED); 
+      gameEvents.emit(GAME_EVENTS.BASTION_UPDATED); 
     } catch (err: any) {
       this.state.error = err.message;
       gameEvents.emit(GAME_EVENTS.GACHA_PULLED, this.getState());

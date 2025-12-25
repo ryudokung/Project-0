@@ -13,7 +13,7 @@ The frontend has been refactored from a standard React state-management approach
     - `ExplorationSystem.ts`: Manages mission starts, timeline advancement, and narrative state.
     - `CombatSystem.ts` (Planned): Will manage turn-based battle logic.
 - **XState Machine (`gameMachine.ts`)**: Controls the high-level "Stages" of the application:
-    - `initializing` -> `landing` -> `characterCreation` -> `hangar` -> `exploration` / `combat`.
+    - `initializing` -> `landing` -> `characterCreation` -> `bastion` -> `exploration` / `combat`.
 - **React UI Layer**: Purely functional components that listen to the Event Bus for updates and send commands to the Systems.
 
 ## 2. Authentication & Onboarding Flow
@@ -34,7 +34,7 @@ The project follows a "Web2.5" onboarding strategy to minimize friction for new 
 ## 3. Backend & Database Structure
 
 ### Backend:
-- **Go (Modular Monolith)**: Organized into domain-specific packages (`auth`, `mech`, `exploration`, `game`).
+- **Go (Modular Monolith)**: Organized into domain-specific packages (`auth`, `vehicle`, `exploration`, `game`).
 - **JWT Middleware**: All protected routes require a valid JWT. The middleware extracts the `user_id` and injects it into the request context.
 - **Context Keys**: Shared constants are used for context keys to prevent circular dependencies between packages.
 
