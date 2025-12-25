@@ -9,7 +9,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/ryudokung/Project-0/backend/internal/auth"
-	"github.com/ryudokung/Project-0/backend/internal/mech"
+	"github.com/ryudokung/Project-0/backend/internal/vehicle"
 	"github.com/ryudokung/Project-0/backend/internal/game"
 	"github.com/ryudokung/Project-0/backend/internal/combat"
 	"github.com/ryudokung/Project-0/backend/internal/exploration"
@@ -33,8 +33,8 @@ func main() {
 
 	// Initialize Game/Pilot Module
 	gameRepo := game.NewRepository(db)
-	mechRepo := mech.NewRepository(db) // Move up to use in gameUseCase
-	gameUseCase := game.NewUseCase(gameRepo, mechRepo)
+	vehicleRepo := vehicle.NewRepository(db) // Move up to use in gameUseCase
+	gameUseCase := game.NewUseCase(gameRepo, vehicleRepo)
 
 	// Initialize Auth Module
 	jwtSecret := os.Getenv("PRIVY_APP_SECRET")
@@ -45,23 +45,23 @@ func main() {
 	authUseCase := auth.NewUseCase(authRepo, gameUseCase, jwtSecret)
 	authHandler := auth.NewHandler(authUseCase)
 
-	// Initialize Mech Module
-	mechUseCase := mech.NewUseCase(mechRepo)
-	mechHandler := mech.NewHandler(mechUseCase)
+	// Initialize Vehicle Module
+	vehicleUseCase := vehicle.NewUseCase(vehicleRepo)
+	vehicleHandler := vehicle.NewHandler(vehicleUseCase)
 
 	// Initialize Combat Module
 	combatEngine := combat.NewEngine()
 	combatService := combat.NewService(combatEngine)
-	combatHandler := combat.NewHandler(combatService, mechRepo, gameRepo)
+	combatHandler := combat.NewHandler(combatService, vehicleRepo, gameRepo)
 
 	// Initialize Exploration Module
 	explorationRepo := exploration.NewRepository(db)
-	explorationService := exploration.NewService(explorationRepo, mechRepo, gameRepo)
+	explorationService := exploration.NewService(explorationRepo, vehicleUseCase, gameRepo)
 	explorationHandler := exploration.NewHandler(explorationService)
 
 	// Initialize Gacha Module
 	gachaRepo := gacha.NewRepository(db)
-	gachaUC := gacha.NewUseCase(gachaRepo, gameRepo, mechRepo)
+	gachaUC := gacha.NewUseCase(gachaRepo, gameRepo, vehicleRepo)
 	gachaHandler := gacha.NewHandler(gachaUC)
 
 	// Routes
@@ -83,11 +83,19 @@ func main() {
 	mux.Handle("/api/v1/auth/link-wallet", authMiddleware(http.HandlerFunc(authHandler.LinkWallet)))
 	mux.Handle("/api/v1/auth/characters", authMiddleware(http.HandlerFunc(authHandler.GetCharacters)))
 	mux.Handle("/api/v1/auth/characters/create", authMiddleware(http.HandlerFunc(authHandler.CreateCharacter)))
-	mux.Handle("/api/v1/mechs/mint-starter", authMiddleware(http.HandlerFunc(mechHandler.MintStarter)))
-	mux.Handle("/api/v1/mechs", authMiddleware(http.HandlerFunc(mechHandler.ListMechs)))
+	mux.Handle("/api/v1/vehicles/mint-starter", authMiddleware(http.HandlerFunc(vehicleHandler.MintStarter)))
+	mux.Handle("/api/v1/vehicles", authMiddleware(http.HandlerFunc(vehicleHandler.ListVehicles)))
+	
+	// DDS & Items
+	mux.Handle("/api/v1/items", authMiddleware(http.HandlerFunc(vehicleHandler.ListItems)))
+	mux.Handle("/api/v1/items/damage", authMiddleware(http.HandlerFunc(vehicleHandler.ApplyDamage)))
+	mux.Handle("/api/v1/items/repair", authMiddleware(http.HandlerFunc(vehicleHandler.Repair)))
+
 	mux.Handle("/api/v1/combat/attack", authMiddleware(http.HandlerFunc(combatHandler.SimulateAttack)))
 	mux.Handle("/api/v1/gacha/pull", authMiddleware(http.HandlerFunc(gachaHandler.Pull)))
 	mux.Handle("/api/v1/exploration/start", authMiddleware(http.HandlerFunc(explorationHandler.StartExploration)))
+	mux.Handle("/api/v1/exploration/timeline", authMiddleware(http.HandlerFunc(explorationHandler.GetTimeline)))
+	mux.Handle("/api/v1/exploration/resolve", authMiddleware(http.HandlerFunc(explorationHandler.ResolveChoice)))
 	mux.Handle("/api/v1/exploration/advance", authMiddleware(http.HandlerFunc(explorationHandler.AdvanceTimeline)))
 
 	// Simple CORS Middleware

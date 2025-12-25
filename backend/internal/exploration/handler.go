@@ -17,6 +17,45 @@ func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
 }
 
+func (h *Handler) GetTimeline(w http.ResponseWriter, r *http.Request) {
+	expeditionIDStr := r.URL.Query().Get("expedition_id")
+	expeditionID, err := uuid.Parse(expeditionIDStr)
+	if err != nil {
+		http.Error(w, "Invalid expedition_id", http.StatusBadRequest)
+		return
+	}
+
+	nodes, err := h.service.repo.GetNodesByExpeditionID(expeditionID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(nodes)
+}
+
+func (h *Handler) ResolveChoice(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		NodeID uuid.UUID `json:"node_id"`
+		Choice string    `json:"choice"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	node, err := h.service.ResolveNodeChoice(r.Context(), req.NodeID, req.Choice)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(node)
+}
+
 func (h *Handler) GetUniverseMap(w http.ResponseWriter, r *http.Request) {
 	sectors, err := h.service.repo.GetAllSectors()
 	if err != nil {
@@ -103,6 +142,9 @@ func (h *Handler) StartExploration(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+	if encounters == nil {
+		encounters = []Encounter{}
 	}
 
 	// Fetch pilot stats

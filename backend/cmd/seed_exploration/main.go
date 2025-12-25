@@ -40,11 +40,11 @@ func main() {
 	}
 
 	// SubSectors for SOL GATE
-	_, err = db.Exec(`INSERT INTO sub_sectors (sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+	_, err = db.Exec(`INSERT INTO sub_sectors (sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y) 
 		VALUES ($1, 'STATION', 'Outpost 01', 'A standard refueling station for independent scavengers.', '{"Scrap Metal", "Fuel Isotopes"}', '{}', '{"PILOT", "SPEEDER"}', FALSE, 100, 20, 40, 30)`,
 		solGateID)
 	
-	_, err = db.Exec(`INSERT INTO sub_sectors (sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+	_, err = db.Exec(`INSERT INTO sub_sectors (sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y) 
 		VALUES ($1, 'WRECK', 'Old Freighter', 'A derelict cargo ship drifting near the gate.', '{"Scrap Metal", "O2 Crystals"}', '{}', '{"PILOT", "EXOSUIT"}', FALSE, 90, 10, 60, 50)`,
 		solGateID)
 
@@ -55,21 +55,21 @@ func main() {
 		ironNebulaID)
 
 	// SubSectors for IRON NEBULA
-	_, err = db.Exec(`INSERT INTO sub_sectors (sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+	_, err = db.Exec(`INSERT INTO sub_sectors (sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y) 
 		VALUES ($1, 'WRECK', 'Scrap Graveyard', 'A massive cluster of destroyed freighter hulls.', '{"Scrap Metal", "Neural Links"}', '{}', '{"PILOT", "SPEEDER", "EXOSUIT"}', FALSE, 80, 40, 30, 40)`,
 		ironNebulaID)
 
 	kriosPrimeID := uuid.New()
-	_, err = db.Exec(`INSERT INTO sub_sectors (id, sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+	_, err = db.Exec(`INSERT INTO sub_sectors (id, sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y) 
 		VALUES ($1, $2, 'PLANET', 'Krios Prime', 'A frozen planetoid with hidden Syndicate bunkers.', '{"Fuel Isotopes", "Neural Links"}', '{}', '{"MECH", "TANK", "HAULER"}', TRUE, 20, 90, 70, 60)`,
 		kriosPrimeID, ironNebulaID)
 
 	// Locations for Krios Prime
-	_, err = db.Exec(`INSERT INTO planet_locations (sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+	_, err = db.Exec(`INSERT INTO planet_locations (sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y) 
 		VALUES ($1, 'Bunker Alpha', 'Deep underground storage facility.', '{"Neural Links", "Scrap Metal"}', '{"Hacking Module"}', '{"PILOT", "EXOSUIT"}', TRUE, 90, 10, 20, 30)`,
 		kriosPrimeID)
 
-	_, err = db.Exec(`INSERT INTO planet_locations (sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+	_, err = db.Exec(`INSERT INTO planet_locations (sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y) 
 		VALUES ($1, 'Mining Rig 7', 'Automated extraction site on the surface.', '{"Scrap Metal", "Fuel Isotopes"}', '{"Mining Drill"}', '{"MECH", "HAULER"}', TRUE, 10, 100, 60, 70)`,
 		kriosPrimeID)
 
@@ -79,7 +79,7 @@ func main() {
 		VALUES ($1, 'NEON ABYSS', 'A high-tech sector plagued by EMP storms and rogue AI signals.', 'HIGH', 75, 30, 'red')`,
 		neonAbyssID)
 
-	_, err = db.Exec(`INSERT INTO sub_sectors (sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+	_, err = db.Exec(`INSERT INTO sub_sectors (sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y) 
 		VALUES ($1, 'STATION', 'Data Hive', 'A massive server farm drifting in a nebula.', '{"Neural Links", "Void Shards"}', '{"Hacking Module"}', '{"PILOT", "EXOSUIT"}', FALSE, 100, 0, 50, 50)`,
 		neonAbyssID)
 
@@ -90,11 +90,11 @@ func main() {
 		deadRimID)
 
 	vulcanisID := uuid.New()
-	_, err = db.Exec(`INSERT INTO sub_sectors (id, sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+	_, err = db.Exec(`INSERT INTO sub_sectors (id, sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y) 
 		VALUES ($1, $2, 'PLANET', 'Vulcanis', 'A high-gravity mining planet near a dying star.', '{"Void Shards", "Ancient Tech"}', '{}', '{"MECH", "TANK", "SHIP"}', TRUE, 5, 95, 40, 30)`,
 		vulcanisID, deadRimID)
 
-	_, err = db.Exec(`INSERT INTO planet_locations (sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_mech, coordinates_x, coordinates_y) 
+	_, err = db.Exec(`INSERT INTO planet_locations (sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y) 
 		VALUES ($1, 'Magma Chamber', 'Extreme heat zone with rare mineral deposits.', '{"Ancient Tech", "Nexus Cores"}', '{"Mining Drill"}', '{"MECH", "TANK"}', TRUE, 0, 100, 50, 50)`,
 		vulcanisID)
 

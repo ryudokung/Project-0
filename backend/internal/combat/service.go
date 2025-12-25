@@ -1,7 +1,7 @@
 package combat
 
 import (
-	"github.com/ryudokung/Project-0/backend/internal/mech"
+	"github.com/ryudokung/Project-0/backend/internal/vehicle"
 	"github.com/ryudokung/Project-0/backend/internal/game"
 )
 
@@ -13,8 +13,8 @@ func NewService(engine *Engine) *Service {
 	return &Service{engine: engine}
 }
 
-// MapMechToUnitStats converts a Mech and its equipped parts into UnitStats for the combat engine
-func (s *Service) MapMechToUnitStats(m *mech.Mech, parts []mech.Part, pilot *game.PilotStats) UnitStats {
+// MapVehicleToUnitStats converts a Vehicle and its equipped parts into UnitStats for the combat engine
+func (s *Service) MapVehicleToUnitStats(v *vehicle.Vehicle, parts []vehicle.Part, pilot *game.PilotStats) UnitStats {
 	// Default stats for Pilot Only mode
 	stats := UnitStats{
 		HP:                100,
@@ -27,15 +27,15 @@ func (s *Service) MapMechToUnitStats(m *mech.Mech, parts []mech.Part, pilot *gam
 		Speed:             50,
 	}
 
-	if m != nil {
-		stats.HP = m.Stats.HP
-		stats.MaxHP = m.Stats.HP
-		stats.BaseAttack = m.Stats.Attack
-		stats.TargetDefense = m.Stats.Defense
+	if v != nil {
+		stats.HP = v.Stats.HP
+		stats.MaxHP = v.Stats.HP
+		stats.BaseAttack = v.Stats.Attack
+		stats.TargetDefense = v.Stats.Defense
 		stats.DefenseEfficiency = 0.5 // Default from Bible
 		stats.Accuracy = 80           // Base accuracy
-		stats.Evasion = m.Stats.Speed / 10
-		stats.Speed = m.Stats.Speed
+		stats.Evasion = v.Stats.Speed / 10
+		stats.Speed = v.Stats.Speed
 
 		// Apply Part Bonuses
 		for _, p := range parts {
@@ -56,7 +56,7 @@ func (s *Service) MapMechToUnitStats(m *mech.Mech, parts []mech.Part, pilot *gam
 	return stats
 }
 
-// ExecuteAttack runs a single attack cycle between two mechs
+// ExecuteAttack runs a single attack cycle between two vehicles
 func (s *Service) ExecuteAttack(attackerStats UnitStats, defenderStats UnitStats, dmgType DamageType) CombatResult {
 	return s.engine.CalculateDamage(attackerStats, defenderStats, dmgType)
 }

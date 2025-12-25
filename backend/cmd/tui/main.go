@@ -15,7 +15,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/ryudokung/Project-0/backend/internal/combat"
 	"github.com/ryudokung/Project-0/backend/internal/game"
-	"github.com/ryudokung/Project-0/backend/internal/mech"
+	"github.com/ryudokung/Project-0/backend/internal/vehicle"
 )
 
 var (
@@ -45,12 +45,12 @@ var (
 
 type model struct {
 	db            *sql.DB
-	mechRepo      mech.Repository
+	vehicleRepo   vehicle.Repository
 	gameRepo      game.Repository
 	combatService *combat.Service
 	
-	attacker      *mech.Mech
-	defender      *mech.Mech
+	attacker      *vehicle.Vehicle
+	defender      *vehicle.Vehicle
 	aStats        combat.UnitStats
 	dStats        combat.UnitStats
 	aPilot        *game.PilotStats
@@ -65,13 +65,13 @@ type model struct {
 }
 
 func initialModel(db *sql.DB) model {
-	mechRepo := mech.NewRepository(db)
+	vehicleRepo := vehicle.NewRepository(db)
 	gameRepo := game.NewRepository(db)
 	combatEngine := combat.NewEngine()
 	combatService := combat.NewService(combatEngine)
 
-	// Fetch first two mechs for demo
-	rows, _ := db.Query("SELECT id FROM mechs LIMIT 2")
+	// Fetch first two vehicles for demo
+	rows, _ := db.Query("SELECT id FROM vehicles LIMIT 2")
 	var ids []uuid.UUID
 	for rows.Next() {
 		var id uuid.UUID
@@ -81,23 +81,23 @@ func initialModel(db *sql.DB) model {
 	rows.Close()
 
 	ctx := context.Background()
-	aMech, _ := mechRepo.GetByID(ctx, ids[0])
-	dMech, _ := mechRepo.GetByID(ctx, ids[1])
-	aParts, _ := mechRepo.GetPartsByMechID(ids[0])
-	dParts, _ := mechRepo.GetPartsByMechID(ids[1])
-	aPilot, _ := gameRepo.GetActivePilotStats(aMech.OwnerID)
-	dPilot, _ := gameRepo.GetActivePilotStats(dMech.OwnerID)
+	aVehicle, _ := vehicleRepo.GetByID(ctx, ids[0])
+	dVehicle, _ := vehicleRepo.GetByID(ctx, ids[1])
+	aParts, _ := vehicleRepo.GetPartsByVehicleID(ids[0])
+	dParts, _ := vehicleRepo.GetPartsByVehicleID(ids[1])
+	aPilot, _ := gameRepo.GetActivePilotStats(aVehicle.OwnerID)
+	dPilot, _ := gameRepo.GetActivePilotStats(dVehicle.OwnerID)
 
-	aStats := combatService.MapMechToUnitStats(aMech, aParts, aPilot)
-	dStats := combatService.MapMechToUnitStats(dMech, dParts, dPilot)
+	aStats := combatService.MapVehicleToUnitStats(aVehicle, aParts, aPilot)
+	dStats := combatService.MapVehicleToUnitStats(dVehicle, dParts, dPilot)
 
 	return model{
 		db:            db,
-		mechRepo:      mechRepo,
+		vehicleRepo:   vehicleRepo,
 		gameRepo:      gameRepo,
 		combatService: combatService,
-		attacker:      aMech,
-		defender:      dMech,
+		attacker:      aVehicle,
+		defender:      dVehicle,
 		aStats:        aStats,
 		dStats:        dStats,
 		aPilot:        aPilot,

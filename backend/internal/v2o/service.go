@@ -4,56 +4,56 @@ import (
 	"context"
 	"fmt"
 	"github.com/ryudokung/Project-0/backend/internal/blockchain"
-	"github.com/ryudokung/Project-0/backend/internal/mech"
+	"github.com/ryudokung/Project-0/backend/internal/vehicle"
 
 	"github.com/google/uuid"
 )
 
 type Service struct {
-	mechRepo   mech.Repository
-	bcProvider blockchain.Provider
+	vehicleRepo vehicle.Repository
+	bcProvider  blockchain.Provider
 }
 
-func NewService(repo mech.Repository, bc blockchain.Provider) *Service {
+func NewService(repo vehicle.Repository, bc blockchain.Provider) *Service {
 	return &Service{
-		mechRepo:   repo,
-		bcProvider: bc,
+		vehicleRepo: repo,
+		bcProvider:  bc,
 	}
 }
 
-func (s *Service) BridgeToChain(ctx context.Context, mechID uuid.UUID, ownerAddress string) (string, error) {
-	// 1. Fetch the virtual mech
-	m, err := s.mechRepo.GetByID(ctx, mechID)
+func (s *Service) BridgeToChain(ctx context.Context, vehicleID uuid.UUID, ownerAddress string) (string, error) {
+	// 1. Fetch the virtual vehicle
+	v, err := s.vehicleRepo.GetByID(ctx, vehicleID)
 	if err != nil {
-		return "", fmt.Errorf("failed to find mech: %w", err)
+		return "", fmt.Errorf("failed to find vehicle: %w", err)
 	}
 
-	if m.Status == mech.StatusMinted {
-		return "", fmt.Errorf("mech is already minted")
+	if v.Status == vehicle.StatusMinted {
+		return "", fmt.Errorf("vehicle is already minted")
 	}
 
 	// 2. Prepare mint request
 	req := blockchain.MintRequest{
 		OwnerAddress: ownerAddress,
-		MetadataURI:  m.ImageURL,
+		MetadataURI:  v.ImageURL,
 		Stats: map[string]int{
-			"hp":      m.Stats.HP,
-			"attack":  m.Stats.Attack,
-			"defense": m.Stats.Defense,
+			"hp":      v.Stats.HP,
+			"attack":  v.Stats.Attack,
+			"defense": v.Stats.Defense,
 		},
 	}
 
 	// 3. Call blockchain provider
-	txHash, err := s.bcProvider.MintMech(ctx, req)
+	txHash, err := s.bcProvider.MintVehicle(ctx, req)
 	if err != nil {
 		return "", fmt.Errorf("blockchain minting failed: %w", err)
 	}
 
 	// 4. Update status in DB
-	m.Status = mech.StatusMinted
-	m.TokenID = &txHash // Using txHash as temporary TokenID for mock
-	if err := s.mechRepo.Update(ctx, m); err != nil {
-		return "", fmt.Errorf("failed to update mech status: %w", err)
+	v.Status = vehicle.StatusMinted
+	v.TokenID = &txHash // Using txHash as temporary TokenID for mock
+	if err := s.vehicleRepo.Update(ctx, v); err != nil {
+		return "", fmt.Errorf("failed to update vehicle status: %w", err)
 	}
 
 	return txHash, nil

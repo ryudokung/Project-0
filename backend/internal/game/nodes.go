@@ -57,7 +57,7 @@ var EngineeringMatrix = []MatrixNode{
 	{
 		ID:          "REINFORCED_HULL",
 		Name:        "Reinforced Hull",
-		Description: "+10% Mech HP after landing",
+		Description: "+10% Vehicle HP after landing",
 		Path:        "ENTRY",
 		Cost:        250,
 	},

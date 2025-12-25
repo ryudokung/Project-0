@@ -13,7 +13,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/ryudokung/Project-0/backend/internal/combat"
 	"github.com/ryudokung/Project-0/backend/internal/game"
-	"github.com/ryudokung/Project-0/backend/internal/mech"
+	"github.com/ryudokung/Project-0/backend/internal/vehicle"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 	}
 	defer db.Close()
 
-	mechRepo := mech.NewRepository(db)
+	vehicleRepo := vehicle.NewRepository(db)
 	gameRepo := game.NewRepository(db)
 	combatEngine := combat.NewEngine()
 	combatService := combat.NewService(combatEngine)
@@ -39,31 +39,31 @@ func main() {
 	fmt.Println("   PROJECT-0: TACTICAL NOIR CLI")
 	fmt.Println("========================================")
 
-	// 1. Get All Mechs
-	// For simplicity in CLI, we'll just fetch all mechs in the DB
-	rows, _ := db.Query("SELECT id, class, rarity FROM mechs")
-	var mechs []struct {
+	// 1. Get All Vehicles
+	// For simplicity in CLI, we'll just fetch all vehicles in the DB
+	rows, _ := db.Query("SELECT id, class, rarity FROM vehicles")
+	var vehicles []struct {
 		ID     uuid.UUID
 		Class  string
 		Rarity string
 	}
-	fmt.Println("\nAvailable Mechs in Database:")
+	fmt.Println("\nAvailable Vehicles in Database:")
 	i := 0
 	for rows.Next() {
-		var m struct {
+		var v struct {
 			ID     uuid.UUID
 			Class  string
 			Rarity string
 		}
-		rows.Scan(&m.ID, &m.Class, &m.Rarity)
-		mechs = append(mechs, m)
-		fmt.Printf("[%d] ID: %s | Class: %s | Rarity: %s\n", i, m.ID.String()[:8], m.Class, m.Rarity)
+		rows.Scan(&v.ID, &v.Class, &v.Rarity)
+		vehicles = append(vehicles, v)
+		fmt.Printf("[%d] ID: %s | Class: %s | Rarity: %s\n", i, v.ID.String()[:8], v.Class, v.Rarity)
 		i++
 	}
 	rows.Close()
 
-	if len(mechs) < 2 {
-		fmt.Println("Not enough mechs in DB. Please run seed first.")
+	if len(vehicles) < 2 {
+		fmt.Println("Not enough vehicles in DB. Please run seed first.")
 		return
 	}
 
@@ -79,24 +79,24 @@ func main() {
 	var defenderIdx int
 	fmt.Sscanf(input, "%d", &defenderIdx)
 
-	attackerID := mechs[attackerIdx].ID
-	defenderID := mechs[defenderIdx].ID
+	attackerID := vehicles[attackerIdx].ID
+	defenderID := vehicles[defenderIdx].ID
 
 	// 4. Load Full Data
 	ctx := context.Background()
-	aMech, _ := mechRepo.GetByID(ctx, attackerID)
-	dMech, _ := mechRepo.GetByID(ctx, defenderID)
-	aParts, _ := mechRepo.GetPartsByMechID(attackerID)
-	dParts, _ := mechRepo.GetPartsByMechID(defenderID)
-	aPilot, _ := gameRepo.GetActivePilotStats(aMech.OwnerID)
-	dPilot, _ := gameRepo.GetActivePilotStats(dMech.OwnerID)
+	aVehicle, _ := vehicleRepo.GetByID(ctx, attackerID)
+	dVehicle, _ := vehicleRepo.GetByID(ctx, defenderID)
+	aParts, _ := vehicleRepo.GetPartsByVehicleID(attackerID)
+	dParts, _ := vehicleRepo.GetPartsByVehicleID(defenderID)
+	aPilot, _ := gameRepo.GetActivePilotStats(aVehicle.OwnerID)
+	dPilot, _ := gameRepo.GetActivePilotStats(dVehicle.OwnerID)
 
-	aStats := combatService.MapMechToUnitStats(aMech, aParts, aPilot)
-	dStats := combatService.MapMechToUnitStats(dMech, dParts, dPilot)
+	aStats := combatService.MapVehicleToUnitStats(aVehicle, aParts, aPilot)
+	dStats := combatService.MapVehicleToUnitStats(dVehicle, dParts, dPilot)
 
 	fmt.Printf("\n--- BATTLE START ---\n")
-	fmt.Printf("Attacker: %s (HP: %d, ATK: %d)\n", aMech.Class, aStats.HP, aStats.BaseAttack)
-	fmt.Printf("Defender: %s (HP: %d, DEF: %d)\n", dMech.Class, dStats.HP, dStats.TargetDefense)
+	fmt.Printf("Attacker: %s (HP: %d, ATK: %d)\n", aVehicle.Class, aStats.HP, aStats.BaseAttack)
+	fmt.Printf("Defender: %s (HP: %d, DEF: %d)\n", dVehicle.Class, dStats.HP, dStats.TargetDefense)
 
 	for aStats.HP > 0 && dStats.HP > 0 {
 		fmt.Println("\nChoose Damage Type: [K]inetic, [E]nergy, [X]plosive")

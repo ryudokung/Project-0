@@ -23,6 +23,13 @@ type Repository interface {
 	GetPartsByMechID(mechID uuid.UUID) ([]Part, error)
 	EquipPart(partID uuid.UUID, mechID uuid.UUID) error
 	UnequipPart(partID uuid.UUID) error
+
+	// Item operations (DDS)
+	CreateItem(ctx context.Context, item *Item) error
+	GetItemByID(ctx context.Context, id uuid.UUID) (*Item, error)
+	UpdateItem(ctx context.Context, item *Item) error
+	GetItemsByOwnerID(ctx context.Context, ownerID uuid.UUID) ([]Item, error)
+	UpdateDurability(ctx context.Context, id uuid.UUID, durability int, condition ItemCondition) error
 }
 
 type mechRepository struct {
@@ -103,7 +110,7 @@ func (r *mechRepository) GetByOwnerID(ownerID uuid.UUID) ([]Mech, error) {
 	}
 	defer rows.Close()
 
-	var mechs []Mech
+	mechs := []Mech{}
 	for rows.Next() {
 		var m Mech
 		var statsJSON []byte
@@ -138,7 +145,7 @@ func (r *mechRepository) GetByCharacterID(charID uuid.UUID) ([]Mech, error) {
 	}
 	defer rows.Close()
 
-	var mechs []Mech
+	mechs := []Mech{}
 	for rows.Next() {
 		var m Mech
 		var statsJSON []byte
@@ -235,5 +242,147 @@ func (r *mechRepository) EquipPart(partID uuid.UUID, mechID uuid.UUID) error {
 func (r *mechRepository) UnequipPart(partID uuid.UUID) error {
 	query := `UPDATE parts SET mech_id = NULL WHERE id = $1`
 	_, err := r.db.Exec(query, partID)
+	return err
+}
+
+// Item implementations (DDS)
+
+func (r *mechRepository) CreateItem(ctx context.Context, i *Item) error {
+	statsJSON, _ := json.Marshal(i.Stats)
+	dnaJSON, _ := json.Marshal(i.VisualDNA)
+	metaJSON, _ := json.Marshal(i.Metadata)
+
+	query := `
+		INSERT INTO items (
+			id, owner_id, character_id, name, item_type, rarity, tier, slot, 
+			is_nft, token_id, durability, max_durability, condition, 
+			stats, visual_dna, metadata, is_equipped, parent_item_id
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+	`
+	_, err := r.db.ExecContext(ctx, query,
+		i.ID, i.OwnerID, i.CharacterID, i.Name, i.ItemType, i.Rarity, i.Tier, i.Slot,
+		i.IsNFT, i.TokenID, i.Durability, i.MaxDurability, i.Condition,
+		statsJSON, dnaJSON, metaJSON, i.IsEquipped, i.ParentItemID,
+	)
+	return err
+}
+
+func (r *mechRepository) GetItemByID(ctx context.Context, id uuid.UUID) (*Item, error) {
+	query := `
+		SELECT 
+			id, owner_id, character_id, name, item_type, rarity, tier, slot, 
+			is_nft, token_id, durability, max_durability, condition, 
+			stats, visual_dna, metadata, is_equipped, parent_item_id, created_at, updated_at
+		FROM items WHERE id = $1
+	`
+	row := r.db.QueryRowContext(ctx, query, id)
+
+	var i Item
+	var statsJSON, dnaJSON, metaJSON []byte
+	var tokenID sql.NullString
+	var charID, parentID uuid.NullUUID
+
+	err := row.Scan(
+		&i.ID, &i.OwnerID, &charID, &i.Name, &i.ItemType, &i.Rarity, &i.Tier, &i.Slot,
+		&i.IsNFT, &tokenID, &i.Durability, &i.MaxDurability, &i.Condition,
+		&statsJSON, &dnaJSON, &metaJSON, &i.IsEquipped, &parentID, &i.CreatedAt, &i.UpdatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if tokenID.Valid {
+		i.TokenID = &tokenID.String
+	}
+	if charID.Valid {
+		i.CharacterID = &charID.UUID
+	}
+	if parentID.Valid {
+		i.ParentItemID = &parentID.UUID
+	}
+
+	json.Unmarshal(statsJSON, &i.Stats)
+	json.Unmarshal(dnaJSON, &i.VisualDNA)
+	json.Unmarshal(metaJSON, &i.Metadata)
+
+	return &i, nil
+}
+
+func (r *mechRepository) UpdateItem(ctx context.Context, i *Item) error {
+	statsJSON, _ := json.Marshal(i.Stats)
+	dnaJSON, _ := json.Marshal(i.VisualDNA)
+	metaJSON, _ := json.Marshal(i.Metadata)
+
+	query := `
+		UPDATE items SET 
+			owner_id = $1, character_id = $2, name = $3, item_type = $4, rarity = $5, 
+			tier = $6, slot = $7, is_nft = $8, token_id = $9, durability = $10, 
+			max_durability = $11, condition = $12, stats = $13, visual_dna = $14, 
+			metadata = $15, is_equipped = $16, parent_item_id = $17
+		WHERE id = $18
+	`
+	_, err := r.db.ExecContext(ctx, query,
+		i.OwnerID, i.CharacterID, i.Name, i.ItemType, i.Rarity,
+		i.Tier, i.Slot, i.IsNFT, i.TokenID, i.Durability,
+		i.MaxDurability, i.Condition, statsJSON, dnaJSON,
+		metaJSON, i.IsEquipped, i.ParentItemID, i.ID,
+	)
+	return err
+}
+
+func (r *mechRepository) GetItemsByOwnerID(ctx context.Context, ownerID uuid.UUID) ([]Item, error) {
+	query := `
+		SELECT 
+			id, owner_id, character_id, name, item_type, rarity, tier, slot, 
+			is_nft, token_id, durability, max_durability, condition, 
+			stats, visual_dna, metadata, is_equipped, parent_item_id, created_at, updated_at
+		FROM items WHERE owner_id = $1
+	`
+	rows, err := r.db.QueryContext(ctx, query, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := []Item{}
+	for rows.Next() {
+		var i Item
+		var statsJSON, dnaJSON, metaJSON []byte
+		var tokenID sql.NullString
+		var charID, parentID uuid.NullUUID
+
+		err := rows.Scan(
+			&i.ID, &i.OwnerID, &charID, &i.Name, &i.ItemType, &i.Rarity, &i.Tier, &i.Slot,
+			&i.IsNFT, &tokenID, &i.Durability, &i.MaxDurability, &i.Condition,
+			&statsJSON, &dnaJSON, &metaJSON, &i.IsEquipped, &parentID, &i.CreatedAt, &i.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if tokenID.Valid {
+			i.TokenID = &tokenID.String
+		}
+		if charID.Valid {
+			i.CharacterID = &charID.UUID
+		}
+		if parentID.Valid {
+			i.ParentItemID = &parentID.UUID
+		}
+
+		json.Unmarshal(statsJSON, &i.Stats)
+		json.Unmarshal(dnaJSON, &i.VisualDNA)
+		json.Unmarshal(metaJSON, &i.Metadata)
+		items = append(items, i)
+	}
+	return items, nil
+}
+
+func (r *mechRepository) UpdateDurability(ctx context.Context, id uuid.UUID, durability int, condition ItemCondition) error {
+	query := `UPDATE items SET durability = $1, condition = $2 WHERE id = $3`
+	_, err := r.db.ExecContext(ctx, query, durability, condition, id)
 	return err
 }

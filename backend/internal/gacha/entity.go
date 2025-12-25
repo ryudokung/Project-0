@@ -3,7 +3,7 @@ package gacha
 import (
 	"time"
 	"github.com/google/uuid"
-	"github.com/ryudokung/Project-0/backend/internal/mech"
+	"github.com/ryudokung/Project-0/backend/internal/vehicle"
 )
 
 type PullType string
@@ -25,24 +25,24 @@ type GachaPullResponse struct {
 }
 
 type GachaResult struct {
-	Item      interface{}     `json:"item"` // Can be mech.Mech or mech.Part
-	ItemType  string          `json:"item_type"`
-	Rarity    mech.RarityTier `json:"rarity"`
-	IsNew     bool            `json:"is_new"`
-	PityCount int             `json:"pity_count"`
+	Item      interface{}        `json:"item"` // Can be vehicle.Vehicle or vehicle.Part
+	ItemType  string             `json:"item_type"`
+	Rarity    vehicle.RarityTier `json:"rarity"`
+	IsNew     bool               `json:"is_new"`
+	PityCount int                `json:"pity_count"`
 }
 
 type GachaHistory struct {
-	ID                      uuid.UUID       `json:"id"`
-	UserID                  uuid.UUID       `json:"user_id"`
-	ItemID                  uuid.UUID       `json:"item_id"`
-	ItemType                string          `json:"item_type"`
-	PullType                PullType        `json:"pull_type"`
-	Rarity                  mech.RarityTier `json:"rarity"`
-	Seed                    int64           `json:"seed"`
-	PityRelicBefore         int             `json:"pity_relic_before"`
-	PityRelicAfter          int             `json:"pity_relic_after"`
-	PitySingularityBefore   int             `json:"pity_singularity_before"`
-	PitySingularityAfter    int             `json:"pity_singularity_after"`
-	CreatedAt               time.Time       `json:"created_at"`
+	ID                      uuid.UUID          `json:"id"`
+	UserID                  uuid.UUID          `json:"user_id"`
+	ItemID                  uuid.UUID          `json:"item_id"`
+	ItemType                string             `json:"item_type"`
+	PullType                PullType           `json:"pull_type"`
+	Rarity                  vehicle.RarityTier `json:"rarity"`
+	Seed                    int64              `json:"seed"`
+	PityRelicBefore         int                `json:"pity_relic_before"`
+	PityRelicAfter          int                `json:"pity_relic_after"`
+	PitySingularityBefore   int                `json:"pity_singularity_before"`
+	PitySingularityAfter    int                `json:"pity_singularity_after"`
+	CreatedAt               time.Time          `json:"created_at"`
 }

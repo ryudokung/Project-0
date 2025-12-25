@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/ryudokung/Project-0/backend/internal/game"
-	"github.com/ryudokung/Project-0/backend/internal/mech"
+	"github.com/ryudokung/Project-0/backend/internal/vehicle"
 )
 
 type UseCase interface {
@@ -15,16 +15,16 @@ type UseCase interface {
 }
 
 type gachaUseCase struct {
-	repo      Repository
-	gameRepo  game.Repository
-	mechRepo  mech.Repository
+	repo        Repository
+	gameRepo    game.Repository
+	vehicleRepo vehicle.Repository
 }
 
-func NewUseCase(repo Repository, gameRepo game.Repository, mechRepo mech.Repository) UseCase {
+func NewUseCase(repo Repository, gameRepo game.Repository, vehicleRepo vehicle.Repository) UseCase {
 	return &gachaUseCase{
-		repo:     repo,
-		gameRepo: gameRepo,
-		mechRepo: mechRepo,
+		repo:        repo,
+		gameRepo:    gameRepo,
+		vehicleRepo: vehicleRepo,
 	}
 }
 
@@ -74,28 +74,28 @@ func (u *gachaUseCase) Pull(req GachaPullRequest) (*GachaPullResponse, error) {
 		rarity := u.rollRarity(stats)
 		
 		// Reset pity if we hit high rarity
-		if rarity == mech.RaritySingularity {
+		if rarity == vehicle.RaritySingularity {
 			stats.PitySingularityCount = 0
 			stats.PityRelicCount = 0
-		} else if rarity == mech.RarityRelic {
+		} else if rarity == vehicle.RarityRelic {
 			stats.PityRelicCount = 0
 		}
 
-		// Create the item (Simplified for now: 50% Mech, 50% Part)
+		// Create the item (Simplified for now: 50% Vehicle, 50% Part)
 		var result GachaResult
 		if rand.Float64() < 0.5 {
-			m := u.generateRandomMech(req.UserID, rarity)
-			if err := u.mechRepo.Create(m); err != nil {
+			v := u.generateRandomVehicle(req.UserID, rarity)
+			if err := u.vehicleRepo.Create(v); err != nil {
 				return nil, err
 			}
 			result = GachaResult{
-				Item:     m,
-				ItemType: "MECH",
+				Item:     v,
+				ItemType: "VEHICLE",
 				Rarity:   rarity,
 			}
 		} else {
 			p := u.generateRandomPart(req.UserID, rarity)
-			if err := u.mechRepo.CreatePart(p); err != nil {
+			if err := u.vehicleRepo.CreatePart(p); err != nil {
 				return nil, err
 			}
 			result = GachaResult{
@@ -132,56 +132,60 @@ func (u *gachaUseCase) Pull(req GachaPullRequest) (*GachaPullResponse, error) {
 	return &GachaPullResponse{Results: results}, nil
 }
 
-func (u *gachaUseCase) rollRarity(stats *game.GachaStats) mech.RarityTier {
+func (u *gachaUseCase) rollRarity(stats *game.GachaStats) vehicle.RarityTier {
 	// 1. Check Singularity Pity (Hard pity at 80)
 	if stats.PitySingularityCount >= 80 {
-		return mech.RaritySingularity
+		return vehicle.RaritySingularity
 	}
 
 	// 2. Check Relic Pity (Hard pity at 10)
 	if stats.PityRelicCount >= 10 {
-		return mech.RarityRelic
+		return vehicle.RarityRelic
 	}
 
 	// 3. Random Roll
 	r := rand.Float64() * 100
 
 	if r < 0.6 { // 0.6% for Singularity (Standard rate)
-		return mech.RaritySingularity
+		return vehicle.RaritySingularity
 	}
 	if r < 5.1 { // 4.5% for Relic
-		return mech.RarityRelic
+		return vehicle.RarityRelic
 	}
 	if r < 15.0 { // 10% for Prototype
-		return mech.RarityPrototype
+		return vehicle.RarityPrototype
 	}
 	if r < 40.0 { // 25% for Refined
-		return mech.RarityRefined
+		return vehicle.RarityRefined
 	}
-	return mech.RarityCommon
+	return vehicle.RarityCommon
 }
 
-func (u *gachaUseCase) generateRandomMech(userID uuid.UUID, rarity mech.RarityTier) *mech.Mech {
-	return &mech.Mech{
+func (u *gachaUseCase) generateRandomVehicle(userID uuid.UUID, rarity vehicle.RarityTier) *vehicle.Vehicle {
+	v := &vehicle.Vehicle{
 		ID:            uuid.New(),
 		OwnerID:       userID,
-		VehicleType:   mech.TypeMech,
-		Class:         mech.ClassStriker,
+		VehicleType:   vehicle.TypeMech,
+		Class:         vehicle.ClassStriker,
 		Rarity:        rarity,
 		Tier:          1,
 		IsVoidTouched: true,
-		Status:        mech.StatusPending,
-		Stats: mech.MechStats{
+		Status:        vehicle.StatusPending,
+		Stats: vehicle.VehicleStats{
 			HP:      100,
 			Attack:  10,
 			Defense: 10,
 			Speed:   10,
 		},
+		SuitabilityTags: []string{"urban"},
 	}
+	// Calculate CR
+	v.CR = (v.Stats.Attack * 2) + (v.Stats.Defense * 2) + (v.Stats.HP / 10)
+	return v
 }
 
-func (u *gachaUseCase) generateRandomPart(userID uuid.UUID, rarity mech.RarityTier) *mech.Part {
-	return &mech.Part{
+func (u *gachaUseCase) generateRandomPart(userID uuid.UUID, rarity vehicle.RarityTier) *vehicle.Part {
+	return &vehicle.Part{
 		ID:            uuid.New(),
 		OwnerID:       userID,
 		Slot:          "ARM_L",
@@ -189,17 +193,17 @@ func (u *gachaUseCase) generateRandomPart(userID uuid.UUID, rarity mech.RarityTi
 		Rarity:        rarity,
 		Tier:          1,
 		IsVoidTouched: true,
-		Stats: mech.PartStats{
+		Stats: vehicle.PartStats{
 			BonusAttack: 5,
 		},
 	}
 }
 
 func (u *gachaUseCase) getItemID(item interface{}) uuid.UUID {
-	if m, ok := item.(*mech.Mech); ok {
-		return m.ID
+	if v, ok := item.(*vehicle.Vehicle); ok {
+		return v.ID
 	}
-	if p, ok := item.(*mech.Part); ok {
+	if p, ok := item.(*vehicle.Part); ok {
 		return p.ID
 	}
 	return uuid.Nil

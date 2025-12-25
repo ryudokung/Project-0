@@ -21,7 +21,7 @@ const (
 type ExplorationSession struct {
 	ID           uuid.UUID         `json:"id"`
 	PilotID      uuid.UUID         `json:"pilot_id"`
-	MechID       uuid.UUID         `json:"mech_id"`
+	VehicleID    uuid.UUID         `json:"vehicle_id"`
 	Status       ExplorationStatus `json:"status"`
 	Fuel         int               `json:"fuel"`
 	ScannerRange int               `json:"scanner_range"`
@@ -37,11 +37,11 @@ func NewExplorationService() *ExplorationService {
 	return &ExplorationService{}
 }
 
-func (s *ExplorationService) StartSession(ctx context.Context, pilotID, mechID uuid.UUID) (*ExplorationSession, error) {
+func (s *ExplorationService) StartSession(ctx context.Context, pilotID, vehicleID uuid.UUID) (*ExplorationSession, error) {
 	return &ExplorationSession{
 		ID:           uuid.New(),
 		PilotID:      pilotID,
-		MechID:       mechID,
+		VehicleID:    vehicleID,
 		Status:       StatusInTransit,
 		Fuel:         100,
 		ScannerRange: 50,

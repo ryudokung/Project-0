@@ -2,7 +2,7 @@ package game
 
 import (
 	"github.com/google/uuid"
-	"github.com/ryudokung/Project-0/backend/internal/mech"
+	"github.com/ryudokung/Project-0/backend/internal/vehicle"
 )
 
 type UseCase interface {
@@ -11,14 +11,14 @@ type UseCase interface {
 }
 
 type gameUseCase struct {
-	repo     Repository
-	mechRepo mech.Repository
+	repo        Repository
+	vehicleRepo vehicle.Repository
 }
 
-func NewUseCase(repo Repository, mechRepo mech.Repository) UseCase {
+func NewUseCase(repo Repository, vehicleRepo vehicle.Repository) UseCase {
 	return &gameUseCase{
-		repo:     repo,
-		mechRepo: mechRepo,
+		repo:        repo,
+		vehicleRepo: vehicleRepo,
 	}
 }
 
@@ -34,23 +34,25 @@ func (u *gameUseCase) InitializeNewCharacter(userID, charID uuid.UUID) error {
 	}
 
 	// 3. Assign Starter Gear (Ship)
-	starterShip := mech.Mech{
+	starterShip := vehicle.Vehicle{
 		ID:          uuid.New(),
 		OwnerID:     userID,
 		CharacterID: &charID,
-		VehicleType: mech.TypeShip,
-		Class:       mech.ClassScout,
-		Rarity:      mech.RarityCommon,
-		Status:      mech.StatusPending,
-		Stats: mech.MechStats{
+		VehicleType: vehicle.TypeShip,
+		Class:       vehicle.ClassScout,
+		Rarity:      vehicle.RarityCommon,
+		Status:      vehicle.StatusPending,
+		Stats: vehicle.VehicleStats{
 			HP:      100,
 			Attack:  10,
 			Defense: 10,
 			Speed:   20,
 		},
+		CR:              50, // Initial CR for starter ship
+		SuitabilityTags: []string{"ocean", "coastal"},
 	}
 
-	if err := u.mechRepo.Create(&starterShip); err != nil {
+	if err := u.vehicleRepo.Create(&starterShip); err != nil {
 		return err
 	}
 
