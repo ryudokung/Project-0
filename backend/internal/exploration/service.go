@@ -330,14 +330,32 @@ func (s *Service) CalculateEffectiveCP(ctx context.Context, userID uuid.UUID, ve
 
 	// 5. Get Exosuit CP and Metadata
 	exosuitCP := 0
-	var exosuit *vehicle.Vehicle
+	var exosuitSeries string
 	if pilot.EquippedExosuitID != nil {
-		exosuitCP, err = s.vehicleUseCase.GetVehicleCP(ctx, *pilot.EquippedExosuitID)
+		// Exosuit is an Item, so we use GetItemByID
+		exosuitItem, err := s.vehicleUseCase.GetItemByID(ctx, *pilot.EquippedExosuitID)
 		if err != nil {
-			// Log error but continue without exosuit
-			fmt.Printf("Error getting exosuit CP: %v\n", err)
-		} else {
-			exosuit, _ = s.vehicleUseCase.GetVehicleByID(ctx, *pilot.EquippedExosuitID)
+			fmt.Printf("Error getting exosuit item: %v\n", err)
+		} else if exosuitItem != nil {
+			// Calculate Exosuit CP: (ATK*2) + (DEF*2) + (HP/10)
+			// Note: ItemStats might need to be checked for nil, but struct usually has zero values
+			atk := exosuitItem.Stats.Attack + exosuitItem.Stats.BonusAttack
+			def := exosuitItem.Stats.Defense + exosuitItem.Stats.BonusDefense
+			hp := exosuitItem.Stats.HP + exosuitItem.Stats.BonusHP
+			
+			exosuitCP = (atk * 2) + (def * 2) + (hp / 10)
+
+			// Get Series ID
+			if exosuitItem.SeriesID != nil {
+				exosuitSeries = *exosuitItem.SeriesID
+			} else if exosuitItem.Metadata != nil {
+				// Fallback to metadata
+				if meta, ok := exosuitItem.Metadata.(map[string]interface{}); ok {
+					if s, ok := meta["Series"].(string); ok {
+						exosuitSeries = s
+					}
+				}
+			}
 		}
 	}
 
@@ -379,19 +397,44 @@ func (s *Service) CalculateEffectiveCP(ctx context.Context, userID uuid.UUID, ve
 		fatiguePenalty = 0.5
 	}
 
-	// 9. Calculate Set Synergy
-	synergyMod := 1.0
-	if exosuit != nil && v.Metadata != nil && exosuit.Metadata != nil {
-		vSeries := v.Metadata["Series"]
-		eSeries := exosuit.Metadata["Series"]
-		if vSeries != "" && vSeries == eSeries {
-			synergyMod = 1.15 // +15% Synergy Bonus
+	// Check for Critical Fatigue (from Emergency Retrieval)
+	if pilot.Metadata != nil {
+		if critical, ok := pilot.Metadata["critical_fatigue"].(bool); ok && critical {
+			fatiguePenalty += 0.5 // Additional 50% penalty
+			if fatiguePenalty > 0.9 {
+				fatiguePenalty = 0.9 // Max penalty 90%
+			}
 		}
 	}
 
-	// 10. Final ECP Calculation
+	// 9. Calculate Set Synergy
+	synergyMod := 1.0
+	vehicleSeries := ""
+	if v.Metadata != nil {
+		if meta, ok := v.Metadata.(map[string]interface{}); ok {
+			if s, ok := meta["Series"].(string); ok {
+				vehicleSeries = s
+			}
+		}
+	}
+
+	if vehicleSeries != "" && exosuitSeries != "" && vehicleSeries == exosuitSeries {
+		synergyMod = 1.15 // +15% Synergy Bonus
+	}
+
+	// 10. Check for Active Skill Buffs (Overclock)
+	skillMod := 1.0
+	if pilot.Metadata != nil {
+		if active, ok := pilot.Metadata["active_skill_overclock"].(bool); ok && active {
+			skillMod = 1.3 // +30% ECP
+			// Note: The flag should be cleared after use. This logic should be in ResolveNodeChoice or similar.
+			// For calculation purposes, we just apply the mod.
+		}
+	}
+
+	// 11. Final ECP Calculation
 	totalBaseCP := float64(vehicleCP + exosuitCP)
-	ecp := totalBaseCP * suitabilityMod * resonanceSync * (1.0 - fatiguePenalty) * synergyMod
+	ecp := totalBaseCP * suitabilityMod * resonanceSync * (1.0 - fatiguePenalty) * synergyMod * skillMod
 
 	return int(ecp), nil
 }
@@ -474,15 +517,21 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 	// 5. Apply Consequences
 	stats, err := s.gameRepo.GetActivePilotStats(expedition.UserID)
 	if err == nil && stats != nil {
-		// Get Bastion Module Levels
+		// Get Bastion Module Levels (Migrated to Table)
 		labLevel := 1.0
 		warpLevel := 1.0
-		if stats.Metadata != nil {
-			if lv, ok := stats.Metadata["lab_level"].(float64); ok {
-				labLevel = lv
-			}
-			if lv, ok := stats.Metadata["warp_level"].(float64); ok {
-				warpLevel = lv
+		
+		modules, err := s.gameRepo.GetBastionModules(expedition.UserID)
+		if err == nil {
+			for _, m := range modules {
+				if m.IsActive {
+					switch m.ModuleType {
+					case "LAB":
+						labLevel = float64(m.Level)
+					case "WARP_DRIVE":
+						warpLevel = float64(m.Level)
+					}
+				}
 			}
 		}
 
@@ -499,10 +548,43 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 			stats.CurrentFuel = 0
 		}
 
+		// Clear Active Skill Flags (Overclock)
+		if stats.Metadata != nil {
+			if _, ok := stats.Metadata["active_skill_overclock"]; ok {
+				delete(stats.Metadata, "active_skill_overclock")
+			}
+		}
+
+		// Neural Energy Gain (Phase 4: NE System)
+		stats.CurrentNE += 10.0
+		if stats.CurrentNE > stats.MaxNE {
+			stats.CurrentNE = stats.MaxNE
+		}
+
+		// Emergency Retrieval Protocol (Phase 2: Tactical Engine)
+		isEmergency := false
+		if stats.CurrentFuel <= 0 || stats.CurrentO2 <= 0 {
+			isEmergency = true
+			stats.Stress += 50
+			if stats.Stress > 100 {
+				stats.Stress = 100
+			}
+			if stats.Metadata == nil {
+				stats.Metadata = make(map[string]interface{})
+			}
+			stats.Metadata["critical_fatigue"] = true
+			// In a full implementation, this would trigger an immediate end to the expedition.
+		}
+
 		if success {
 			// Apply Rewards (Lab increases these)
 			rewardMod := 1.0 + (labLevel-1)*0.1 // 10% bonus per level
 			xpMod := 1.0 + (labLevel-1)*0.15    // 15% bonus per level
+
+			if isEmergency {
+				rewardMod *= 0.5 // 50% Penalty for Emergency Retrieval
+				xpMod *= 0.5
+			}
 
 			for _, reward := range selectedChoice.Rewards {
 				switch reward {
@@ -774,6 +856,67 @@ func (s *Service) GenerateNewEncounter(ctx context.Context, expeditionID uuid.UU
 	}
 
 	return encounter, nil
+}
+
+// ActivateSkill handles the usage of Neural Energy (NE) for active skills
+func (s *Service) ActivateSkill(ctx context.Context, userID uuid.UUID, skillName string) error {
+	// 1. Get Pilot Stats
+	stats, err := s.gameRepo.GetActivePilotStats(userID)
+	if err != nil {
+		return err
+	}
+
+	// 2. Check NE Cost and Apply Effect
+	cost := 0.0
+	switch skillName {
+	case "OVERCLOCK":
+		cost = 50.0
+		if stats.CurrentNE < cost {
+			return fmt.Errorf("insufficient neural energy")
+		}
+		// Set Overclock flag in metadata
+		if stats.Metadata == nil {
+			stats.Metadata = make(map[string]interface{})
+		}
+		stats.Metadata["active_skill_overclock"] = true
+
+	case "EMERGENCY_REPAIR":
+		cost = 40.0
+		if stats.CurrentNE < cost {
+			return fmt.Errorf("insufficient neural energy")
+		}
+		// Restore Vehicle HP (Durability)
+		// We need to find the active vehicle first. This is tricky without expedition context.
+		// Assuming we repair the currently equipped vehicle or we need expedition ID.
+		// For now, let's assume this is called within an expedition context or we find the active vehicle.
+		// Simplified: Repair the vehicle in the active session.
+		session, err := s.repo.GetSessionByUserID(userID)
+		if err != nil || session == nil {
+			return fmt.Errorf("no active exploration session found")
+		}
+		if session.VehicleID != uuid.Nil {
+			// Repair 30% of Max Durability
+			// We need to fetch the item to know max durability
+			item, err := s.vehicleUseCase.GetItemByID(ctx, session.VehicleID)
+			if err != nil {
+				return fmt.Errorf("vehicle item not found")
+			}
+			repairAmount := int(float64(item.MaxDurability) * 0.3)
+			_, err = s.vehicleUseCase.RepairItem(ctx, session.VehicleID, repairAmount)
+			if err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("no vehicle to repair")
+		}
+
+	default:
+		return fmt.Errorf("unknown skill: %s", skillName)
+	}
+
+	// 3. Consume NE
+	stats.CurrentNE -= cost
+	return s.gameRepo.UpdatePilotStats(stats)
 }
 
 // GenerateVisualPrompt combines Item DNA and Node Environment for AI Image Generation (DDS Integrated)

@@ -10,12 +10,13 @@ type DamageType string
 const (
 	Kinetic   DamageType = "KINETIC"
 	Energy    DamageType = "ENERGY"
-	Explosive DamageType = "EXPLOSIVE"
+	Void      DamageType = "VOID"
 )
 
 type UnitStats struct {
 	HP               int     `json:"hp"`
 	MaxHP            int     `json:"max_hp"`
+	Shields          int     `json:"shields"` // Added for Energy damage bonus
 	BaseAttack       int     `json:"base_attack"`
 	TargetDefense    int     `json:"target_defense"`
 	DefenseEfficiency float64 `json:"defense_efficiency"`
@@ -77,14 +78,27 @@ func (e *Engine) CalculateDamage(attacker UnitStats, defender UnitStats, dmgType
 		return CombatResult{FinalDamage: 0, IsMiss: true}
 	}
 
-	// 2. Calculate Base Damage with Type Multiplier
-	defenderArmorType := Kinetic // Default for now
-	multiplier := TypeMultipliers[dmgType][defenderArmorType]
+	// 2. Calculate Base Damage & Apply Damage Matrix
+	baseDmg := float64(attacker.BaseAttack)
+	
+	// Defense Calculation
+	defense := float64(defender.TargetDefense) * defender.DefenseEfficiency
 
-	baseDmg := float64(attacker.BaseAttack) * multiplier
-	defenseReduction := float64(defender.TargetDefense) * defender.DefenseEfficiency
+	// Damage Matrix Logic
+	switch dmgType {
+	case Energy:
+		// +20% Damage vs Shields
+		if defender.Shields > 0 {
+			baseDmg *= 1.2
+		}
+	case Void:
+		// Ignores 30% Defense
+		defense *= 0.7
+	case Kinetic:
+		// Standard (High Base - usually handled by higher base stats on Kinetic weapons)
+	}
 
-	finalDmg := baseDmg - defenseReduction
+	finalDmg := baseDmg - defense
 	if finalDmg < 1 {
 		finalDmg = 1 // Minimum 1 damage
 	}

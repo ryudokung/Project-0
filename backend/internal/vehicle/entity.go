@@ -58,6 +58,8 @@ type Item struct {
 	Rarity        RarityTier    `json:"rarity"`
 	Tier          int           `json:"tier"`
 	Slot          *string       `json:"slot,omitempty"`
+	DamageType    *string       `json:"damage_type,omitempty"` // KINETIC, ENERGY, VOID
+	SeriesID      *string       `json:"series_id,omitempty"`   // For Set Synergy
 	IsNFT         bool          `json:"is_nft"`
 	TokenID       *string       `json:"token_id,omitempty"`
 	Durability    int           `json:"durability"`

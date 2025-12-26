@@ -16,6 +16,10 @@ type PilotStats struct {
 	Rank              int                    `json:"rank"`
 	CurrentO2         float64                `json:"current_o2"`
 	CurrentFuel       float64                `json:"current_fuel"`
+	CurrentNE         float64                `json:"current_ne"`
+	MaxNE             float64                `json:"max_ne"`
+	ExpeditionsCompleted int                 `json:"expeditions_completed"`
+	CharacterAttributes  map[string]int      `json:"character_attributes"`
 	ScrapMetal        int                    `json:"scrap_metal"`
 	ResearchData      int                    `json:"research_data"`
 	Metadata          map[string]interface{} `json:"metadata"`
@@ -29,4 +33,14 @@ type GachaStats struct {
 	TotalPulls           int       `json:"total_pulls"`
 	LastFreePullAt       *time.Time `json:"last_free_pull_at"`
 	UpdatedAt            time.Time `json:"updated_at"`
+}
+
+type BastionModule struct {
+	ID          uuid.UUID              `json:"id"`
+	UserID      uuid.UUID              `json:"user_id"`
+	ModuleType  string                 `json:"module_type"` // RADAR, LAB, WARP_DRIVE
+	Level       int                    `json:"level"`
+	IsActive    bool                   `json:"is_active"`
+	Metadata    map[string]interface{} `json:"metadata"`
+	UnlockedAt  time.Time              `json:"unlocked_at"`
 }

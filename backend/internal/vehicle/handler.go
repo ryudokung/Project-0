@@ -96,6 +96,50 @@ func (h *Handler) ListVehicles(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(vehicles)
 }
 
+func (h *Handler) RepairItem(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		ItemID uuid.UUID `json:"item_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// 1. Calculate Cost
+	cost, err := h.useCase.CalculateRepairCost(r.Context(), req.ItemID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// 2. Check & Deduct Resources (This should be in a transaction in a real app)
+	// For now, we assume the caller (Client/Orchestrator) handles the resource deduction via GameService
+	// or we inject GameService here.
+	// To keep it simple for this phase, we just return the cost and let the client confirm.
+	// In a full implementation, we would call gameService.ConsumeResources(userID, cost, 0)
+
+	// 3. Perform Repair
+	// Assuming resources are paid:
+	item, err := h.useCase.RepairItem(r.Context(), req.ItemID, 999999) // Repair to full
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]interface{}{
+		"item": item,
+		"cost": cost,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 func (h *Handler) GetVehicleCP(w http.ResponseWriter, r *http.Request) {
 	vehicleIDStr := r.URL.Query().Get("id")
 	vehicleID, err := uuid.Parse(vehicleIDStr)

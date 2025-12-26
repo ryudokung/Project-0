@@ -93,6 +93,8 @@ CREATE TABLE IF NOT EXISTS items (
     rarity rarity_tier NOT NULL DEFAULT 'COMMON',
     tier INTEGER DEFAULT 1,
     slot VARCHAR(50), -- e.g., 'ARM_L', 'WARP_DRIVE', 'HEAD'
+    damage_type VARCHAR(20), -- KINETIC, ENERGY, VOID
+    series_id VARCHAR(50), -- For Set Synergy
     
     -- Stage Change (NFT) Support
     is_nft BOOLEAN DEFAULT FALSE,
@@ -145,6 +147,10 @@ CREATE TABLE IF NOT EXISTS pilot_stats (
     rank INTEGER DEFAULT 1,
     current_o2 DECIMAL(5, 2) DEFAULT 100.00,
     current_fuel DECIMAL(5, 2) DEFAULT 100.00,
+    current_ne DECIMAL(5, 2) DEFAULT 0.00, -- Neural Energy
+    max_ne DECIMAL(5, 2) DEFAULT 100.00,
+    expeditions_completed INTEGER DEFAULT 0,
+    character_attributes JSONB DEFAULT '{}', -- Agility, Tech, Luck
     scrap_metal INTEGER DEFAULT 0,
     research_data INTEGER DEFAULT 0,
     metadata JSONB DEFAULT '{}',
@@ -263,6 +269,7 @@ CREATE TABLE IF NOT EXISTS exploration_sessions (
     user_id UUID REFERENCES users(id),
     vehicle_id UUID REFERENCES vehicles(id),
     current_node_id UUID REFERENCES nodes(id),
+    loot_buffer JSONB DEFAULT '[]', -- Temporary loot storage
     status VARCHAR(20) DEFAULT 'ACTIVE', -- ACTIVE, COMPLETED, FAILED
     logs JSONB DEFAULT '[]',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

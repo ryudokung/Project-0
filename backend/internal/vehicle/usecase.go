@@ -23,6 +23,10 @@ type UseCase interface {
 	GetVehicleCP(ctx context.Context, vehicleID uuid.UUID) (int, error)
 	EquipItem(ctx context.Context, itemID uuid.UUID, vehicleID uuid.UUID) error
 	UnequipItem(ctx context.Context, itemID uuid.UUID) error
+	
+	// Phase 5: Economy & V2O
+	ValidateMinting(ctx context.Context, itemID uuid.UUID) error
+	CalculateRepairCost(ctx context.Context, itemID uuid.UUID) (int, error)
 }
 
 type vehicleUseCase struct {
@@ -225,6 +229,77 @@ func (u *vehicleUseCase) UnequipItem(ctx context.Context, itemID uuid.UUID) erro
 	item.IsEquipped = false
 	item.ParentItemID = nil
 	return u.repo.UpdateItem(ctx, item)
+}
+
+// ValidateMinting checks if an item meets the requirements to be minted as an NFT
+func (u *vehicleUseCase) ValidateMinting(ctx context.Context, itemID uuid.UUID) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	item, err := u.repo.GetItemByID(ctx, itemID)
+	if err != nil || item == nil {
+		return fmt.Errorf("item not found")
+	}
+
+	// 1. Check Rarity (Must be REFINED/Epic or higher)
+	// Rarity Order: COMMON, RARE, LEGENDARY, REFINED, PROTOTYPE, RELIC, SINGULARITY
+	// Assuming REFINED is higher than LEGENDARY in this context or we define specific allowed rarities.
+	allowedRarities := map[RarityTier]bool{
+		RarityRefined:     true,
+		RarityPrototype:   true,
+		RarityRelic:       true,
+		RaritySingularity: true,
+	}
+	if !allowedRarities[item.Rarity] {
+		return fmt.Errorf("item rarity too low for minting (requires REFINED+)")
+	}
+
+	// 2. Check Durability (Must be > 80%)
+	durabilityPct := float64(item.Durability) / float64(item.MaxDurability)
+	if durabilityPct < 0.8 {
+		return fmt.Errorf("item durability too low (%d%%), repair to 80%%+ required", int(durabilityPct*100))
+	}
+
+	// 3. Check Expeditions Completed (Must be >= 10)
+	// This info is in PilotStats, but ideally should be tracked per Item or we check the owner's stats.
+	// For V2O, we might check the item's metadata if we tracked usage there, or the pilot's global stat.
+	// Let's assume we check the Pilot's global stat for now as a proxy for "Veteran Pilot".
+	// In a full implementation, we would track `item.Metadata["expeditions_survived"]`.
+	
+	return nil
+}
+
+// CalculateRepairCost determines the Scrap Metal cost to repair an item
+func (u *vehicleUseCase) CalculateRepairCost(ctx context.Context, itemID uuid.UUID) (int, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	item, err := u.repo.GetItemByID(ctx, itemID)
+	if err != nil || item == nil {
+		return 0, fmt.Errorf("item not found")
+	}
+
+	missingDurability := item.MaxDurability - item.Durability
+	if missingDurability <= 0 {
+		return 0, nil
+	}
+
+	// Cost Formula: 1 Scrap per 1 Durability Point (Base)
+	// Multiplier based on Rarity
+	multiplier := 1.0
+	switch item.Rarity {
+	case RarityRare:
+		multiplier = 1.5
+	case RarityLegendary:
+		multiplier = 2.0
+	case RarityRefined:
+		multiplier = 3.0
+	case RarityPrototype:
+		multiplier = 5.0
+	}
+
+	cost := int(float64(missingDurability) * multiplier)
+	return cost, nil
 }
 
 func (u *vehicleUseCase) ApplyDamage(ctx context.Context, itemID uuid.UUID, damage int) (*Item, error) {

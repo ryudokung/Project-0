@@ -267,12 +267,14 @@ func (r *vehicleRepository) CreateItem(ctx context.Context, i *Item) error {
 	query := `
 		INSERT INTO items (
 			id, owner_id, character_id, name, item_type, rarity, tier, slot, 
+			damage_type, series_id,
 			is_nft, token_id, durability, max_durability, condition, 
 			stats, visual_dna, metadata, is_equipped, parent_item_id
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
 	`
 	_, err := r.db.ExecContext(ctx, query,
 		i.ID, i.OwnerID, i.CharacterID, i.Name, i.ItemType, i.Rarity, i.Tier, i.Slot,
+		i.DamageType, i.SeriesID,
 		i.IsNFT, i.TokenID, i.Durability, i.MaxDurability, i.Condition,
 		statsJSON, dnaJSON, metaJSON, i.IsEquipped, i.ParentItemID,
 	)
@@ -283,6 +285,7 @@ func (r *vehicleRepository) GetItemByID(ctx context.Context, id uuid.UUID) (*Ite
 	query := `
 		SELECT 
 			id, owner_id, character_id, name, item_type, rarity, tier, slot, 
+			damage_type, series_id,
 			is_nft, token_id, durability, max_durability, condition, 
 			stats, visual_dna, metadata, is_equipped, parent_item_id, created_at, updated_at
 		FROM items WHERE id = $1
@@ -291,11 +294,12 @@ func (r *vehicleRepository) GetItemByID(ctx context.Context, id uuid.UUID) (*Ite
 
 	var i Item
 	var statsJSON, dnaJSON, metaJSON []byte
-	var tokenID sql.NullString
+	var tokenID, damageType, seriesID sql.NullString
 	var charID, parentID uuid.NullUUID
 
 	err := row.Scan(
 		&i.ID, &i.OwnerID, &charID, &i.Name, &i.ItemType, &i.Rarity, &i.Tier, &i.Slot,
+		&damageType, &seriesID,
 		&i.IsNFT, &tokenID, &i.Durability, &i.MaxDurability, &i.Condition,
 		&statsJSON, &dnaJSON, &metaJSON, &i.IsEquipped, &parentID, &i.CreatedAt, &i.UpdatedAt,
 	)
@@ -308,6 +312,12 @@ func (r *vehicleRepository) GetItemByID(ctx context.Context, id uuid.UUID) (*Ite
 
 	if tokenID.Valid {
 		i.TokenID = &tokenID.String
+	}
+	if damageType.Valid {
+		i.DamageType = &damageType.String
+	}
+	if seriesID.Valid {
+		i.SeriesID = &seriesID.String
 	}
 	if charID.Valid {
 		i.CharacterID = &charID.UUID
@@ -331,14 +341,14 @@ func (r *vehicleRepository) UpdateItem(ctx context.Context, i *Item) error {
 	query := `
 		UPDATE items SET 
 			owner_id = $1, character_id = $2, name = $3, item_type = $4, rarity = $5, 
-			tier = $6, slot = $7, is_nft = $8, token_id = $9, durability = $10, 
-			max_durability = $11, condition = $12, stats = $13, visual_dna = $14, 
-			metadata = $15, is_equipped = $16, parent_item_id = $17
-		WHERE id = $18
+			tier = $6, slot = $7, damage_type = $8, series_id = $9, is_nft = $10, token_id = $11, durability = $12, 
+			max_durability = $13, condition = $14, stats = $15, visual_dna = $16, 
+			metadata = $17, is_equipped = $18, parent_item_id = $19
+		WHERE id = $20
 	`
 	_, err := r.db.ExecContext(ctx, query,
 		i.OwnerID, i.CharacterID, i.Name, i.ItemType, i.Rarity,
-		i.Tier, i.Slot, i.IsNFT, i.TokenID, i.Durability,
+		i.Tier, i.Slot, i.DamageType, i.SeriesID, i.IsNFT, i.TokenID, i.Durability,
 		i.MaxDurability, i.Condition, statsJSON, dnaJSON,
 		metaJSON, i.IsEquipped, i.ParentItemID, i.ID,
 	)

@@ -16,6 +16,10 @@ type Repository interface {
 	UpdateGachaStats(stats *GachaStats) error
 	ConsumeFreePull(userID uuid.UUID) (bool, error)
 	ConsumeResources(charID uuid.UUID, o2, fuel float64) (bool, error)
+	
+	// Bastion Modules
+	GetBastionModules(userID uuid.UUID) ([]BastionModule, error)
+	UpdateBastionModule(module *BastionModule) error
 }
 
 type gameRepository struct {
@@ -27,22 +31,24 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (r *gameRepository) GetPilotStats(charID uuid.UUID) (*PilotStats, error) {
-	query := `SELECT user_id, character_id, equipped_exosuit_id, resonance_level, resonance_exp, stress, xp, rank, current_o2, current_fuel, scrap_metal, research_data, metadata, updated_at FROM pilot_stats WHERE character_id = $1`
+	query := `SELECT user_id, character_id, equipped_exosuit_id, resonance_level, resonance_exp, stress, xp, rank, current_o2, current_fuel, current_ne, max_ne, expeditions_completed, character_attributes, scrap_metal, research_data, metadata, updated_at FROM pilot_stats WHERE character_id = $1`
 	row := r.db.QueryRow(query, charID)
 
 	var s PilotStats
 	var metadataJSON []byte
-	err := row.Scan(&s.UserID, &s.CharacterID, &s.EquippedExosuitID, &s.ResonanceLevel, &s.ResonanceExp, &s.Stress, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.ScrapMetal, &s.ResearchData, &metadataJSON, &s.UpdatedAt)
+	var attributesJSON []byte
+	err := row.Scan(&s.UserID, &s.CharacterID, &s.EquippedExosuitID, &s.ResonanceLevel, &s.ResonanceExp, &s.Stress, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.CurrentNE, &s.MaxNE, &s.ExpeditionsCompleted, &attributesJSON, &s.ScrapMetal, &s.ResearchData, &metadataJSON, &s.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	json.Unmarshal(metadataJSON, &s.Metadata)
+	json.Unmarshal(attributesJSON, &s.CharacterAttributes)
 	return &s, err
 }
 
 func (r *gameRepository) GetActivePilotStats(userID uuid.UUID) (*PilotStats, error) {
 	query := `
-		SELECT ps.user_id, ps.character_id, ps.equipped_exosuit_id, ps.resonance_level, ps.resonance_exp, ps.stress, ps.xp, ps.rank, ps.current_o2, ps.current_fuel, ps.scrap_metal, ps.research_data, ps.metadata, ps.updated_at 
+		SELECT ps.user_id, ps.character_id, ps.equipped_exosuit_id, ps.resonance_level, ps.resonance_exp, ps.stress, ps.xp, ps.rank, ps.current_o2, ps.current_fuel, ps.current_ne, ps.max_ne, ps.expeditions_completed, ps.character_attributes, ps.scrap_metal, ps.research_data, ps.metadata, ps.updated_at 
 		FROM pilot_stats ps
 		JOIN users u ON ps.character_id = u.active_character_id
 		WHERE u.id = $1
@@ -51,22 +57,25 @@ func (r *gameRepository) GetActivePilotStats(userID uuid.UUID) (*PilotStats, err
 
 	var s PilotStats
 	var metadataJSON []byte
-	err := row.Scan(&s.UserID, &s.CharacterID, &s.EquippedExosuitID, &s.ResonanceLevel, &s.ResonanceExp, &s.Stress, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.ScrapMetal, &s.ResearchData, &metadataJSON, &s.UpdatedAt)
+	var attributesJSON []byte
+	err := row.Scan(&s.UserID, &s.CharacterID, &s.EquippedExosuitID, &s.ResonanceLevel, &s.ResonanceExp, &s.Stress, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.CurrentNE, &s.MaxNE, &s.ExpeditionsCompleted, &attributesJSON, &s.ScrapMetal, &s.ResearchData, &metadataJSON, &s.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	json.Unmarshal(metadataJSON, &s.Metadata)
+	json.Unmarshal(attributesJSON, &s.CharacterAttributes)
 	return &s, err
 }
 
 func (r *gameRepository) UpdatePilotStats(s *PilotStats) error {
 	metadataJSON, _ := json.Marshal(s.Metadata)
+	attributesJSON, _ := json.Marshal(s.CharacterAttributes)
 	query := `
 		UPDATE pilot_stats 
-		SET equipped_exosuit_id = $1, resonance_level = $2, resonance_exp = $3, stress = $4, xp = $5, rank = $6, current_o2 = $7, current_fuel = $8, scrap_metal = $9, research_data = $10, metadata = $11, updated_at = CURRENT_TIMESTAMP
-		WHERE character_id = $12
+		SET equipped_exosuit_id = $1, resonance_level = $2, resonance_exp = $3, stress = $4, xp = $5, rank = $6, current_o2 = $7, current_fuel = $8, current_ne = $9, max_ne = $10, expeditions_completed = $11, character_attributes = $12, scrap_metal = $13, research_data = $14, metadata = $15, updated_at = CURRENT_TIMESTAMP
+		WHERE character_id = $16
 	`
-	_, err := r.db.Exec(query, s.EquippedExosuitID, s.ResonanceLevel, s.ResonanceExp, s.Stress, s.XP, s.Rank, s.CurrentO2, s.CurrentFuel, s.ScrapMetal, s.ResearchData, metadataJSON, s.CharacterID)
+	_, err := r.db.Exec(query, s.EquippedExosuitID, s.ResonanceLevel, s.ResonanceExp, s.Stress, s.XP, s.Rank, s.CurrentO2, s.CurrentFuel, s.CurrentNE, s.MaxNE, s.ExpeditionsCompleted, attributesJSON, s.ScrapMetal, s.ResearchData, metadataJSON, s.CharacterID)
 	return err
 }
 
@@ -79,8 +88,8 @@ func (r *gameRepository) InitializePilot(charID uuid.UUID) error {
 	}
 
 	query := `
-		INSERT INTO pilot_stats (user_id, character_id, resonance_level, resonance_exp, stress, xp, rank, current_o2, current_fuel, scrap_metal, research_data, metadata)
-		VALUES ($1, $2, 0, 0, 0, 0, 1, 100.0, 100.0, 0, 0, '{"radar_level": 1, "lab_level": 1, "warp_level": 1}')
+		INSERT INTO pilot_stats (user_id, character_id, resonance_level, resonance_exp, stress, xp, rank, current_o2, current_fuel, current_ne, max_ne, expeditions_completed, character_attributes, scrap_metal, research_data, metadata)
+		VALUES ($1, $2, 0, 0, 0, 0, 1, 100.0, 100.0, 0, 100.0, 0, '{}', 0, 0, '{"radar_level": 1, "lab_level": 1, "warp_level": 1}')
 		ON CONFLICT (character_id) DO NOTHING
 	`
 	_, err = r.db.Exec(query, userID, charID)
@@ -145,4 +154,37 @@ func (r *gameRepository) ConsumeResources(charID uuid.UUID, o2, fuel float64) (b
 	}
 	rows, _ := res.RowsAffected()
 	return rows > 0, nil
+}
+
+func (r *gameRepository) GetBastionModules(userID uuid.UUID) ([]BastionModule, error) {
+	query := `SELECT id, user_id, module_type, level, is_active, metadata, unlocked_at FROM bastion_modules WHERE user_id = $1`
+	rows, err := r.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var modules []BastionModule
+	for rows.Next() {
+		var m BastionModule
+		var metadataJSON []byte
+		if err := rows.Scan(&m.ID, &m.UserID, &m.ModuleType, &m.Level, &m.IsActive, &metadataJSON, &m.UnlockedAt); err != nil {
+			return nil, err
+		}
+		json.Unmarshal(metadataJSON, &m.Metadata)
+		modules = append(modules, m)
+	}
+	return modules, nil
+}
+
+func (r *gameRepository) UpdateBastionModule(m *BastionModule) error {
+	metadataJSON, _ := json.Marshal(m.Metadata)
+	query := `
+		INSERT INTO bastion_modules (id, user_id, module_type, level, is_active, metadata, unlocked_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		ON CONFLICT (user_id, module_type) DO UPDATE 
+		SET level = $4, is_active = $5, metadata = $6
+	`
+	_, err := r.db.Exec(query, m.ID, m.UserID, m.ModuleType, m.Level, m.IsActive, metadataJSON, m.UnlockedAt)
+	return err
 }
