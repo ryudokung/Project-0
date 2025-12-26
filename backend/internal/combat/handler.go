@@ -93,17 +93,17 @@ func (h *Handler) SimulateAttack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2. Fetch Parts (Equipped)
-	attackerParts, _ := h.vehicleRepo.GetPartsByVehicleID(attackerUUID)
-	defenderParts, _ := h.vehicleRepo.GetPartsByVehicleID(defenderUUID)
+	// 2. Fetch Items (Equipped)
+	attackerItems, _ := h.vehicleRepo.GetItemsByParentItemID(r.Context(), attackerUUID)
+	defenderItems, _ := h.vehicleRepo.GetItemsByParentItemID(r.Context(), defenderUUID)
 
 	// 3. Fetch Pilot Stats (for Resonance bonus)
 	attackerPilot, _ := h.gameRepo.GetActivePilotStats(attacker.OwnerID)
 	defenderPilot, _ := h.gameRepo.GetActivePilotStats(defender.OwnerID)
 
 	// 4. Map to Combat Stats
-	attackerStats := h.service.MapVehicleToUnitStats(attacker, attackerParts, attackerPilot)
-	defenderStats := h.service.MapVehicleToUnitStats(defender, defenderParts, defenderPilot)
+	attackerStats := h.service.MapVehicleToUnitStats(attacker, attackerItems, attackerPilot)
+	defenderStats := h.service.MapVehicleToUnitStats(defender, defenderItems, defenderPilot)
 
 	// 5. Execute Attack
 	result := h.service.ExecuteAttack(attackerStats, defenderStats, DamageType(req.DamageType))
@@ -118,6 +118,27 @@ func (h *Handler) SimulateAttack(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Failed to update defender HP", http.StatusInternalServerError)
 		return
+	}
+
+	// 7. Apply Durability Loss
+	// Attacker loses 1 durability on a random item (using first item for simplicity)
+	if len(attackerItems) > 0 {
+		item := attackerItems[0]
+		newDurability := item.Durability - 1
+		if newDurability < 0 { newDurability = 0 }
+		
+		condition := item.Condition
+		if newDurability == 0 {
+			condition = vehicle.ConditionBroken
+		} else if newDurability < item.MaxDurability/4 {
+			condition = vehicle.ConditionCritical
+		} else if newDurability < item.MaxDurability/2 {
+			condition = vehicle.ConditionDamaged
+		} else if newDurability < item.MaxDurability {
+			condition = vehicle.ConditionWorn
+		}
+
+		h.vehicleRepo.UpdateDurability(r.Context(), item.ID, newDurability, condition)
 	}
 
 	// Update local stats for response

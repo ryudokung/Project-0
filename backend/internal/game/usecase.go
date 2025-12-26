@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/ryudokung/Project-0/backend/internal/vehicle"
 )
@@ -9,11 +10,19 @@ import (
 type UseCase interface {
 	InitializeNewCharacter(userID, charID uuid.UUID) error
 	InitializeGachaStats(userID uuid.UUID) error
+	UnlockResearch(ctx context.Context, userID uuid.UUID, researchID string) (*PilotStats, error)
 }
 
 type gameUseCase struct {
 	repo        Repository
 	vehicleRepo vehicle.Repository
+}
+
+var ResearchCosts = map[string]int{
+	"atmosphericEntry": 100,
+	"quantumGate":      500,
+	"miningDrill":      200,
+	"hackingModule":    300,
 }
 
 func NewUseCase(repo Repository, vehicleRepo vehicle.Repository) UseCase {
@@ -93,6 +102,48 @@ func (u *gameUseCase) InitializeNewCharacter(userID, charID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func (uc *gameUseCase) UnlockResearch(ctx context.Context, userID uuid.UUID, researchID string) (*PilotStats, error) {
+	stats, err := uc.repo.GetPilotStats(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	cost, ok := ResearchCosts[researchID]
+	if !ok {
+		return nil, errors.New("invalid research ID")
+	}
+
+	// Check if already unlocked
+	unlocked, ok := stats.Metadata["unlocked_research"].([]interface{})
+	if ok {
+		for _, id := range unlocked {
+			if id == researchID {
+				return nil, errors.New("research already unlocked")
+			}
+		}
+	} else {
+		// Initialize if nil
+		stats.Metadata["unlocked_research"] = []interface{}{}
+	}
+
+	if stats.ResearchData < cost {
+		return nil, errors.New("insufficient research data")
+	}
+
+	// Deduct cost
+	stats.ResearchData -= cost
+
+	// Add to unlocked list
+	currentUnlocked := stats.Metadata["unlocked_research"].([]interface{})
+	stats.Metadata["unlocked_research"] = append(currentUnlocked, researchID)
+
+	if err := uc.repo.UpdatePilotStats(stats); err != nil {
+		return nil, err
+	}
+
+	return stats, nil
 }
 
 func (u *gameUseCase) InitializeGachaStats(userID uuid.UUID) error {

@@ -12,6 +12,7 @@ interface LocationScanProps {
   onSelectSubSector: (ss: SubSector) => void;
   onConfirmDeployment: () => void;
   onBack: () => void;
+  vehicles?: any[]; // Added optional vehicles prop
   selectedVehicle: any | null;
   onSelectVehicle: (v: any | null) => void;
   upgrades: any;
@@ -164,8 +165,8 @@ export default function LocationScan({
                       </div>
                     </div>
                     {vehicles.map((v, idx) => {
-                      const vType = v.vehicle_type || v.type || 'VEHICLE';
-                      const vClass = v.class || v.model || 'UNKNOWN';
+                      const vType = v.vehicle_type || (v as any).type || 'VEHICLE';
+                      const vClass = v.class || (v as any).model || 'UNKNOWN';
                       return (
                         <div 
                           key={`vehicle-deploy-subsector-${v.id || idx}`}

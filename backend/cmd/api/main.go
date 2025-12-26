@@ -95,7 +95,7 @@ func main() {
 	// DDS & Items
 	mux.Handle("/api/v1/items", authMiddleware(http.HandlerFunc(vehicleHandler.ListItems)))
 	mux.Handle("/api/v1/items/damage", authMiddleware(http.HandlerFunc(vehicleHandler.ApplyDamage)))
-	mux.Handle("/api/v1/items/repair", authMiddleware(http.HandlerFunc(vehicleHandler.Repair)))
+	mux.Handle("/api/v1/items/repair", authMiddleware(http.HandlerFunc(vehicleHandler.RepairItem)))
 
 	mux.Handle("/api/v1/combat/attack", authMiddleware(http.HandlerFunc(combatHandler.SimulateAttack)))
 	mux.Handle("/api/v1/gacha/pull", authMiddleware(http.HandlerFunc(gachaHandler.Pull)))
@@ -105,6 +105,7 @@ func main() {
 	mux.Handle("/api/v1/exploration/resolve-node", authMiddleware(http.HandlerFunc(explorationHandler.ResolveNode)))
 	mux.Handle("/api/v1/exploration/advance", authMiddleware(http.HandlerFunc(explorationHandler.AdvanceTimeline)))
 	mux.Handle("/api/v1/game/pilot-stats", authMiddleware(http.HandlerFunc(gameHandler.GetPilotStats)))
+	mux.Handle("/api/v1/game/research/unlock", authMiddleware(http.HandlerFunc(gameHandler.UnlockResearch)))
 
 	// Simple CORS Middleware
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

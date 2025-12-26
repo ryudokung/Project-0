@@ -10,6 +10,7 @@ type DamageType string
 const (
 	Kinetic   DamageType = "KINETIC"
 	Energy    DamageType = "ENERGY"
+	Explosive DamageType = "EXPLOSIVE"
 	Void      DamageType = "VOID"
 )
 

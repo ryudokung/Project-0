@@ -109,6 +109,14 @@ export default function PlayPage() {
     fetchVehicles();
   }, [user?.id]);
 
+  // Temporary fix for missing upgrades state
+  const upgrades = { 
+    atmosphericEntry: true, 
+    quantumGate: false,
+    miningDrill: true,
+    hackingModule: true
+  };
+
   const canDeploy = (target: { allowedModes: string[], requiresAtmosphere: boolean }) => {
     const currentMode = selectedVehicle ? selectedVehicle.type : 'PILOT';
     const modeAllowed = target.allowedModes.includes(currentMode);
@@ -255,7 +263,7 @@ export default function PlayPage() {
       <AnimatePresence mode="wait">
         {stage === 'BASTION' && (
           <motion.div key="bastion" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <Bastion onDeploy={() => setStage('MAP')} onGacha={() => {}} />
+            <Bastion onDeploy={() => setStage('MAP')} onGacha={() => {}} onResearch={() => {}} />
           </motion.div>
         )}
 

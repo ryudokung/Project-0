@@ -108,6 +108,11 @@ export interface PilotStats {
   scrap_metal: number;
   research_data: number;
   updated_at: string;
+  metadata?: {
+    radar_level?: number;
+    lab_level?: number;
+    warp_drive_level?: number;
+  };
 }
 
 export interface StrategicChoice {

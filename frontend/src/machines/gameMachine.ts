@@ -1,10 +1,41 @@
 import { createMachine, assign } from 'xstate';
 import { Sector, SubSector, PlanetLocation, Encounter, Node } from '@/services/exploration';
 
+export type GameEvent = 
+  | { type: 'UPDATE_USER'; user: any }
+  | { type: 'UPDATE_PILOT_STATS'; stats: any }
+  | { type: 'UPDATE_STATS'; o2: number; fuel: number; scrap?: number; research?: number; encounters: Encounter[]; currentEncounter: Encounter | null; expeditionId: string; title: string }
+  | { type: 'UPDATE_TIMELINE'; timeline: Node[]; currentNode?: Node }
+  | { type: 'RESET_EXPEDITION' }
+  | { type: 'START'; user?: any }
+  | { type: 'SUCCESS' }
+  | { type: 'CHARACTER_CREATED'; character: any }
+  | { type: 'DEPLOY' }
+  | { type: 'OPEN_GACHA' }
+  | { type: 'OPEN_RESEARCH' }
+  | { type: 'UPDATE_VEHICLES'; vehicles: any[] }
+  | { type: 'BACK' }
+  | { type: 'SELECT_SECTOR'; sector: Sector }
+  | { type: 'SELECT_SUBSECTOR'; subSector: SubSector }
+  | { type: 'SELECT_PLANET_LOCATION'; location: PlanetLocation }
+  | { type: 'SELECT_VEHICLE'; vehicle: any }
+  | { type: 'CONFIRM_DEPLOYMENT'; isPlanet?: boolean }
+  | { type: 'ENTER_COMBAT'; enemyId: string }
+  | { type: 'COMBAT_END' }
+  | { type: 'MISSION_END' }
+  | { type: 'NEXT_NODE' }
+  | { type: 'RETURN' }
+  | { type: 'RESOLVE_NODE'; node: Node }
+  | { type: 'SCAN' }
+  | { type: 'AUTH_READY'; user: any };
+
 export interface GameContext {
   user: any | null;
+  pilotStats: any | null;
   o2: number;
   fuel: number;
+  scrap: number;
+  research: number;
   activeEnemyId: string | null;
   encounters: Encounter[];
   currentEncounter: Encounter | null;
@@ -21,11 +52,18 @@ export interface GameContext {
 
 export const gameMachine = createMachine({
   id: 'game',
+  types: {} as {
+    context: GameContext;
+    events: GameEvent;
+  },
   initial: 'initializing',
   context: {
     user: null,
+    pilotStats: null,
     o2: 100,
     fuel: 100,
+    scrap: 0,
+    research: 0,
     activeEnemyId: null,
     encounters: [],
     currentEncounter: null,
@@ -43,10 +81,19 @@ export const gameMachine = createMachine({
     UPDATE_USER: {
       actions: assign({ user: ({ event }) => event.user })
     },
+    UPDATE_PILOT_STATS: {
+      actions: assign({ 
+        pilotStats: ({ event }) => event.stats,
+        research: ({ event }) => event.stats.research_data,
+        scrap: ({ event }) => event.stats.scrap_metal
+      })
+    },
     UPDATE_STATS: {
       actions: assign({
         o2: ({ event }) => event.o2,
         fuel: ({ event }) => event.fuel,
+        scrap: ({ event, context }) => event.scrap !== undefined ? event.scrap : context.scrap,
+        research: ({ event, context }) => event.research !== undefined ? event.research : context.research,
         encounters: ({ event }) => event.encounters,
         currentEncounter: ({ event }) => event.currentEncounter,
         currentExpeditionId: ({ event }) => event.expeditionId,
@@ -169,6 +216,7 @@ export const gameMachine = createMachine({
       on: {
         DEPLOY: 'map',
         OPEN_GACHA: 'gacha',
+        OPEN_RESEARCH: 'research',
         UPDATE_VEHICLES: {
           actions: assign({ 
             vehicles: ({ event }) => event.vehicles,
@@ -178,6 +226,11 @@ export const gameMachine = createMachine({
       }
     },
     gacha: {
+      on: {
+        BACK: 'bastion'
+      }
+    },
+    research: {
       on: {
         BACK: 'bastion'
       }

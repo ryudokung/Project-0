@@ -13,8 +13,8 @@ func NewService(engine *Engine) *Service {
 	return &Service{engine: engine}
 }
 
-// MapVehicleToUnitStats converts a Vehicle and its equipped parts into UnitStats for the combat engine
-func (s *Service) MapVehicleToUnitStats(v *vehicle.Vehicle, parts []vehicle.Part, pilot *game.PilotStats) UnitStats {
+// MapVehicleToUnitStats converts a Vehicle and its equipped items into UnitStats for the combat engine
+func (s *Service) MapVehicleToUnitStats(v *vehicle.Vehicle, items []vehicle.Item, pilot *game.PilotStats) UnitStats {
 	// Default stats for Pilot Only mode
 	stats := UnitStats{
 		HP:                100,
@@ -37,12 +37,15 @@ func (s *Service) MapVehicleToUnitStats(v *vehicle.Vehicle, parts []vehicle.Part
 		stats.Evasion = v.Stats.Speed / 10
 		stats.Speed = v.Stats.Speed
 
-		// Apply Part Bonuses
-		for _, p := range parts {
-			stats.HP += p.Stats.BonusHP
-			stats.MaxHP += p.Stats.BonusHP
-			stats.BaseAttack += p.Stats.BonusAttack
-			stats.TargetDefense += p.Stats.BonusDefense
+		// Apply Item Bonuses
+		for _, i := range items {
+			// Only count equipped items (though the query should filter this)
+			if i.IsEquipped {
+				stats.HP += i.Stats.BonusHP
+				stats.MaxHP += i.Stats.BonusHP
+				stats.BaseAttack += i.Stats.BonusAttack
+				stats.TargetDefense += i.Stats.BonusDefense
+			}
 		}
 	}
 

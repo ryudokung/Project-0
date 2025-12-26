@@ -26,9 +26,13 @@ export interface Item {
   rarity: string;
   tier: number;
   slot?: string;
+  damage_type?: string; // KINETIC, ENERGY, VOID
+  series_id?: string;   // For Set Synergy
   durability: number;
   max_durability: number;
   condition: string;
+  is_nft?: boolean;
+  token_id?: string;
   stats: {
     hp?: number;
     attack?: number;
@@ -109,5 +113,30 @@ export const vehicleService = {
     if (!response.ok) {
       throw new Error('Failed to unequip item');
     }
-  }
-};
+  },
+
+  async repairItem(itemId: string): Promise<{ item: Item; cost: number }> {
+    const response = await fetch(`${API_BASE_URL}/vehicles/repair`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ item_id: itemId }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to repair item');
+    }
+    return await response.json();
+  },
+
+  async mintItem(itemId: string): Promise<{ status: string; token_id: string }> {
+    const response = await fetch(`${API_BASE_URL}/vehicles/mint`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ item_id: itemId }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to mint item');
+    }
+    return await response.json();
+  },};

@@ -30,6 +30,7 @@ type Repository interface {
 	GetItemByID(ctx context.Context, id uuid.UUID) (*Item, error)
 	UpdateItem(ctx context.Context, item *Item) error
 	GetItemsByOwnerID(ctx context.Context, ownerID uuid.UUID) ([]Item, error)
+	GetItemsByParentItemID(ctx context.Context, parentItemID uuid.UUID) ([]Item, error)
 	UpdateDurability(ctx context.Context, id uuid.UUID, durability int, condition ItemCondition) error
 }
 
@@ -393,6 +394,62 @@ func (r *vehicleRepository) GetItemsByOwnerID(ctx context.Context, ownerID uuid.
 		}
 		if parentID.Valid {
 			i.ParentItemID = &parentID.UUID
+		}
+
+		json.Unmarshal(statsJSON, &i.Stats)
+		json.Unmarshal(dnaJSON, &i.VisualDNA)
+		json.Unmarshal(metaJSON, &i.Metadata)
+		items = append(items, i)
+	}
+	return items, nil
+}
+
+func (r *vehicleRepository) GetItemsByParentItemID(ctx context.Context, parentItemID uuid.UUID) ([]Item, error) {
+	query := `
+		SELECT 
+			id, owner_id, character_id, name, item_type, rarity, tier, slot, 
+			damage_type, series_id,
+			is_nft, token_id, durability, max_durability, condition, 
+			stats, visual_dna, metadata, is_equipped, parent_item_id, created_at, updated_at
+		FROM items WHERE parent_item_id = $1
+	`
+	rows, err := r.db.QueryContext(ctx, query, parentItemID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := []Item{}
+	for rows.Next() {
+		var i Item
+		var statsJSON, dnaJSON, metaJSON []byte
+		var tokenID, damageType, seriesID sql.NullString
+		var charID, parentID uuid.NullUUID
+
+		err := rows.Scan(
+			&i.ID, &i.OwnerID, &charID, &i.Name, &i.ItemType, &i.Rarity, &i.Tier, &i.Slot,
+			&damageType, &seriesID,
+			&i.IsNFT, &tokenID, &i.Durability, &i.MaxDurability, &i.Condition,
+			&statsJSON, &dnaJSON, &metaJSON, &i.IsEquipped, &parentID, &i.CreatedAt, &i.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if tokenID.Valid {
+			i.TokenID = &tokenID.String
+		}
+		if charID.Valid {
+			i.CharacterID = &charID.UUID
+		}
+		if parentID.Valid {
+			i.ParentItemID = &parentID.UUID
+		}
+		if damageType.Valid {
+			i.DamageType = &damageType.String
+		}
+		if seriesID.Valid {
+			i.SeriesID = &seriesID.String
 		}
 
 		json.Unmarshal(statsJSON, &i.Stats)

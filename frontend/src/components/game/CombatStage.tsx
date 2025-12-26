@@ -8,12 +8,16 @@ import { gameEvents, GAME_EVENTS } from '@/systems/EventBus';
 
 interface CombatStageProps {
   attackerId: string;
+  attackerName?: string;
+  attackerVehicle?: any;
   enemyId: string;
   onCombatEnd: (result: 'VICTORY' | 'DEFEAT' | 'ESCAPE') => void;
 }
 
 export default function CombatStage({
   attackerId,
+  attackerName = "PLAYER_VEHICLE",
+  attackerVehicle,
   enemyId,
   onCombatEnd
 }: CombatStageProps) {
@@ -39,7 +43,11 @@ export default function CombatStage({
 
   const { attackerStats, defenderStats, combatLog, isProcessing, turn } = combatState;
 
-  const attackerName = "PLAYER_VEHICLE";
+  // Use props for initial display, then fallback to combat state
+  const displayName = attackerVehicle?.class || attackerName;
+  const displayHP = attackerStats ? attackerStats.hp : (attackerVehicle?.stats?.hp || 100);
+  const displayMaxHP = attackerStats ? attackerStats.max_hp : (attackerVehicle?.stats?.hp || 100);
+
   const defenderName = "ENEMY_UNIT";
 
   const handleAttack = async (type: DamageType) => {
@@ -58,26 +66,26 @@ export default function CombatStage({
         <div className="border border-zinc-800 p-8 bg-zinc-900/20 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
           <div className="text-xs text-zinc-500 uppercase mb-2">Friendly Unit</div>
-          <div className="text-3xl font-bold mb-6">{attackerName}</div>
+          <div className="text-3xl font-bold mb-6">{displayName}</div>
           
           <div className="space-y-4">
             <div>
               <div className="flex justify-between text-xs mb-1">
                 <span>INTEGRITY</span>
-                <span>{attackerStats?.hp || '???'}/{attackerStats?.max_hp || '???'}</span>
+                <span>{displayHP}/{displayMaxHP}</span>
               </div>
               <div className="w-full h-2 bg-zinc-900">
                 <motion.div 
                   className="h-full bg-blue-500"
                   initial={{ width: '100%' }}
-                  animate={{ width: attackerStats ? `${(attackerStats.hp / attackerStats.max_hp) * 100}%` : '100%' }}
+                  animate={{ width: `${(displayHP / displayMaxHP) * 100}%` }}
                 />
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4 text-[10px] text-zinc-400 uppercase">
-              <div className="border border-zinc-800 p-2">ATK: {attackerStats?.base_attack || '--'}</div>
-              <div className="border border-zinc-800 p-2">DEF: {attackerStats?.target_defense || '--'}</div>
+              <div className="border border-zinc-800 p-2">ATK: {attackerStats?.base_attack || attackerVehicle?.stats?.attack || '--'}</div>
+              <div className="border border-zinc-800 p-2">DEF: {attackerStats?.target_defense || attackerVehicle?.stats?.defense || '--'}</div>
             </div>
           </div>
         </div>

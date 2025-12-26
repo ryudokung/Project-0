@@ -25,6 +25,8 @@ export class ExplorationSystem {
       const missionData = {
         o2: result.pilot_stats?.current_o2 || 100,
         fuel: result.pilot_stats?.current_fuel || 100,
+        scrap: result.pilot_stats?.scrap_metal || 0,
+        research: result.pilot_stats?.research_data || 0,
         encounters: result.encounters,
         currentEncounter: result.encounters[0],
         expeditionId: result.expedition.id,

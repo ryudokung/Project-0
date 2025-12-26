@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMachine } from '@xstate/react';
 import { gameMachine } from '@/machines/gameMachine';
@@ -23,8 +23,11 @@ import TimelineView from '@/components/game/TimelineView';
 import CombatStage from '@/components/game/CombatStage';
 import GachaStage from '@/components/game/GachaStage';
 import NotificationSystem from '@/components/game/NotificationSystem';
+import { ResearchTerminal } from '@/components/game/ResearchTerminal';
 
-type GameStage = 'LANDING' | 'CHARACTER_CREATION' | 'BASTION' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'COMBAT' | 'DEBRIEF' | 'GACHA';
+export const GameContext = createContext<any>(null);
+
+type GameStage = 'LANDING' | 'CHARACTER_CREATION' | 'BASTION' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'COMBAT' | 'DEBRIEF' | 'GACHA' | 'RESEARCH';
 type DeploymentMode = 'PILOT' | 'SPEEDER' | 'MECH' | 'TANK' | 'SHIP' | 'EXOSUIT' | 'HAULER';
 
 interface BastionModules {
@@ -113,6 +116,17 @@ export default function UnifiedGamePage() {
     universeSystem.fetchMap();
     if (user?.active_character_id || user?.id) {
       bastionSystem.refreshVehicles(user.active_character_id || user.id);
+      
+      // Fetch Pilot Stats
+      const token = localStorage.getItem('token');
+      if (token && user?.active_character_id) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/game/pilot-stats?character_id=${user.active_character_id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(stats => send({ type: 'UPDATE_PILOT_STATS', stats }))
+        .catch(console.error);
+      }
     }
 
     return () => {
@@ -120,6 +134,15 @@ export default function UnifiedGamePage() {
       unsubBastion();
     };
   }, [user?.id, user?.active_character_id, send]);
+
+  // Upgrades from Pilot Stats
+  const unlockedResearch = state.context.pilotStats?.metadata?.unlocked_research || [];
+  const upgrades = { 
+    atmosphericEntry: unlockedResearch.includes('atmosphericEntry'), 
+    quantumGate: unlockedResearch.includes('quantumGate'),
+    miningDrill: unlockedResearch.includes('miningDrill'),
+    hackingModule: unlockedResearch.includes('hackingModule')
+  };
 
   const canDeploy = (target: { allowedModes: string[], requiresAtmosphere: boolean }) => {
     const currentMode = selectedVehicle ? selectedVehicle.type : 'PILOT';
@@ -206,7 +229,7 @@ export default function UnifiedGamePage() {
           fuel: result.pilot_stats?.current_fuel ?? fuel,
           encounters,
           currentEncounter,
-          expeditionId: currentExpeditionId,
+          expeditionId: currentExpeditionId || '',
           title: expeditionTitle
         });
 
@@ -248,6 +271,8 @@ export default function UnifiedGamePage() {
         type: 'UPDATE_STATS', 
         o2: stats?.current_o2 ?? o2,
         fuel: stats?.current_fuel ?? fuel,
+        scrap: stats?.scrap_metal ?? 0,
+        research: stats?.research_data ?? 0,
         encounters: [...(encounters || []), encounter],
         currentEncounter: encounter,
         expeditionId: currentExpeditionId,
@@ -269,7 +294,7 @@ export default function UnifiedGamePage() {
 
       if (encounter.type === 'COMBAT') {
         setTimeout(() => {
-          send({ type: 'ENTER_COMBAT', enemyId: encounter.enemy_id || null });
+          send({ type: 'ENTER_COMBAT', enemyId: encounter.enemy_id || '' });
           setIsTransitioning(false);
         }, 2000);
       } else {
@@ -300,30 +325,46 @@ export default function UnifiedGamePage() {
   }
 
   return (
-    <main className="relative h-screen w-screen overflow-hidden bg-black text-zinc-100 font-mono">
-      <AnimatePresence mode="wait">
-        {state.matches('landing') && (
-          <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <LandingStage onStart={() => send({ type: 'START', user })} />
-          </motion.div>
-        )}
+    <GameContext.Provider value={gameMachine}>
+      <main className="relative h-screen w-screen overflow-hidden bg-black text-zinc-100 font-mono">
+        <AnimatePresence mode="wait">
+          {state.matches('landing') && (
+            <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+              <LandingStage onStart={() => send({ type: 'START', user })} />
+            </motion.div>
+          )}
 
-        {state.matches('characterCreation') && (
-          <motion.div key="char-creation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <CharacterCreationStage onSuccess={() => send({ type: 'SUCCESS' })} />
-          </motion.div>
-        )}
+          {state.matches('characterCreation') && (
+            <motion.div key="char-creation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+              <CharacterCreationStage onSuccess={() => send({ type: 'SUCCESS' })} />
+            </motion.div>
+          )}
 
-        {state.matches('bastion') && (
-          <motion.div key="bastion" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <Bastion 
-              onDeploy={() => send({ type: 'DEPLOY' })} 
-              onGacha={() => send({ type: 'OPEN_GACHA' })}
-            />
-          </motion.div>
-        )}
+          {state.matches('bastion') && (
+            <motion.div key="bastion" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+              <Bastion 
+                onDeploy={() => send({ type: 'DEPLOY' })} 
+                onGacha={() => send({ type: 'OPEN_GACHA' })}
+                onResearch={() => send({ type: 'OPEN_RESEARCH' })}
+              />
+            </motion.div>
+          )}
 
-        {state.matches('gacha') && (
+          {state.matches('research') && (
+            <motion.div key="research" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full relative">
+              <button 
+                onClick={() => send({ type: 'BACK' })}
+                className="absolute top-4 left-4 z-50 px-4 py-2 bg-gray-800 border border-gray-600 text-white rounded hover:bg-gray-700"
+              >
+                BACK TO BASTION
+              </button>
+              <div className="h-full w-full p-12 pt-20">
+                <ResearchTerminal />
+              </div>
+            </motion.div>
+          )}
+
+          {state.matches('gacha') && (
           <motion.div key="gacha" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
             <GachaStage onBack={() => send({ type: 'BACK' })} />
           </motion.div>
@@ -384,6 +425,8 @@ export default function UnifiedGamePage() {
               expeditionTitle={expeditionTitle}
               o2={o2}
               fuel={fuel}
+              scrap={state.context.scrap}
+              research={state.context.research}
               timeline={timeline}
               currentNode={currentNode}
               onResolveChoice={resolveChoice}
@@ -399,6 +442,7 @@ export default function UnifiedGamePage() {
           <motion.div key="combat" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
             <CombatStage 
               attackerId={selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'}
+              attackerVehicle={selectedVehicle}
               enemyId={activeEnemyId || ''}
               onCombatEnd={async (result) => {
                 console.log('Combat ended:', result);
@@ -446,5 +490,6 @@ export default function UnifiedGamePage() {
       {/* SCANLINES EFFECT */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-50 bg-[length:100%_2px,3px_100%]" />
     </main>
+    </GameContext.Provider>
   );
 }

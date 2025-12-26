@@ -1,17 +1,17 @@
-import { mechService, Mech } from '@/services/mech';
+import { vehicleService, Vehicle } from '@/services/vehicle';
 import { gameEvents, GAME_EVENTS } from './EventBus';
 
 export interface HangarState {
-  mechs: Mech[];
-  selectedMechId: string | null;
+  vehicles: Vehicle[];
+  selectedVehicleId: string | null;
   isLoading: boolean;
   error: string | null;
 }
 
 class HangarSystem {
   private state: HangarState = {
-    mechs: [],
-    selectedMechId: null,
+    vehicles: [],
+    selectedVehicleId: null,
     isLoading: false,
     error: null,
   };
@@ -20,16 +20,16 @@ class HangarSystem {
     return { ...this.state };
   }
 
-  async refreshMechs(characterId?: string) {
+  async refreshVehicles(characterId?: string) {
     this.state.isLoading = true;
     this.state.error = null;
     gameEvents.emit(GAME_EVENTS.HANGAR_UPDATED, this.getState());
 
     try {
-      const mechs = await mechService.getMechs(characterId);
-      this.state.mechs = mechs || [];
-      if (this.state.mechs.length > 0 && !this.state.selectedMechId) {
-        this.state.selectedMechId = this.state.mechs[0].id;
+      const vehicles = await vehicleService.getVehicles(characterId);
+      this.state.vehicles = vehicles || [];
+      if (this.state.vehicles.length > 0 && !this.state.selectedVehicleId) {
+        this.state.selectedVehicleId = this.state.vehicles[0].id;
       }
       gameEvents.emit(GAME_EVENTS.HANGAR_UPDATED, this.getState());
     } catch (error: any) {
@@ -41,8 +41,8 @@ class HangarSystem {
     }
   }
 
-  selectMech(mechId: string) {
-    this.state.selectedMechId = mechId;
+  selectVehicle(vehicleId: string) {
+    this.state.selectedVehicleId = vehicleId;
     gameEvents.emit(GAME_EVENTS.HANGAR_UPDATED, this.getState());
   }
 }

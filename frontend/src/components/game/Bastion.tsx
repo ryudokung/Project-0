@@ -11,9 +11,10 @@ import { gameEvents, GAME_EVENTS } from '@/systems/EventBus';
 interface BastionProps {
   onDeploy: () => void;
   onGacha: () => void;
+  onResearch: () => void;
 }
 
-export default function Bastion({ onDeploy, onGacha }: BastionProps) {
+export default function Bastion({ onDeploy, onGacha, onResearch }: BastionProps) {
   const { user: backendUser } = useAuthSync();
   const [bastionState, setBastionState] = useState<BastionState>(bastionSystem.getState());
   const [showInventory, setShowInventory] = useState(false);
@@ -93,7 +94,7 @@ export default function Bastion({ onDeploy, onGacha }: BastionProps) {
               </div>
               <div className="flex flex-col items-center">
                 <div className="text-[8px] text-zinc-400 uppercase">Warp</div>
-                <div className="text-lg font-black text-orange-400">LV.{bastionState.pilotStats?.metadata?.warp_level || 1}</div>
+                <div className="text-lg font-black text-orange-400">LV.{bastionState.pilotStats?.metadata?.warp_drive_level || 1}</div>
               </div>
             </div>
           </div>
@@ -326,6 +327,12 @@ export default function Bastion({ onDeploy, onGacha }: BastionProps) {
           className="bg-yellow-400 text-black px-6 py-2 font-bold uppercase tracking-tighter hover:bg-yellow-300 transition-colors text-center"
         >
           Void Signals (Gacha)
+        </button>
+        <button 
+          onClick={onResearch}
+          className="bg-green-600 text-white px-6 py-2 font-bold uppercase tracking-tighter hover:bg-green-500 transition-colors text-center"
+        >
+          Research Lab
         </button>
         <button className="bg-white text-black px-6 py-2 font-bold uppercase tracking-tighter hover:bg-gray-200 transition-colors">
           Share to Social

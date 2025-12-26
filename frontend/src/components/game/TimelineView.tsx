@@ -7,6 +7,8 @@ interface TimelineViewProps {
   expeditionTitle: string;
   o2: number;
   fuel: number;
+  scrap?: number;
+  research?: number;
   timeline: Node[];
   currentNode: Node | null;
   onResolveChoice: (nodeId: string, choice: string) => void;
@@ -18,6 +20,8 @@ export default function TimelineView({
   expeditionTitle,
   o2,
   fuel,
+  scrap,
+  research,
   timeline,
   currentNode,
   onResolveChoice,
@@ -33,6 +37,14 @@ export default function TimelineView({
           <div className="text-lg font-black italic text-pink-500">{expeditionTitle}</div>
         </div>
         <div className="flex gap-8">
+          <div className="text-right">
+            <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Scrap</div>
+            <div className="text-xl font-black text-yellow-500">{scrap || 0}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Research</div>
+            <div className="text-xl font-black text-blue-500">{research || 0}</div>
+          </div>
           <div className="text-right">
             <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Oxygen Level</div>
             <div className={`text-xl font-black ${o2 < 30 ? 'text-red-500 animate-pulse' : 'text-white'}`}>{o2}%</div>
