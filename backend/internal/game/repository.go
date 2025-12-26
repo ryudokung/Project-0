@@ -26,11 +26,11 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (r *gameRepository) GetPilotStats(charID uuid.UUID) (*PilotStats, error) {
-	query := `SELECT user_id, character_id, resonance_level, resonance_exp, xp, rank, current_o2, current_fuel, updated_at FROM pilot_stats WHERE character_id = $1`
+	query := `SELECT user_id, character_id, resonance_level, resonance_exp, stress, xp, rank, current_o2, current_fuel, scrap_metal, research_data, updated_at FROM pilot_stats WHERE character_id = $1`
 	row := r.db.QueryRow(query, charID)
 
 	var s PilotStats
-	err := row.Scan(&s.UserID, &s.CharacterID, &s.ResonanceLevel, &s.ResonanceExp, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.UpdatedAt)
+	err := row.Scan(&s.UserID, &s.CharacterID, &s.ResonanceLevel, &s.ResonanceExp, &s.Stress, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.ScrapMetal, &s.ResearchData, &s.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -39,7 +39,7 @@ func (r *gameRepository) GetPilotStats(charID uuid.UUID) (*PilotStats, error) {
 
 func (r *gameRepository) GetActivePilotStats(userID uuid.UUID) (*PilotStats, error) {
 	query := `
-		SELECT ps.user_id, ps.character_id, ps.resonance_level, ps.resonance_exp, ps.xp, ps.rank, ps.current_o2, ps.current_fuel, ps.updated_at 
+		SELECT ps.user_id, ps.character_id, ps.resonance_level, ps.resonance_exp, ps.stress, ps.xp, ps.rank, ps.current_o2, ps.current_fuel, ps.scrap_metal, ps.research_data, ps.updated_at 
 		FROM pilot_stats ps
 		JOIN users u ON ps.character_id = u.active_character_id
 		WHERE u.id = $1
@@ -47,7 +47,7 @@ func (r *gameRepository) GetActivePilotStats(userID uuid.UUID) (*PilotStats, err
 	row := r.db.QueryRow(query, userID)
 
 	var s PilotStats
-	err := row.Scan(&s.UserID, &s.CharacterID, &s.ResonanceLevel, &s.ResonanceExp, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.UpdatedAt)
+	err := row.Scan(&s.UserID, &s.CharacterID, &s.ResonanceLevel, &s.ResonanceExp, &s.Stress, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.ScrapMetal, &s.ResearchData, &s.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -57,10 +57,10 @@ func (r *gameRepository) GetActivePilotStats(userID uuid.UUID) (*PilotStats, err
 func (r *gameRepository) UpdatePilotStats(s *PilotStats) error {
 	query := `
 		UPDATE pilot_stats 
-		SET resonance_level = $1, resonance_exp = $2, xp = $3, rank = $4, current_o2 = $5, current_fuel = $6, updated_at = CURRENT_TIMESTAMP
-		WHERE character_id = $7
+		SET resonance_level = $1, resonance_exp = $2, stress = $3, xp = $4, rank = $5, current_o2 = $6, current_fuel = $7, scrap_metal = $8, research_data = $9, updated_at = CURRENT_TIMESTAMP
+		WHERE character_id = $10
 	`
-	_, err := r.db.Exec(query, s.ResonanceLevel, s.ResonanceExp, s.XP, s.Rank, s.CurrentO2, s.CurrentFuel, s.CharacterID)
+	_, err := r.db.Exec(query, s.ResonanceLevel, s.ResonanceExp, s.Stress, s.XP, s.Rank, s.CurrentO2, s.CurrentFuel, s.ScrapMetal, s.ResearchData, s.CharacterID)
 	return err
 }
 
@@ -73,8 +73,8 @@ func (r *gameRepository) InitializePilot(charID uuid.UUID) error {
 	}
 
 	query := `
-		INSERT INTO pilot_stats (user_id, character_id, resonance_level, resonance_exp, xp, rank, current_o2, current_fuel)
-		VALUES ($1, $2, 0, 0, 0, 1, 100.0, 100.0)
+		INSERT INTO pilot_stats (user_id, character_id, resonance_level, resonance_exp, stress, xp, rank, current_o2, current_fuel, scrap_metal, research_data)
+		VALUES ($1, $2, 0, 0, 0, 0, 1, 100.0, 100.0, 0, 0)
 		ON CONFLICT (character_id) DO NOTHING
 	`
 	_, err = r.db.Exec(query, userID, charID)

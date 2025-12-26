@@ -14,7 +14,7 @@ The universe evolves through "Context Patches" deployed by the Creator.
 To ensure all AI-generated assets look like they belong to the same universe:
 - **Master LoRA/Style:** A fixed visual foundation for each season.
 - **Visual DNA Guardrails:**
-    - **Material Enforcement:** Ensuring "Industrial Steel" always looks consistent across Mechs and Tanks.
+    - **Material Enforcement:** Ensuring "Industrial Steel" always looks consistent across Vehicles.
     - **Faction Aesthetics:** Automatically applying "Void Cult" purple glows to any item associated with that faction.
 - **Quality Control:** A "God Mode" dashboard to review and approve/regenerate key asset visuals.
 
@@ -22,7 +22,7 @@ To ensure all AI-generated assets look like they belong to the same universe:
 Real-time monitoring of the player ecosystem:
 - **Death Heatmaps:** Identifying zones that are too difficult or too easy.
 - **Economy Health:** Monitoring the total supply of Scrap and Cores to prevent inflation.
-- **Asset Popularity:** Seeing which NFT parts are being "Flexed" the most in the Hangar.
+- **Asset Popularity:** Seeing which NFT parts are being "Flexed" the most in the Bastion.
 
 ## 4. Live Operations (LiveOps)
 - **Difficulty Adjustment:** Real-time tweaking of enemy stats or drop rates based on community progress.

@@ -11,6 +11,7 @@ interface TimelineViewProps {
   currentNode: Node | null;
   onResolveChoice: (nodeId: string, choice: string) => void;
   onEnterCombat: (enemyId: string) => void;
+  onAdvance: () => void;
 }
 
 export default function TimelineView({
@@ -20,7 +21,8 @@ export default function TimelineView({
   timeline,
   currentNode,
   onResolveChoice,
-  onEnterCombat
+  onEnterCombat,
+  onAdvance
 }: TimelineViewProps) {
   return (
     <div className="h-screen flex flex-col bg-black text-white font-mono overflow-hidden">
@@ -92,7 +94,7 @@ export default function TimelineView({
               <div className="absolute bottom-8 left-8 right-8">
                 <div className="text-[10px] text-pink-500 font-bold mb-2 tracking-[0.3em] uppercase">Visual DNA Synthesis</div>
                 <div className="text-xs text-zinc-400 font-mono bg-black/60 p-4 border-l-2 border-pink-500 backdrop-blur-sm">
-                  {currentNode?.environment_description.toUpperCase()}
+                  {currentNode?.environment_description?.toUpperCase() || 'SCANNING ENVIRONMENT...'}
                 </div>
               </div>
             </motion.div>
@@ -113,13 +115,13 @@ export default function TimelineView({
 
           <div className="flex-1 space-y-4">
             <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-4">Strategic Choices</div>
-            {currentNode?.choices.map((choice) => (
+            {currentNode?.choices?.map((choice) => (
               <button
                 key={choice.label}
-                disabled={currentNode.is_resolved}
-                onClick={() => onResolveChoice(currentNode.id, choice.label)}
+                disabled={currentNode?.is_resolved}
+                onClick={() => currentNode && onResolveChoice(currentNode.id, choice.label)}
                 className={`w-full text-left p-4 border transition-all group relative overflow-hidden
-                  ${currentNode.is_resolved ? 'border-zinc-800 opacity-50 cursor-not-allowed' : 'border-zinc-800 hover:border-pink-500 hover:bg-pink-500/5'}
+                  ${currentNode?.is_resolved ? 'border-zinc-800 opacity-50 cursor-not-allowed' : 'border-zinc-800 hover:border-pink-500 hover:bg-pink-500/5'}
                 `}
               >
                 <div className="flex justify-between items-start mb-1">
@@ -128,7 +130,7 @@ export default function TimelineView({
                 </div>
                 <p className="text-[10px] text-zinc-500 leading-tight">{choice.description}</p>
                 
-                {choice.requirements.length > 0 && (
+                {choice.requirements && choice.requirements.length > 0 && (
                   <div className="mt-2 flex gap-2">
                     {choice.requirements.map(req => (
                       <span key={req} className="text-[8px] bg-zinc-900 text-zinc-400 px-1.5 py-0.5 rounded border border-zinc-800">
@@ -144,14 +146,15 @@ export default function TimelineView({
             ))}
 
             {currentNode?.is_resolved && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="p-4 bg-zinc-900/50 border border-zinc-800 text-center"
+              <motion.button 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={onAdvance}
+                className="w-full p-6 bg-white text-black font-black uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]"
               >
-                <div className="text-[10px] text-zinc-500 uppercase mb-1">Node Resolved</div>
-                <div className="text-xs font-bold text-pink-500">PROCEED TO NEXT SECTOR</div>
-              </motion.div>
+                <div className="text-[10px] opacity-50 mb-1">Node Resolved</div>
+                <div className="text-sm">Proceed to Next Sector</div>
+              </motion.button>
             )}
           </div>
 

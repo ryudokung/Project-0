@@ -42,6 +42,33 @@ export const gameMachine = createMachine({
   on: {
     UPDATE_USER: {
       actions: assign({ user: ({ event }) => event.user })
+    },
+    UPDATE_STATS: {
+      actions: assign({
+        o2: ({ event }) => event.o2,
+        fuel: ({ event }) => event.fuel,
+        encounters: ({ event }) => event.encounters,
+        currentEncounter: ({ event }) => event.currentEncounter,
+        currentExpeditionId: ({ event }) => event.expeditionId,
+        expeditionTitle: ({ event }) => event.title
+      })
+    },
+    UPDATE_TIMELINE: {
+      actions: assign({
+        timeline: ({ event }) => event.timeline,
+        currentNode: ({ event }) => event.currentNode || event.timeline.find((n: Node) => !n.is_resolved) || event.timeline[0]
+      })
+    },
+    RESET_EXPEDITION: {
+      actions: assign({
+        timeline: [],
+        currentNode: null,
+        encounters: [],
+        currentEncounter: null,
+        currentExpeditionId: null,
+        selectedSubSector: null,
+        selectedPlanetLocation: null,
+      })
     }
   },
   states: {
@@ -193,22 +220,6 @@ export const gameMachine = createMachine({
     },
     exploration: {
       on: {
-        UPDATE_STATS: {
-          actions: assign({
-            o2: ({ event }) => event.o2,
-            fuel: ({ event }) => event.fuel,
-            encounters: ({ event }) => event.encounters,
-            currentEncounter: ({ event }) => event.currentEncounter,
-            currentExpeditionId: ({ event }) => event.expeditionId,
-            expeditionTitle: ({ event }) => event.title
-          })
-        },
-        UPDATE_TIMELINE: {
-          actions: assign({
-            timeline: ({ event }) => event.timeline,
-            currentNode: ({ event }) => event.currentNode || event.timeline.find((n: Node) => !n.is_resolved) || event.timeline[0]
-          })
-        },
         RESOLVE_NODE: {
           actions: assign({
             currentNode: ({ event }) => event.node,
@@ -219,6 +230,23 @@ export const gameMachine = createMachine({
           actions: assign({ activeEnemyId: ({ event }) => event.enemyId }),
           target: 'combat'
         },
+        NEXT_NODE: [
+          {
+            guard: ({ context }) => {
+              const currentIndex = context.timeline.findIndex(n => n.id === context.currentNode?.id);
+              return currentIndex >= context.timeline.length - 1;
+            },
+            target: 'debrief'
+          },
+          {
+            actions: assign({
+              currentNode: ({ context }) => {
+                const currentIndex = context.timeline.findIndex(n => n.id === context.currentNode?.id);
+                return context.timeline[currentIndex + 1] || context.currentNode;
+              }
+            })
+          }
+        ],
         MISSION_END: 'debrief'
       }
     },
@@ -229,7 +257,18 @@ export const gameMachine = createMachine({
     },
     debrief: {
       on: {
-        RETURN: 'bastion'
+        RETURN: {
+          target: 'bastion',
+          actions: assign({
+            timeline: [],
+            currentNode: null,
+            encounters: [],
+            currentEncounter: null,
+            currentExpeditionId: null,
+            selectedSubSector: null,
+            selectedPlanetLocation: null,
+          })
+        }
       }
     }
   }

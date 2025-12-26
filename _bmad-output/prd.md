@@ -23,7 +23,7 @@ date: '2025-12-21'
 ## 1. Executive Summary
 
 ### 1.1 Product Vision
-Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles and high entry barriers by utilizing a **Web2.5 Onboarding strategy** (Social Login first, Wallet later). It utilizes AI to generate unique, seasonal NFT assets (Vehicles, Tanks, Ships) with genuine aesthetic and functional rarity. The game is an **Intense, Evolving Live-Service Universe** where the creator gradually releases a dark, gripping narrative, new star systems, and context-driven patches to keep the exploration loop fresh and meaningful.
+Project-0 is a sustainable Crypto Web Game that bridges traditional gaming mechanics with AI-driven innovation. It features a hybrid economy designed to eliminate "FOMO" cycles and high entry barriers by utilizing a **Web2.5 Onboarding strategy** (Social Login first, Wallet later). It utilizes AI to generate unique, seasonal NFT assets (**Vehicles**: Mechs, Tanks, Ships) with genuine aesthetic and functional rarity. The game is an **Intense, Evolving Live-Service Universe** where the creator gradually releases a dark, gripping narrative, new star systems, and context-driven patches to keep the exploration loop fresh and meaningful.
 
 ### 1.2 Project Classification
 - **Project Type:** Blockchain/Web3 & Web Application
@@ -51,10 +51,11 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 ### 2.3 Technical Success
 - **AI Generation Efficiency:** Implementing a "Time-Gated Assembly" system to manage GPU load and prevent spamming.
 - **Hybrid 2D/3D Immersion:** Delivering High-Fidelity AI assets (2D) for visual storytelling while using **WebGPU + React Three Fiber** for a global 3D space background and an immersive 3D Cockpit and Bastion experience.
-- **Single-Page Game Loop (Unified Controller):** Moving away from traditional web routing (`/bastion`, `/explore`) to a unified, state-driven game controller. This ensures seamless transitions, persistent audio/state, and a true "Game Client" feel.
+- **Single-Page Game Loop (Unified Controller):** Moving away from traditional web routing (`/bastion`, `/explore`) to a unified, state-driven game controller using **XState v5**. This ensures seamless transitions, persistent audio/state, and a true "Game Client" feel.
 - **Design Intelligence:** Utilizing [UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/) standards to ensure professional-grade aesthetics, including Glassmorphism, Bento Grids, and industry-specific color palettes for a premium feel.
 - **Modular NFT Ownership:** Utilizing **ERC-6551 (Token Bound Accounts)** to allow Vehicles to "own" their equipment, simplifying marketplace trading and inventory management.
-- **Hybrid State Management (V2O):** Implementing a "Virtual-to-On-chain" model where gameplay and asset creation are off-chain by default (Server-side), with on-chain minting required only for trading or permanent storage.
+- **Anatomical Equipment System:** Modules are mapped to specific anatomical slots (HEAD, CORE, ARM_L, ARM_R, LEGS) on a silhouette in the Bastion UI.
+- **Hybrid State Management (V2O):** Implementing a "Manifested-to-On-chain" model where gameplay and asset creation are off-chain by default (Server-side), with on-chain minting required only for trading or permanent storage.
 - **System Resilience:** Using Saga patterns and distributed tracing to ensure 100% consistency between Web2 (AI/DB) and Web3 (On-chain) states.
 - **AI Contextual Intelligence:** Implementing **Model Context Protocol (MCP)** to provide the AI Narrative Engine with real-time game state for dynamic event generation.
 
@@ -67,7 +68,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
     - **Social Login:** Google/Email via Privy (Primary Web2.5 path).
     - **Account Binding:** Seamlessly upgrade Guest -> Traditional/Social without losing progress.
     - **Late-Binding Wallet:** Link an external wallet (MetaMask, etc.) only when ready to mint NFTs.
-- **Player Identity:** Start as a **Void Scavenger** with a **Resonance Suit** and a **Starter Ship**. Players must complete a **Character Creation** process (Name, Gender, Face, Hair) before receiving their first ship. This identity is tied to a **Character** instance, allowing for multiple characters per user.
+- **Player Identity:** Start as a **Void Scavenger** with a **Resonance Suit** and a **Starter Pack**. Players must complete a **Character Creation** process (Name, Gender, Face, Hair) before receiving their first ship. This identity is tied to a **Character** instance, allowing for multiple characters per user.
 - **Mothership Engineering Philosophy:** Motherships (The Bastion) are defined by two independent, non-linear systems:
     1. **Teleport System (Dimensional Tech):** For instant travel across dangerous sectors. High energy cost and instability. Some ships cannot install this due to structural mass.
     2. **Atmospheric Entry System (Structural Tech):** For safe landing on planets. Manages heat and gravity. Independent of Teleport capabilities.
@@ -80,6 +81,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 - **Void Signals (Gacha):** A "Hoyoverse-style" pull system for high-tier assets with a pity mechanism.
 - **Seasonal Temporal Wormholes:** Limited-time exploration zones requiring specific gear compatibility, offering exclusive "Lost Tech" and "Rare DNA Fragments."
 - **Complex Combat Engine:** Stat-based battle system integrating vehicle attributes (Mothership, Vehicle, Pilot) and AI-generated item "Options."
+    - **Combat Power (CP):** A weighted sum of stats: `(ATK*3) + (DEF*2) + (HP/5)`.
     - **Real Combat Integration:** Transitioning from placeholder combat to a functional system where encounters are linked to real backend data.
     - **Backend Enemy Seeding:** A system to generate and persist specific NPC enemies (e.g., Striker, Guardian, Scout) within combat encounters, allowing for persistent enemy stats and unique loot tables.
 - **Monetization Engine:** Season Pass, Void Signals, and Minting fees for "Void-Touched" (Premium) items.
@@ -98,7 +100,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 ## 4. User Journeys
 
 ### 4.1 Journey 1: Somchai - The Grinder (The Foundation)
-Somchai is a dedicated player who enjoys steady progress. He starts for free, farming basic resources like "Scrap Metal" and "Energy" through daily exploration with his **Starter Ship**. After two weeks of consistent effort, he gathers enough materials to initiate his first "Mech Assembly." He experiences a 24-hour waiting period, simulating the engineering process. When complete, he receives a unique AI-generated Mech with a "Digital Gold" camo—a rare find that he proudly showcases in Discord, validating his hard work and encouraging him to aim for higher-tier upgrades.
+Somchai is a dedicated player who enjoys steady progress. He starts for free, farming basic resources like "Scrap Metal" and "Energy" through daily exploration with his **Starter Pack**. After two weeks of consistent effort, he gathers enough materials to initiate his first "Mech Assembly." He experiences a 24-hour waiting period, simulating the engineering process. When complete, he receives a unique AI-generated Mech with a "Digital Gold" camo—a rare find that he proudly showcases in Discord, validating his hard work and encouraging him to aim for higher-tier upgrades.
 
 ### 4.2 Journey 2: Alex - The Discord Socialite (The Catalyst)
 Alex thrives on community engagement and being "first." He monitors the `#star-discovery` channel for real-time alerts. When a new "Abandoned Planet" is detected, he rallies his guild. Using his **Season Pass+** 2x Exploration Buff, his team reaches the planet first. After defeating the Raid Boss, Alex receives a "Mysterious Blueprint." He chooses the **USDT Premium Build** to ensure the highest quality AI generation. He shares the live "Assembly Status" link in Discord, building hype until a high-fidelity "Light-Wing Mech" is revealed, cementing his status as a community leader.
@@ -272,7 +274,7 @@ Project-0 operates as a "Closed-Loop Premium Economy." USDT flows into the syste
 - **FR31:** ระบบ Hybrid Energy: 
     - **Standard Energy (Off-chain):** รีเฟรชฟรีทุกวัน ใช้สำหรับการสำรวจและต่อสู้ทั่วไป
     - **Premium Energy / Overclock (On-chain):** ผู้เล่นสามารถจ่าย USDT/Token เพื่อซื้อพลังงานเพิ่มสำหรับการสำรวจที่เกินขีดจำกัดรายวัน (Exploration Boost)
-- **FR32:** ระบบ Virtual-to-On-chain (V2O): สินค้าและหุ่นที่สร้างขึ้นใหม่จะเป็น "Virtual Assets" บน Server โดยอัตโนมัติ และผู้เล่นสามารถเลือก "Mint to Chain" เมื่อต้องการขายหรือโอนย้ายออกภายนอกเท่านั้น
+- **FR32:** ระบบ Manifested-to-On-chain (V2O): สินค้าและหุ่นที่สร้างขึ้นใหม่จะเป็น "Manifested Assets" บน Server โดยอัตโนมัติ และผู้เล่นสามารถเลือก "Mint to Chain" เมื่อต้องการขายหรือโอนย้ายออกภายนอกเท่านั้น
 
 ### 9.7 Social & Engagement
 - **FR37:** ระบบ Customizable Pilot Profile: ผู้เล่นสามารถปรับแต่งหน้า Profile, เลือกโชว์หุ่น Mech (Showcase), และแสดงรายการ NFT/Achievements ที่ภาคภูมิใจได้

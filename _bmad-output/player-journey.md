@@ -10,7 +10,7 @@
 - **Starter Quest: "Signal Lost":** The Bastion's Radar is malfunctioning. The player must perform a manual EVA (Extra-Vehicular Activity) to find Scrap from nearby debris to repair the Radar and unlock the mission board.
 - **The Awakening:** The first official mission. The player uses their **Starter Vehicle** to navigate to a nearby derelict wreck.
 - **The "Aha!" Moment:** Finding the first Rare NFT part and seeing the AI synthesize it onto their Vehicle in the Bastion.
-- **Goal:** Repair the Bastion's core systems and build the first full-scale Mech or specialized Tank/Ship.
+- **Goal:** Repair the Bastion's core systems and build the first full-scale Vehicle (Mech, Tank, or Ship).
 - **Emotional State:** Vulnerability, isolation, and the drive to survive.
 
 ## 2. Phase 2: The Skilled Mercenary (Mid Game)
@@ -44,7 +44,7 @@ The daily loop is a seamless, single-page experience that maintains immersion fr
 5. **Debrief & Showcase:** Return to the Bastion to synthesize new parts and share the "Flex" build.
 
 ## 5. Emotional Milestones (The "Gasp" Moments)
-- **The Seamless Transition:** The feeling of "launching" from the Hangar into the Universe Map without a single loading screen.
+- **The Seamless Transition:** The feeling of "launching" from the Bastion into the Universe Map without a single loading screen.
 - **The First Synthesis:** Seeing the AI combine mismatched parts into a cool, cohesive design.
 - **The Near-Death Escape:** Successfully extracting from an EVA mission with 5% O2 left.
 - **The Rare Drop:** Seeing the "Legendary Gold" glow during a salvage reveal.

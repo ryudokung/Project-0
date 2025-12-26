@@ -32,8 +32,11 @@ export default function PlayPage() {
   // Game State
   const [o2, setO2] = useState(100);
   const [fuel, setFuel] = useState(100);
+  const [scrapMetal, setScrapMetal] = useState(0);
+  const [researchData, setResearchData] = useState(0);
   const [activeEnemyId, setActiveEnemyId] = useState<string | null>(null);
   const [encounters, setEncounters] = useState<any[]>([]);
+  const [timelineNodes, setTimelineNodes] = useState<any[]>([]);
   const [currentEncounter, setCurrentEncounter] = useState<any | null>(null);
   const [expeditionTitle, setExpeditionTitle] = useState('THE SILENT SIGNAL');
   
@@ -141,11 +144,20 @@ export default function PlayPage() {
         
         setCurrentExpeditionId(result.expedition.id);
         setExpeditionTitle(`${selectedSector?.name} // ${selectedSubSector.name}`);
+        
+        // Fetch Timeline
+        const timeline = await explorationService.getTimeline(result.expedition.id);
+        setTimelineNodes(timeline);
+
         setStage('EXPLORATION');
         
         if (result.pilot_stats) {
           setO2(result.pilot_stats.current_o2);
           setFuel(result.pilot_stats.current_fuel);
+          setScrapMetal(result.pilot_stats.scrap_metal);
+          setResearchData(result.pilot_stats.research_data);
+          setScrapMetal(result.pilot_stats.scrap_metal);
+          setResearchData(result.pilot_stats.research_data);
         }
 
         setEncounters(result.encounters);
@@ -173,6 +185,11 @@ export default function PlayPage() {
       
       setCurrentExpeditionId(result.expedition.id);
       setExpeditionTitle(`${selectedSector?.name} // ${selectedSubSector?.name} // ${selectedPlanetLocation.name}`);
+      
+      // Fetch Timeline
+      const timeline = await explorationService.getTimeline(result.expedition.id);
+      setTimelineNodes(timeline);
+
       setStage('EXPLORATION');
       
       if (result.pilot_stats) {
@@ -202,6 +219,8 @@ export default function PlayPage() {
       if (nextEncounterData.pilot_stats) {
         setO2(nextEncounterData.pilot_stats.current_o2);
         setFuel(nextEncounterData.pilot_stats.current_fuel);
+        setScrapMetal(nextEncounterData.pilot_stats.scrap_metal);
+        setResearchData(nextEncounterData.pilot_stats.research_data);
         
         if (nextEncounterData.pilot_stats.current_o2 <= 0) {
           setStage('DEBRIEF');
@@ -211,6 +230,10 @@ export default function PlayPage() {
 
       const nextEncounter = nextEncounterData.encounter;
       
+      // Refresh timeline to reflect resolved status in HUD
+      const updatedTimeline = await explorationService.getTimeline(currentExpeditionId);
+      setTimelineNodes(updatedTimeline);
+
       setEncounters(prev => [...prev, nextEncounter]);
       setCurrentEncounter(nextEncounter);
 
@@ -294,13 +317,37 @@ export default function PlayPage() {
               expeditionTitle={expeditionTitle}
               o2={o2}
               fuel={fuel}
+              scrapMetal={scrapMetal}
+              researchData={researchData}
               encounters={encounters}
+              timelineNodes={timelineNodes}
               currentEncounter={currentEncounter}
               isTransitioning={isTransitioning}
               onAdvance={advanceTimeline}
               onEnterCombat={(enemyId) => {
                 setActiveEnemyId(enemyId);
                 setStage('COMBAT');
+              }}
+              onResolveNode={async (nodeId, choiceId) => {
+                try {
+                  if (choiceId) {
+                    const result = await explorationService.resolveChoice(nodeId, choiceId);
+                    if (result.pilot_stats) {
+                      setO2(result.pilot_stats.current_o2);
+                      setFuel(result.pilot_stats.current_fuel);
+                      setScrapMetal(result.pilot_stats.scrap_metal);
+                      setResearchData(result.pilot_stats.research_data);
+                    }
+                  } else {
+                    await explorationService.resolveNode(nodeId);
+                  }
+                  // Refresh timeline
+                  const updatedTimeline = await explorationService.getTimeline(currentExpeditionId!);
+                  setTimelineNodes(updatedTimeline);
+                } catch (error) {
+                  console.error('Failed to resolve node:', error);
+                  throw error;
+                }
               }}
             />
           </motion.div>
@@ -311,8 +358,22 @@ export default function PlayPage() {
             <CombatStage 
               attackerId={selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'}
               enemyId={activeEnemyId || ''}
-              onCombatEnd={(result) => {
+              onCombatEnd={async (result) => {
                 console.log('Combat ended:', result);
+                if (result === 'VICTORY') {
+                  // Mark the current node as resolved
+                  const currentNode = timelineNodes[encounters.length - 1];
+                  if (currentNode) {
+                    try {
+                      await explorationService.resolveNode(currentNode.id);
+                      // Refresh timeline
+                      const updatedTimeline = await explorationService.getTimeline(currentExpeditionId!);
+                      setTimelineNodes(updatedTimeline);
+                    } catch (error) {
+                      console.error('Failed to resolve node after combat:', error);
+                    }
+                  }
+                }
                 setStage('EXPLORATION');
               }}
             />
@@ -331,6 +392,14 @@ export default function PlayPage() {
                 <div className="flex justify-between border-b border-zinc-900 pb-2">
                   <span className="text-zinc-500 uppercase text-xs">Combat Encounters</span>
                   <span className="font-bold text-red-500">{encounters.filter(e => e.type === 'COMBAT').length}</span>
+                </div>
+                <div className="flex justify-between border-b border-zinc-900 pb-2">
+                  <span className="text-zinc-500 uppercase text-xs">Total Scrap Metal</span>
+                  <span className="font-bold text-yellow-500">{scrapMetal}</span>
+                </div>
+                <div className="flex justify-between border-b border-zinc-900 pb-2">
+                  <span className="text-zinc-500 uppercase text-xs">Total Research Data</span>
+                  <span className="font-bold text-cyan-500">{researchData}</span>
                 </div>
               </div>
               <button 

@@ -28,8 +28,8 @@ The project follows a "Web2.5" onboarding strategy to minimize friction for new 
 3.  **Pilot Registration**: Every new account must create a "Pilot" (Character). This process:
     - Creates a record in the `characters` table.
     - Initializes `pilot_stats` (O2, Fuel, XP).
-    - Mints a "Starter Vehicle" (Virtual Asset) in the database.
-4.  **Wallet Linking (Late-Stage)**: Wallet connection is an optional step used only when the player decides to "Mint" their virtual assets into on-chain NFTs or interact with the Base L2 blockchain.
+    - Initializes a "Starter Pack" (Manifested Assets) in the database.
+4.  **Wallet Linking (Late-Stage)**: Wallet connection is an optional step used only when the player decides to "Mint" their manifested assets into on-chain NFTs or interact with the Base L2 blockchain.
 
 ## 3. Backend & Database Structure
 

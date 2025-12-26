@@ -33,8 +33,8 @@ To prevent hyperinflation of items:
 
 ## 5. Death & Recovery: The "Cloning" System
 To balance high-stakes gameplay with asset security:
-- **The Rule:** If a Pilot dies (during EVA or Mech destruction), the player **loses all loot gathered during that specific run**.
-- **Asset Security:** Permanent NFTs (Mechs, Tanks, Ships, and equipped Gear) are **never lost**. However, they take "Critical Damage" (DDS Threshold) and require significant Scrap to repair before they can be used again.
+- **The Rule:** If a Pilot dies (during EVA or Vehicle destruction), the player **loses all loot gathered during that specific run**.
+- **Asset Security:** Permanent NFTs (Vehicles and equipped Modules) are **never lost**. However, they take "Critical Damage" (DDS Threshold) and require significant Scrap to repair before they can be used again.
 - **Cloning (Service):** This is a **consumable service**, not a permanent NFT. Players pay a small Scrap fee before a mission to "Sync" their consciousness. If they die, they are "re-sleeved" at The Bastion.
 - **Insurance (Optional):** A one-time Scrap payment per mission that reduces the repair cost of the vehicle if it gets destroyed.
 

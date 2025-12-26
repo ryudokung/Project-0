@@ -22,22 +22,20 @@ Project-0 is not just a game; it's an evolving universe. Players take on the rol
 - **Pilot & Exosuits:** The operative's "Infiltration Layer." Exosuits provide power armor for indoor salvage, boarding actions, and stealth missions where vehicles cannot enter.
 
 ## ✨ Unique Selling Points
-- **AI-Generated Visual DNA:** Vehicles are synthesized by AI (FLUX.1) based on their specific NFT parts and stats.
-- **Resonance & Dominance:** High-level Pilot Resonance and gear quality allow players to "Annihilate" lower-tier threats, focusing on high-stakes progression.
-- **Deep Durability System (DDS):** Items aren't just "broken" or "fixed." They have 5 thresholds (Pristine to Broken) affecting stats and visuals.
+- **AI-Generated Visual DNA:** Vehicles and parts are synthesized by AI (FLUX.1) based on their specific Metadata and Visual DNA keywords. The appearance changes dynamically based on the item's condition and rarity.
+- **Anatomical Equipment System:** A visual mapping interface (Silhouette Map) where players install modules onto specific anatomical slots (HEAD, CORE, ARMS, LEGS), directly affecting Combat Power (CP) and visuals.
+- **Hybrid Web3 Economy (V2O):** A "Virtual-to-Onchain" model. Play for free with "Manifested Assets" in the database, and choose to "Mint" rare or high-tier items to the blockchain as NFTs when ready.
+- **Strategic Procedural Exploration:** A linear timeline-based navigation system where players manage O2 and Fuel while making high-stakes decisions across procedurally generated nodes.
+- **Deep Durability System (DDS):** Items aren't just "broken" or "fixed." They have 5 thresholds (Pristine to Broken) affecting stats and visuals, creating a realistic sense of wear and tear.
+- **Tactical Noir Experience:** A high-fidelity, monochromatic HUD with scanlines and glitch effects, designed to feel like a neural link to a powerful machine.
 - **Security-First Architecture:** Every game mechanic is validated server-side. No client-side trust. Atomic database operations prevent race conditions and double-spending.
-- **Hybrid Narrative Architecture:** A unique blend of Director-fixed plot points ("Narrative Anchors") and AI-generated dynamic content, ensuring every player has a unique but cohesive story.
-- **Node-Based Exploration:** A "Tactical Noir" radar interface where you click to discover the universe.
-- **Showcase Engine:** A high-fidelity 3D Bastion for "flexing" your unique assets to the community.
-- **Stage Change Model (V2O):** Play for free, find rare items, and choose to bridge them to the blockchain as NFTs while maintaining their in-game utility and durability.
-- **Captain's Log:** A personal, AI-narrated history of your greatest victories and "First Discoveries."
+- **Showcase Engine:** A high-fidelity 3D Bastion for "flexing" your unique assets and managing your fleet.
 
 ## 🛠 Tech Stack
-- **Frontend**: Next.js 15+, **Decoupled Systems (EventBus + Singletons)**, **XState (Finite State Machine)**, **WebGPU**, **React Three Fiber (R3F)**, Tailwind CSS.
-- **Backend**: Go (Modular Monolith), Clean Architecture, Saga Pattern, **JWT Security Middleware**, **Atomic Concurrency Control**.
-- **Database**: PostgreSQL 16+, **Consolidated Schema (init.sql)**.
+- **Frontend**: Next.js 15+, **Decoupled Systems (EventBus + Singletons)**, **XState v5 (Finite State Machine)**, **Framer Motion**, Tailwind CSS.
+- **Backend**: Go (Modular Monolith), Clean Architecture, **JWT Security Middleware**, **PostgreSQL 16+**.
+- **AI**: FLUX.1 via Fal.ai/Replicate, Structured Output for Narrative and Visual DNA.
 - **Blockchain**: Base L2, **ERC-6551 (Token Bound Accounts)**, ERC-721.
-- **AI**: FLUX.1 via Fal.ai/Replicate, Structured Output.
 
 ## 🚀 Getting Started
 

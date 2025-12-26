@@ -42,7 +42,8 @@ export default function UnifiedGamePage() {
   const { 
     o2, fuel, activeEnemyId, encounters, currentEncounter, 
     expeditionTitle, vehicles, selectedVehicle, selectedSector, 
-    selectedSubSector, selectedPlanetLocation, currentExpeditionId 
+    selectedSubSector, selectedPlanetLocation, currentExpeditionId,
+    timeline, currentNode
   } = state.context;
   
   const [sectors, setSectors] = useState<Sector[]>([]);
@@ -154,8 +155,12 @@ export default function UnifiedGamePage() {
         // Fetch Timeline
         const timeline = await explorationSystem.getTimeline(result.expeditionId);
         
+        send({ 
+          type: 'UPDATE_TIMELINE', 
+          timeline,
+          currentNode: timeline[0]
+        });
         send({ type: 'UPDATE_STATS', ...result });
-        send({ type: 'UPDATE_TIMELINE', timeline });
         send({ type: 'CONFIRM_DEPLOYMENT', isPlanet: false });
       } catch (error) {
         console.error('Failed to start exploration:', error);
@@ -194,13 +199,22 @@ export default function UnifiedGamePage() {
     if (isTransitioning) return;
     try {
       setIsTransitioning(true);
-      const updatedNode = await explorationSystem.resolveChoice(nodeId, choice);
-      send({ type: 'RESOLVE_NODE', node: updatedNode });
+      const result = await explorationSystem.resolveChoice(nodeId, choice);
+      if (result) {
+        send({ type: 'RESOLVE_NODE', node: result.node });
+        send({ 
+          type: 'UPDATE_STATS', 
+          o2: result.pilot_stats?.current_o2 ?? o2,
+          fuel: result.pilot_stats?.current_fuel ?? fuel,
+          encounters,
+          currentEncounter,
+          expeditionId: currentExpeditionId,
+          title: expeditionTitle
+        });
 
-      if (updatedNode.type === 'COMBAT') {
-        // For combat nodes, we might want to trigger combat stage
-        // For now, let's just simulate it or check if it's resolved
-        // send({ type: 'ENTER_COMBAT', enemyId: '...' });
+        if (result.node.type === 'COMBAT') {
+          // For combat nodes, we might want to trigger combat stage
+        }
       }
     } catch (error) {
       console.error('Failed to resolve choice:', error);
@@ -212,24 +226,44 @@ export default function UnifiedGamePage() {
   const advanceTimeline = async () => {
     if (isTransitioning || !currentExpeditionId) return;
 
+    // Check if we are at the last node
+    const currentIndex = timeline.findIndex(n => n.id === currentNode?.id);
+    if (currentIndex === timeline.length - 1) {
+      send({ type: 'MISSION_END' });
+      return;
+    }
+
     try {
       setIsTransitioning(true);
-      const { encounter, stats } = await explorationSystem.advance(
+      const result = await explorationSystem.advance(
         currentExpeditionId,
         selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
       );
       
+      if (!result || !result.encounter) {
+        throw new Error('Invalid advance response');
+      }
+
+      const { encounter, stats } = result;
+      
       send({ 
         type: 'UPDATE_STATS', 
-        o2: stats?.current_o2 || o2,
-        fuel: stats?.current_fuel || fuel,
-        encounters: [...encounters, encounter],
+        o2: stats?.current_o2 ?? o2,
+        fuel: stats?.current_fuel ?? fuel,
+        encounters: [...(encounters || []), encounter],
         currentEncounter: encounter,
         expeditionId: currentExpeditionId,
         title: expeditionTitle
       });
 
-      if (stats?.current_o2 <= 0) {
+      // Update current node in timeline
+      if (currentIndex !== -1 && currentIndex < timeline.length - 1) {
+        send({ type: 'NEXT_NODE' });
+      } else if (currentIndex === timeline.length - 1) {
+        send({ type: 'MISSION_END' });
+      }
+
+      if (stats && stats.current_o2 <= 0) {
         send({ type: 'MISSION_END' });
         setIsTransitioning(false);
         return;
@@ -246,6 +280,13 @@ export default function UnifiedGamePage() {
     } catch (error) {
       console.error('Failed to advance timeline:', error);
       setIsTransitioning(false);
+    }
+  };
+
+  const returnToBastion = () => {
+    send({ type: 'RETURN' });
+    if (user?.active_character_id) {
+      bastionSystem.refreshVehicles(user.active_character_id);
     }
   };
 
@@ -345,12 +386,13 @@ export default function UnifiedGamePage() {
               expeditionTitle={expeditionTitle}
               o2={o2}
               fuel={fuel}
-              timeline={state.context.timeline}
-              currentNode={state.context.currentNode}
+              timeline={timeline}
+              currentNode={currentNode}
               onResolveChoice={resolveChoice}
               onEnterCombat={(enemyId) => {
                 send({ type: 'ENTER_COMBAT', enemyId });
               }}
+              onAdvance={advanceTimeline}
             />
           </motion.div>
         )}
@@ -360,8 +402,16 @@ export default function UnifiedGamePage() {
             <CombatStage 
               attackerId={selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'}
               enemyId={activeEnemyId || ''}
-              onCombatEnd={(result) => {
+              onCombatEnd={async (result) => {
                 console.log('Combat ended:', result);
+                if (result === 'VICTORY' && currentNode) {
+                  try {
+                    const updatedNode = await explorationSystem.resolveNode(currentNode.id);
+                    send({ type: 'RESOLVE_NODE', node: updatedNode });
+                  } catch (error) {
+                    console.error('Failed to resolve node after combat:', error);
+                  }
+                }
                 send({ type: 'COMBAT_END' });
               }}
             />
@@ -383,7 +433,7 @@ export default function UnifiedGamePage() {
                 </div>
               </div>
               <button 
-                onClick={() => send({ type: 'RETURN' })}
+                onClick={returnToBastion}
                 className="w-full border border-white py-4 font-black uppercase tracking-tighter hover:bg-white hover:text-black transition-all"
               >
                 Return to Mothership

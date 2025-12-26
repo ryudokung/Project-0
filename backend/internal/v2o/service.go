@@ -33,9 +33,14 @@ func (s *Service) BridgeToChain(ctx context.Context, vehicleID uuid.UUID, ownerA
 	}
 
 	// 2. Prepare mint request
+	metadataURI := ""
+	if v.ImageURL != nil {
+		metadataURI = *v.ImageURL
+	}
+
 	req := blockchain.MintRequest{
 		OwnerAddress: ownerAddress,
-		MetadataURI:  v.ImageURL,
+		MetadataURI:  metadataURI,
 		Stats: map[string]int{
 			"hp":      v.Stats.HP,
 			"attack":  v.Stats.Attack,

@@ -2,42 +2,29 @@
 
 **Goal:** Define the specific modular parts, rarity tiers, and "Visual DNA" traits for all vehicle types (Mechs, Tanks, Ships) to ensure a consistent asset ecosystem.
 
-## 1. Modular Vehicle Anatomy (Functional Hardpoints)
-All vehicles are composed of modular NFT slots. The **Bastion** serves as a central **Strategic Hub** where players can view their collection and manage their fleet. Every new character begins with a **Starter Vehicle** to facilitate initial exploration. Actual vehicle selection occurs at the **Deployment Phase** based on mission requirements.
+## 1. Modular Vehicle Anatomy (Anatomical Equipment System)
+All vehicles are composed of modular slots mapped to a visual silhouette. The **Bastion** serves as a central **Strategic Hub** where players can view their collection and manage their fleet using the **Visual Equipment Map**.
 
-### 1.1 Ship (Atmospheric/Space)
-- **Role:** Interception, Long-range Scouting, Mothership Defense.
-- **Transformation:** Can switch to **Robot Mode** for precision landing and surface combat.
-- **Hardpoints:** Fuselage, Wing/Pylon, Engine, Transformation Module (T-Module).
+### 1.1 Anatomical Slots
+- **HEAD:** Sensors, Neural Interfaces, and Targeting Systems.
+- **CORE:** Power Source, Armor Plating, and Life Support.
+- **ARM_L / ARM_R:** Weapons, Shields, and Utility Tools.
+- **LEGS:** Mobility Systems, Thrusters, and Stability Anchors.
 
-### 1.2 Mech (Bipedal/Multipedal)
-- **Role:** Heavy Combat, Extraction, All-terrain.
-- **Hardpoints:** Chassis, Left Arm, Right Arm, Legs.
-
-### 1.3 Tank (Treaded/Wheeled)
-- **Role:** Siege, Defensive Escort, High-threat Zones.
-- **Transformation:** Can switch to **Robot Mode** for terrain adaptability and verticality.
-- **Hardpoints:** Hull, Turret, Sponson, Transformation Module (T-Module).
-
-### 1.4 Speeder (Hoverbike/Swoop)
-- **Role:** High-speed Scouting, Time-sensitive Salvage, Stealth.
-- **Hardpoints:** Frame, High-output Engine, Handlebar/Sensors, Side-mount (Light Weapon).
-
-### 1.5 Pilot & Exosuit (The Infiltration Layer)
-- **Role:** Indoor Salvage, Boarding Actions, Stealth Infiltration.
-- **Deployment:** Used when the Pilot **Ejects** from a vehicle to enter areas inaccessible to heavy assets.
-- **Hardpoints:** Exosuit Chassis (Body), Neural Interface (Head), Utility Belt, Personal Weapon.
-
-### 1.6 Heavy Hauler (Industrial)
-- **Role:** Resource Transport, Salvaging Massive Wrecks.
-- **Hardpoints:** Hull, Crane/Grapple, Cargo Bay, Defense Turrets.
+### 1.2 Vehicle Archetypes
+- **Vehicle (General):** Balanced bipedal or multipedal units.
+- **Tank:** Heavy-armored siege units. High defense.
+- **Ship:** High-speed aerial/space units.
+- **Speeder:** Hoverbikes for high-velocity scouting.
+- **Pilot & Exosuit:** The operative's "Infiltration Layer" for areas inaccessible to heavy assets.
 
 ## 2. Progression & Performance Metrics
 
-### 2.1 Combat Rating (CR)
-The **Combat Rating (CR)** is the primary indicator of a vehicle's power. It is calculated dynamically based on:
+### 2.1 Combat Power (CP)
+The **Combat Power (CP)** is the primary indicator of a vehicle's power. It is calculated dynamically based on the synergy of the vehicle and its equipped parts:
+- **Formula:** `(Total ATK * 3) + (Total DEF * 2) + (Total HP / 5)`
 - **Base Stats:** HP, Attack, Defense, Speed.
-- **Pilot Resonance:** The synergy between the Pilot and the Vehicle.
+- **Pilot Resonance:** A multiplier based on the Pilot's rank and synchronization.
 - **Equipment Quality:** The rarity and tier of equipped parts.
 - **Void-Touch Status:** A multiplier for assets corrupted by the void.
 
@@ -47,18 +34,18 @@ Vehicles possess **Suitability Tags** (e.g., `urban`, `desert`, `void`, `high-gr
 - **Mismatched Tags:** Impose penalties to Energy Consumption and Accuracy.
 
 ## 3. Item Rarity & "Options" (Sub-stats)
-Items are minted with a base stat and 1-4 "Options" based on rarity:
+Items are manifested with a base stat and 1-4 "Options" based on rarity:
 - **Common (White):** 0 Options.
 - **Rare (Blue):** 1 Option.
 - **Epic (Purple):** 2 Options.
 - **Legendary (Gold):** 3 Options + 1 Unique Perk.
 - **Singularity (Red):** 4 Options + Unique Visual Effect (e.g., "Energy Wings", "Plasma Trail").
 
-## 3. Visual DNA Framework (AI Synthesis)
+## 4. Visual DNA Framework (AI Synthesis)
 The AI (FLUX.1) uses "Visual Keywords" derived from metadata to synthesize a cohesive image:
 - **The Synthesis Process:**
     1. **Metadata Collection:** Backend gathers all part IDs, faction styles, and rarity traits.
-    2. **Prompt Engineering:** A structured prompt is generated (e.g., "A brutalist Iron Syndicate Mech with rusted steel plating and a glowing green core, tactical noir style, high-fidelity 3D render").
+    2. **Prompt Engineering:** A structured prompt is generated (e.g., "A brutalist Iron Syndicate Vehicle with rusted steel plating and a glowing green core, tactical noir style, high-fidelity 3D render").
     3. **AI Generation:** FLUX.1 generates the unique visual representation.
     4. **Caching:** The image is stored as the "Visual DNA" of that specific asset.
 - **Materials:** `industrial_steel`, `carbon_fiber`, `weathered_copper`, `obsidian_glass`.

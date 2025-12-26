@@ -10,10 +10,13 @@ type PilotStats struct {
 	CharacterID    uuid.UUID `json:"character_id"`
 	ResonanceLevel int       `json:"resonance_level"`
 	ResonanceExp   int       `json:"resonance_exp"`
+	Stress         int       `json:"stress"`
 	XP             int       `json:"xp"`
 	Rank           int       `json:"rank"`
 	CurrentO2      float64   `json:"current_o2"`
 	CurrentFuel    float64   `json:"current_fuel"`
+	ScrapMetal     int       `json:"scrap_metal"`
+	ResearchData   int       `json:"research_data"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 

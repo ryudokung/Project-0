@@ -76,6 +76,17 @@ export class ExplorationSystem {
       throw error;
     }
   }
+
+  async resolveNode(nodeId: string) {
+    try {
+      const result = await explorationService.resolveNode(nodeId);
+      gameEvents.emit(GAME_EVENTS.NOTIFICATION, { message: 'NODE RESOLVED', type: 'SUCCESS' });
+      return result;
+    } catch (error) {
+      gameEvents.emit(GAME_EVENTS.NOTIFICATION, { message: 'FAILED TO RESOLVE NODE', type: 'ERROR' });
+      throw error;
+    }
+  }
 }
 
 export const explorationSystem = ExplorationSystem.getInstance();

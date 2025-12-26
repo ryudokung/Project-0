@@ -35,6 +35,26 @@ func (h *Handler) GetTimeline(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(nodes)
 }
 
+func (h *Handler) ResolveNode(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		NodeID uuid.UUID `json:"node_id"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	node, err := h.service.ResolveNode(r.Context(), req.NodeID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(node)
+}
+
 func (h *Handler) ResolveChoice(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		NodeID uuid.UUID `json:"node_id"`
@@ -52,8 +72,15 @@ func (h *Handler) ResolveChoice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Fetch updated stats to return to frontend
+	expedition, _ := h.service.repo.GetExpeditionByID(node.ExpeditionID)
+	stats, _ := h.service.gameRepo.GetActivePilotStats(expedition.UserID)
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(node)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"node":        node,
+		"pilot_stats": stats,
+	})
 }
 
 func (h *Handler) GetUniverseMap(w http.ResponseWriter, r *http.Request) {

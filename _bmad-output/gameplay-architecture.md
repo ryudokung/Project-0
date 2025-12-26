@@ -5,17 +5,17 @@ This document defines the technical implementation of core gameplay pillars, ens
 
 ## 2. Core Systems
 
-### 2.1 Colony Management
-- **Module:** `internal/colony`
-- **State:** Managed in PostgreSQL (`colonies` table).
-- **Mobility:** Colony position affects fuel consumption for exploration missions. Moving the colony requires a `ColonyMoveSaga`.
-- **Progression:** Upgrading facilities (Hangar, Lab, Refinery) unlocks higher-tier Mechs and faster resource processing.
+### 2.1 Bastion Management
+- **Module:** `internal/bastion`
+- **State:** Managed in PostgreSQL (`bastions` table).
+- **Mobility:** Bastion position affects fuel consumption for exploration missions. Moving the bastion requires a `BastionMoveSaga`.
+- **Progression:** Upgrading facilities (Preparation Area, Lab, Refinery) unlocks higher-tier Vehicles and faster resource processing.
 
 ### 2.2 Exploration Stages
 - **Module:** `internal/exploration`
-- **Frontend Tech:** **Single-Page Game Loop** with Framer Motion for stage transitions. React Three Fiber (Three.js) for the Hangar Showcase and Cockpit HUD.
+- **Frontend Tech:** **Single-Page Game Loop** with Framer Motion for stage transitions. React Three Fiber (Three.js) for the Bastion Showcase and Cockpit HUD.
 - **Stages (State-Driven):**
-    - **HANGAR:** Pilot and Vehicle management. Showcase engine for "Flexing" assets.
+    - **BASTION:** Pilot and Vehicle management. Showcase engine for "Flexing" assets via the **Visual Equipment Map**.
     - **MAP (Universe Map):** Sector-level navigation.
     - **LOCATION_SCAN:** Sub-sector scanning for Points of Interest (Wrecks, Stations, Planets).
     - **PLANET_SURFACE:** Tactical objective selection for planetary missions.
@@ -23,10 +23,9 @@ This document defines the technical implementation of core gameplay pillars, ens
     - **COMBAT:** Turn-based tactical simulation.
     - **DEBRIEF:** Mission summary and loot distribution.
 - **Vehicle Roles:**
-    - **Mech:** Best for heavy resource extraction and high-durability ground combat.
-    - **Aircraft:** Best for rapid scouting, aerial superiority, and high-evasion hit-and-run tactics.
+    - **Vehicle:** Versatile modular units (Mechs, Tanks, Ships) for heavy resource extraction and combat.
 - **Saga:** `ExplorationMissionSaga`
-    1. **Radar Scan & Risk Assessment:** Use Mothership Scanner to probe target. Calculate success probability and Threat Level (Low/Med/High/Extreme).
+    1. **Radar Scan & Risk Assessment:** Use Bastion Scanner to probe target. Calculate success probability and Threat Level (Low/Med/High/Extreme).
     2. **Pre-flight Briefing:** Present fuzzy radar data, risk %, and warnings to the player. Wait for "Proceed" or "Abort" command.
     3. **Departure:** Deduct fuel and lock participating units.
     4. **Event Resolution:** 
@@ -34,7 +33,7 @@ This document defines the technical implementation of core gameplay pillars, ens
         - If an accident occurs, trigger **AI Event Generation** (context-aware narrative).
         - Calculate combat/loot/exploration results (including hidden elite threats).
     5. **Return:** Update unit durability (including accident damage), distribute loot, and generate AI Combat Log.
-    6. **Visualization:** Trigger **Seamless Stage Transitions**: Hangar -> Map -> Scan -> Exploration Loop. Cockpit HUD remains persistent to maintain immersion.
+    6. **Visualization:** Trigger **Seamless Stage Transitions**: Bastion -> Map -> Scan -> Exploration Loop. Cockpit HUD remains persistent to maintain immersion.
 
 ### 2.3 Salvage & Research
 - **Module:** `internal/salvage`
@@ -51,11 +50,12 @@ This document defines the technical implementation of core gameplay pillars, ens
 - **State:** Managed in PostgreSQL (`pilots` table).
 - **Gear:** O2 Tanks, Swords, Guns, and Suits.
 - **Progression:** Upgrading Pilot gear is essential for surviving the final stage of high-value missions.
+- **Combat Power (CP):** Calculated as `(ATK*3) + (DEF*2) + (HP/5)` to provide a quick strength assessment.
 
 ### 2.4 Story Mode
 - **Module:** `internal/story`
 - **Fixed Items:** Unlike AI-generated seasonal NFTs, Story Mode rewards are "Fixed" to ensure balanced progression.
-- **Narrative Integration:** Acts as a trigger for the `StoryProgressionSaga`, which unlocks new star systems and colony facilities.
+- **Narrative Integration:** Acts as a trigger for the `StoryProgressionSaga`, which unlocks new star systems and Bastion facilities.
 
 ## 3. AI Integration
 - **Combat Logs:** Every mission result is sent to the AI Service to generate a unique narrative summary.

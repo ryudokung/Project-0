@@ -35,7 +35,7 @@ Zones define the "Scene" and the specific click-based interaction:
 - **Gameplay:** Click-based decision making (e.g., "Enter Room", "Search Crate", "Fire Pistol").
 - **Visuals:** High-fidelity 3D scenes (R3F) that update based on clicks.
 - **Mechanic:** "O2 Management" - each click or action consumes a small amount of O2.
-- **Vehicle:** Exosuits are the only vehicles allowed in narrow EVA zones.
+- **Vehicle:** Light Vehicles or Exosuits are the only vehicles allowed in narrow EVA zones.
 
 ### 3.3 High-Speed Corridors (Speeder Focus)
 - **Gameplay:** Time-trials, Chases, Rapid Scouting via click-timing.
@@ -46,7 +46,7 @@ Zones define the "Scene" and the specific click-based interaction:
 ## 4. Environmental Hazards (The "Narrative" Layer)
 Hazards are not just visual; they affect stats and trigger AI events:
 - **EMP Storms:** Disables Energy weapons, reduces Radar range.
-- **Corrosive Rain:** Constant Durability damage to Mech Chassis.
+- **Corrosive Rain:** Constant Durability damage to Vehicle Chassis.
 - **Solar Flares:** Increases Heat levels, potentially causing "System Overheat" (Stun).
 - **Void Echoes:** Triggers "Psychological Stress" for the Pilot (reduces Accuracy).
 

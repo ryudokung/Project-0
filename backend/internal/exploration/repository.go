@@ -22,15 +22,15 @@ func (r *explorationRepository) CreateNodes(nodes []Node) error {
 	}
 	defer tx.Rollback()
 
-	query := `INSERT INTO nodes (id, expedition_id, name, type, environment_description, difficulty_multiplier, position_index, choices, is_resolved) 
-	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	query := `INSERT INTO nodes (id, expedition_id, name, type, environment_description, difficulty_multiplier, position_index, choices, is_resolved, terrain, detection_threshold) 
+	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 
 	for _, n := range nodes {
 		choicesJSON, err := json.Marshal(n.Choices)
 		if err != nil {
 			return err
 		}
-		_, err = tx.Exec(query, n.ID, n.ExpeditionID, n.Name, n.Type, n.EnvironmentDescription, n.DifficultyMultiplier, n.PositionIndex, choicesJSON, n.IsResolved)
+		_, err = tx.Exec(query, n.ID, n.ExpeditionID, n.Name, n.Type, n.EnvironmentDescription, n.DifficultyMultiplier, n.PositionIndex, choicesJSON, n.IsResolved, n.Terrain, n.DetectionThreshold)
 		if err != nil {
 			return err
 		}
@@ -40,7 +40,7 @@ func (r *explorationRepository) CreateNodes(nodes []Node) error {
 }
 
 func (r *explorationRepository) GetNodesByExpeditionID(expeditionID uuid.UUID) ([]Node, error) {
-	query := `SELECT id, expedition_id, name, type, environment_description, difficulty_multiplier, position_index, choices, is_resolved 
+	query := `SELECT id, expedition_id, name, type, environment_description, difficulty_multiplier, position_index, choices, is_resolved, terrain, detection_threshold 
 	          FROM nodes WHERE expedition_id = $1 ORDER BY position_index ASC`
 	rows, err := r.db.Query(query, expeditionID)
 	if err != nil {
@@ -52,11 +52,14 @@ func (r *explorationRepository) GetNodesByExpeditionID(expeditionID uuid.UUID) (
 	for rows.Next() {
 		var n Node
 		var choicesJSON []byte
-		if err := rows.Scan(&n.ID, &n.ExpeditionID, &n.Name, &n.Type, &n.EnvironmentDescription, &n.DifficultyMultiplier, &n.PositionIndex, &choicesJSON, &n.IsResolved); err != nil {
+		if err := rows.Scan(&n.ID, &n.ExpeditionID, &n.Name, &n.Type, &n.EnvironmentDescription, &n.DifficultyMultiplier, &n.PositionIndex, &choicesJSON, &n.IsResolved, &n.Terrain, &n.DetectionThreshold); err != nil {
 			return nil, err
 		}
 		if err := json.Unmarshal(choicesJSON, &n.Choices); err != nil {
 			return nil, err
+		}
+		if n.Choices == nil {
+			n.Choices = []StrategicChoice{}
 		}
 		nodes = append(nodes, n)
 	}
@@ -64,16 +67,19 @@ func (r *explorationRepository) GetNodesByExpeditionID(expeditionID uuid.UUID) (
 }
 
 func (r *explorationRepository) GetNodeByID(id uuid.UUID) (*Node, error) {
-	query := `SELECT id, expedition_id, name, type, environment_description, difficulty_multiplier, position_index, choices, is_resolved 
+	query := `SELECT id, expedition_id, name, type, environment_description, difficulty_multiplier, position_index, choices, is_resolved, terrain, detection_threshold 
 	          FROM nodes WHERE id = $1`
 	var n Node
 	var choicesJSON []byte
-	err := r.db.QueryRow(query, id).Scan(&n.ID, &n.ExpeditionID, &n.Name, &n.Type, &n.EnvironmentDescription, &n.DifficultyMultiplier, &n.PositionIndex, &choicesJSON, &n.IsResolved)
+	err := r.db.QueryRow(query, id).Scan(&n.ID, &n.ExpeditionID, &n.Name, &n.Type, &n.EnvironmentDescription, &n.DifficultyMultiplier, &n.PositionIndex, &choicesJSON, &n.IsResolved, &n.Terrain, &n.DetectionThreshold)
 	if err != nil {
 		return nil, err
 	}
 	if err := json.Unmarshal(choicesJSON, &n.Choices); err != nil {
 		return nil, err
+	}
+	if n.Choices == nil {
+		n.Choices = []StrategicChoice{}
 	}
 	return &n, nil
 }
@@ -164,7 +170,7 @@ func (r *explorationRepository) GetAllSectors() ([]Sector, error) {
 }
 
 func (r *explorationRepository) GetSubSectorsBySectorID(sectorID uuid.UUID) ([]SubSector, error) {
-	query := `SELECT id, sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y FROM sub_sectors WHERE sector_id = $1`
+	query := `SELECT id, sector_id, type, name, description, rewards, requirements, allowed_modes, requires_atmosphere, terrain, detection_threshold, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y FROM sub_sectors WHERE sector_id = $1`
 	rows, err := r.db.Query(query, sectorID)
 	if err != nil {
 		return nil, err
@@ -174,7 +180,7 @@ func (r *explorationRepository) GetSubSectorsBySectorID(sectorID uuid.UUID) ([]S
 	var subSectors []SubSector
 	for rows.Next() {
 		var ss SubSector
-		if err := rows.Scan(&ss.ID, &ss.SectorID, &ss.Type, &ss.Name, &ss.Description, pq.Array(&ss.Rewards), pq.Array(&ss.Requirements), pq.Array(&ss.AllowedModes), &ss.RequiresAtmosphere, &ss.SuitabilityPilot, &ss.SuitabilityVehicle, &ss.CoordinatesX, &ss.CoordinatesY); err != nil {
+		if err := rows.Scan(&ss.ID, &ss.SectorID, &ss.Type, &ss.Name, &ss.Description, pq.Array(&ss.Rewards), pq.Array(&ss.Requirements), pq.Array(&ss.AllowedModes), &ss.RequiresAtmosphere, &ss.Terrain, &ss.DetectionThreshold, &ss.SuitabilityPilot, &ss.SuitabilityVehicle, &ss.CoordinatesX, &ss.CoordinatesY); err != nil {
 			return nil, err
 		}
 		subSectors = append(subSectors, ss)
@@ -183,7 +189,7 @@ func (r *explorationRepository) GetSubSectorsBySectorID(sectorID uuid.UUID) ([]S
 }
 
 func (r *explorationRepository) GetPlanetLocationsBySubSectorID(subSectorID uuid.UUID) ([]PlanetLocation, error) {
-	query := `SELECT id, sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y FROM planet_locations WHERE sub_sector_id = $1`
+	query := `SELECT id, sub_sector_id, name, description, rewards, requirements, allowed_modes, requires_atmosphere, terrain, detection_threshold, suitability_pilot, suitability_vehicle, coordinates_x, coordinates_y FROM planet_locations WHERE sub_sector_id = $1`
 	rows, err := r.db.Query(query, subSectorID)
 	if err != nil {
 		return nil, err
@@ -193,7 +199,7 @@ func (r *explorationRepository) GetPlanetLocationsBySubSectorID(subSectorID uuid
 	var locations []PlanetLocation
 	for rows.Next() {
 		var pl PlanetLocation
-		if err := rows.Scan(&pl.ID, &pl.SubSectorID, &pl.Name, &pl.Description, pq.Array(&pl.Rewards), pq.Array(&pl.Requirements), pq.Array(&pl.AllowedModes), &pl.RequiresAtmosphere, &pl.SuitabilityPilot, &pl.SuitabilityVehicle, &pl.CoordinatesX, &pl.CoordinatesY); err != nil {
+		if err := rows.Scan(&pl.ID, &pl.SubSectorID, &pl.Name, &pl.Description, pq.Array(&pl.Rewards), pq.Array(&pl.Requirements), pq.Array(&pl.AllowedModes), &pl.RequiresAtmosphere, &pl.Terrain, &pl.DetectionThreshold, &pl.SuitabilityPilot, &pl.SuitabilityVehicle, &pl.CoordinatesX, &pl.CoordinatesY); err != nil {
 			return nil, err
 		}
 		locations = append(locations, pl)

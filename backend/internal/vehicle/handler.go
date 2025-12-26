@@ -35,7 +35,7 @@ func (h *Handler) MintStarter(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	vehicle, err := h.useCase.MintStarterVehicle(userID)
+	vehicle, err := h.useCase.InitializeStarterPack(r.Context(), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -94,6 +94,73 @@ func (h *Handler) ListVehicles(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(vehicles)
+}
+
+func (h *Handler) GetVehicleCP(w http.ResponseWriter, r *http.Request) {
+	vehicleIDStr := r.URL.Query().Get("id")
+	vehicleID, err := uuid.Parse(vehicleIDStr)
+	if err != nil {
+		http.Error(w, "Invalid vehicle id", http.StatusBadRequest)
+		return
+	}
+
+	cp, err := h.useCase.GetVehicleCP(r.Context(), vehicleID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]int{"cp": cp})
+}
+
+func (h *Handler) EquipItem(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		ItemID    uuid.UUID `json:"item_id"`
+		VehicleID uuid.UUID `json:"vehicle_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	err := h.useCase.EquipItem(r.Context(), req.ItemID, req.VehicleID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "success"})
+}
+
+func (h *Handler) UnequipItem(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		ItemID uuid.UUID `json:"item_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	err := h.useCase.UnequipItem(r.Context(), req.ItemID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "success"})
 }
 
 // Item & DDS Endpoints

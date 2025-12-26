@@ -16,13 +16,16 @@ DO $$ BEGIN
         CREATE TYPE saga_status AS ENUM ('STARTED', 'COMPLETED', 'FAILED', 'COMPENSATING');
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_status') THEN
-        CREATE TYPE vehicle_status AS ENUM ('PENDING', 'MINTED', 'BURNED');
+        CREATE TYPE vehicle_status AS ENUM ('PENDING', 'AVAILABLE', 'MINTED', 'BURNED');
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'item_type') THEN
         CREATE TYPE item_type AS ENUM ('VEHICLE', 'PART', 'BASTION_MODULE', 'CONSUMABLE');
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'item_condition') THEN
         CREATE TYPE item_condition AS ENUM ('PRISTINE', 'WORN', 'DAMAGED', 'CRITICAL', 'BROKEN');
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'terrain_type') THEN
+        CREATE TYPE terrain_type AS ENUM ('URBAN', 'ISLANDS', 'SKY', 'DESERT', 'VOID', 'SPACE');
     END IF;
 END $$;
 
@@ -68,7 +71,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
     image_url TEXT,
     stats JSONB NOT NULL DEFAULT '{}', -- Base stats: HP, Attack, Defense, etc.
     cr INTEGER DEFAULT 0, -- Combat Rating
-    suitability_tags JSONB NOT NULL DEFAULT '[]', -- Terrain suitability (e.g., ["AERIAL", "AQUATIC"])
+    suitability_tags TEXT[] NOT NULL DEFAULT '{}', -- Terrain suitability (e.g., {"AERIAL", "AQUATIC"})
     rarity rarity_tier NOT NULL DEFAULT 'COMMON',
     tier INTEGER DEFAULT 1,
     is_void_touched BOOLEAN DEFAULT FALSE,
@@ -106,7 +109,7 @@ CREATE TABLE IF NOT EXISTS items (
     
     -- State
     is_equipped BOOLEAN DEFAULT FALSE,
-    parent_item_id UUID REFERENCES items(id), -- For parts attached to a Vehicle or Bastion
+    parent_item_id UUID, -- For parts attached to a Vehicle or Bastion
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -135,10 +138,13 @@ CREATE TABLE IF NOT EXISTS pilot_stats (
     character_id UUID PRIMARY KEY REFERENCES characters(id),
     resonance_level INTEGER DEFAULT 0,
     resonance_exp INTEGER DEFAULT 0,
+    stress INTEGER DEFAULT 0,
     xp INTEGER DEFAULT 0,
     rank INTEGER DEFAULT 1,
     current_o2 DECIMAL(5, 2) DEFAULT 100.00,
     current_fuel DECIMAL(5, 2) DEFAULT 100.00,
+    scrap_metal INTEGER DEFAULT 0,
+    research_data INTEGER DEFAULT 0,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -178,6 +184,8 @@ CREATE TABLE IF NOT EXISTS sub_sectors (
     requirements TEXT[],
     allowed_modes TEXT[], -- PILOT, VEHICLE, TANK, etc.
     requires_atmosphere BOOLEAN DEFAULT FALSE,
+    terrain terrain_type DEFAULT 'SPACE',
+    detection_threshold INTEGER DEFAULT 1000,
     suitability_pilot INTEGER DEFAULT 50,
     suitability_vehicle INTEGER DEFAULT 50,
     coordinates_x INTEGER,
@@ -194,6 +202,8 @@ CREATE TABLE IF NOT EXISTS planet_locations (
     requirements TEXT[],
     allowed_modes TEXT[],
     requires_atmosphere BOOLEAN DEFAULT FALSE,
+    terrain terrain_type DEFAULT 'SPACE',
+    detection_threshold INTEGER DEFAULT 1000,
     suitability_pilot INTEGER DEFAULT 50,
     suitability_vehicle INTEGER DEFAULT 50,
     coordinates_x INTEGER,
@@ -224,6 +234,8 @@ CREATE TABLE IF NOT EXISTS encounters (
     visual_prompt TEXT,
     image_url TEXT,
     enemy_id UUID, -- References vehicles(id) for NPC enemies
+    terrain terrain_type DEFAULT 'SPACE',
+    detection_threshold INTEGER DEFAULT 1000,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -237,6 +249,8 @@ CREATE TABLE IF NOT EXISTS nodes (
     position_index INTEGER NOT NULL, -- Order on the "Expedition"
     choices JSONB DEFAULT '[]', -- Strategic choices for the node
     is_resolved BOOLEAN DEFAULT FALSE,
+    terrain terrain_type DEFAULT 'SPACE',
+    detection_threshold INTEGER DEFAULT 1000,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

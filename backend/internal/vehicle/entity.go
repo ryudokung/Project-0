@@ -31,9 +31,10 @@ const (
 	RarityRelic       RarityTier = "RELIC"
 	RaritySingularity RarityTier = "SINGULARITY"
 
-	StatusPending VehicleStatus = "PENDING"
-	StatusMinted  VehicleStatus = "MINTED"
-	StatusBurned  VehicleStatus = "BURNED"
+	StatusPending   VehicleStatus = "PENDING"
+	StatusAvailable VehicleStatus = "AVAILABLE"
+	StatusMinted    VehicleStatus = "MINTED"
+	StatusBurned    VehicleStatus = "BURNED"
 
 	ItemTypeVehicle       ItemType = "VEHICLE"
 	ItemTypePart          ItemType = "PART"

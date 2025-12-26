@@ -7,7 +7,7 @@ This document contains text-based wireframes to visualize the "Tactical Noir" in
 
 ```text
 ________________________________________________________________________________
-| [MOTHERSHIP: THE SILENT WHALE]                      [SCRAP: 150] [FUEL: 85%] |
+| [BASTION: THE SILENT WHALE]                         [SCRAP: 150] [FUEL: 85%] |
 |______________________________________________________________________________|
 |                                                                              |
 |          .                                                                   |
@@ -24,7 +24,7 @@ ________________________________________________________________________________
 |                     ( ) NODE: UNKNOWN SIGNAL                                 |
 |                                                                              |
 |______________________________________________________________________________|
-| [SCAN FOR BLIPS] [MOTHERSHIP LAB] [HANGAR] [CAPTAIN'S LOG]                   |
+| [SCAN FOR BLIPS] [BASTION LAB] [PREPARATION] [CAPTAIN'S LOG]                 |
 |______________________________________________________________________________|
 ```
 
@@ -51,22 +51,24 @@ ________________________________________________________________________________
 |______________________________________________________________________________|
 ```
 
-## 3. The Hangar (Synthesis Mode)
-*Theme: High-fidelity 3D Vehicle Showcase.*
+## 3. The Bastion (Visual Equipment Map)
+*Theme: High-fidelity 3D Vehicle Showcase with Anatomical Mapping.*
 
 ```text
 ________________________________________________________________________________
-| [VEHICLE: EXOSUIT-01] [RARITY: COMMON]              [STATS: HP 100 | ATK 20] |
+| [VEHICLE: EXOSUIT-01] [CP: 1250]                    [STATS: HP 100 | ATK 20] |
 |______________________________________________________________________________|
 |                                                                              |
-|    [ 3D VIEW: EXOSUIT ON A HYDRAULIC PLATFORM WITH SPOTLIGHTS ]              |
+|    [ 3D VIEW: VEHICLE SILHOUETTE WITH GLOWING SLOTS ]                        |
 |                                                                              |
-|      / \                                                                     |
-|     | X |  <-- AI-GENERATED VISUAL DNA (FLUX.1)                              |
-|      \ /                                                                     |
+|      [HEAD]  <-- (Equipped: Sensor-X)                                        |
+|      [CORE]  <-- (Equipped: Reactor-A)                                       |
+|      [ARM_L] <-- (Equipped: Railgun-01)                                      |
+|      [ARM_R] <-- (Equipped: Shield-01)                                       |
+|      [LEGS]  <-- (Equipped: Thruster-Z)                                      |
 |                                                                              |
 |______________________________________________________________________________|
-| [CHASSIS: IRON-01] [ARMS: SCRAP-02] [LEGS: BASIC-01] [WEAPON: PISTOL-01]     |
+| [CHASSIS: IRON-01] [RARITY: COMMON] [DDS: PRISTINE]                          |
 |------------------------------------------------------------------------------|
 | [SYNTHESIZE NEW DNA] [PHOTO MODE] [DEPLOY TO RADAR]                          |
 |______________________________________________________________________________|

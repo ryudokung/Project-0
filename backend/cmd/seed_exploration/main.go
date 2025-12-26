@@ -100,11 +100,19 @@ func main() {
 
 	// 5. Initialize Mock Pilot
 	mockUserID := "a58aa13f-f715-4137-bdf3-6ee44dd244ba"
+	mockCharacterID := "c58aa13f-f715-4137-bdf3-6ee44dd244ba"
+
 	_, err = db.Exec(`INSERT INTO users (id, wallet_address, username) VALUES ($1, '0x1234567890123456789012345678901234567890', 'PILOT_0') ON CONFLICT DO NOTHING`, mockUserID)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = db.Exec(`INSERT INTO pilot_stats (user_id, current_o2, current_fuel) VALUES ($1, 100.0, 100.0) ON CONFLICT (user_id) DO UPDATE SET current_o2 = 100.0, current_fuel = 100.0`, mockUserID)
+
+	_, err = db.Exec(`INSERT INTO characters (id, user_id, name, gender) VALUES ($1, $2, 'PILOT_0', 'MALE') ON CONFLICT DO NOTHING`, mockCharacterID, mockUserID)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`INSERT INTO pilot_stats (user_id, character_id, current_o2, current_fuel) VALUES ($1, $2, 100.0, 100.0) ON CONFLICT (character_id) DO UPDATE SET current_o2 = 100.0, current_fuel = 100.0`, mockUserID, mockCharacterID)
 	if err != nil {
 		log.Fatal(err)
 	}

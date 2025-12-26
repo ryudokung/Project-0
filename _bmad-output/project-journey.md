@@ -7,16 +7,17 @@
 
 - **Old Way:** React Components จัดการ State กันเองผ่าน Props/Context ทำให้ Code ผูกติดกัน (Tightly Coupled) และขยายยาก
 - **New Way (Unity-like Systems):** 
-    - **EventBus:** ใช้ระบบ Global Event ในการสื่อสารระหว่างส่วนต่างๆ (เช่น Combat จบ -> ส่ง Event -> Hangar อัปเดต)
-    - **Singleton Systems:** แยก Logic ออกจาก UI มาไว้ใน `CombatSystem`, `BastionSystem`, `GachaSystem`
-    - **XState (Game Machine):** ใช้ State Machine ควบคุม Flow ใหญ่ของเกม (Loading -> Menu -> Bastion -> Combat)
+    - **EventBus:** ใช้ระบบ Global Event ในการสื่อสารระหว่างส่วนต่างๆ (เช่น Combat จบ -> ส่ง Event -> Bastion อัปเดต)
+    - **Singleton Systems:** แยก Logic ออกจาก UI มาไว้ใน `CombatSystem`, `BastionSystem`, `ExplorationSystem`
+    - **XState v5 (Game Machine):** ใช้ State Machine ควบคุม Flow ใหญ่ของเกม (Loading -> Menu -> Bastion -> Combat) พร้อมระบบ Reset Context เมื่อจบ Expedition
     - **Result:** โค้ดสะอาดขึ้นมาก UI มีหน้าที่แค่ "แสดงผล" และ "ส่งคำสั่ง" ส่วน Logic อยู่ใน System ทั้งหมด
 
 ## 2. The Bastion: Beyond a Simple Menu
 เปลี่ยนจาก "Hangar" ที่เป็นแค่เมนูเลือกด่าน กลายเป็น **"The Bastion"** (ฐานทัพเคลื่อนที่)
 
 - **Bridge View:** หน้าจอหลักที่จะเป็นศูนย์กลางความดื่มด่ำ (Immersion) เห็นวิวอวกาศและสถานะของยานแบบ Real-time
-- **Modular Hardpoints:** ยานแม่มี Slot สำหรับติดตั้งอุปกรณ์ (Warp Drive, Shields, Turrets) ซึ่งส่งผลต่อการเล่นจริง
+- **Visual Equipment Map:** ระบบติดตั้ง Module แบบ Anatomical (HEAD, CORE, ARM_L, ARM_R, LEGS) บน Silhouette ของหุ่น
+- **Combat Power (CP):** ระบบคำนวณความแข็งแกร่งแบบรวมศูนย์ `(ATK*3) + (DEF*2) + (HP/5)` เพื่อให้ผู้เล่นประเมินความพร้อมได้ทันที
 - **The Maintenance Hub:** เป็นที่ที่ผู้เล่นต้องกลับมาซ่อมแซมและปรับแต่งอุปกรณ์
 
 ## 3. The "Stage Change" NFT Model
@@ -55,4 +56,4 @@
 - **AI Integration:** FLUX.1 (Image Gen), IP-Adapter (Consistency), ControlNet (Structure)
 
 ---
-*สถานะปัจจุบัน: เสร็จสิ้นการ Refactor ใหญ่ (Hangar -> Bastion, Mech -> Vehicle) และการรวม Database Schema พร้อมสำหรับการพัฒนาฟีเจอร์ Gameplay ต่อไป*
+*สถานะปัจจุบัน: เสร็จสิ้นการ Refactor ใหญ่ (Hangar -> Bastion, Mech -> Vehicle), การเพิ่มระบบ CP & Anatomical Mapping, และการแก้ปัญหา Expedition Loop Hang พร้อมสำหรับการพัฒนาฟีเจอร์ Gameplay ต่อไป*

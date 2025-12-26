@@ -59,6 +59,9 @@ func main() {
 	explorationService := exploration.NewService(explorationRepo, vehicleUseCase, gameRepo)
 	explorationHandler := exploration.NewHandler(explorationService)
 
+	// Initialize Game Handler
+	gameHandler := game.NewHandler(gameUseCase, gameRepo)
+
 	// Initialize Gacha Module
 	gachaRepo := gacha.NewRepository(db)
 	gachaUC := gacha.NewUseCase(gachaRepo, gameRepo, vehicleRepo)
@@ -85,6 +88,9 @@ func main() {
 	mux.Handle("/api/v1/auth/characters/create", authMiddleware(http.HandlerFunc(authHandler.CreateCharacter)))
 	mux.Handle("/api/v1/vehicles/mint-starter", authMiddleware(http.HandlerFunc(vehicleHandler.MintStarter)))
 	mux.Handle("/api/v1/vehicles", authMiddleware(http.HandlerFunc(vehicleHandler.ListVehicles)))
+	mux.Handle("/api/v1/vehicles/cp", authMiddleware(http.HandlerFunc(vehicleHandler.GetVehicleCP)))
+	mux.Handle("/api/v1/vehicles/equip", authMiddleware(http.HandlerFunc(vehicleHandler.EquipItem)))
+	mux.Handle("/api/v1/vehicles/unequip", authMiddleware(http.HandlerFunc(vehicleHandler.UnequipItem)))
 	
 	// DDS & Items
 	mux.Handle("/api/v1/items", authMiddleware(http.HandlerFunc(vehicleHandler.ListItems)))
@@ -96,7 +102,9 @@ func main() {
 	mux.Handle("/api/v1/exploration/start", authMiddleware(http.HandlerFunc(explorationHandler.StartExploration)))
 	mux.Handle("/api/v1/exploration/timeline", authMiddleware(http.HandlerFunc(explorationHandler.GetTimeline)))
 	mux.Handle("/api/v1/exploration/resolve", authMiddleware(http.HandlerFunc(explorationHandler.ResolveChoice)))
+	mux.Handle("/api/v1/exploration/resolve-node", authMiddleware(http.HandlerFunc(explorationHandler.ResolveNode)))
 	mux.Handle("/api/v1/exploration/advance", authMiddleware(http.HandlerFunc(explorationHandler.AdvanceTimeline)))
+	mux.Handle("/api/v1/game/pilot-stats", authMiddleware(http.HandlerFunc(gameHandler.GetPilotStats)))
 
 	// Simple CORS Middleware
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -11,7 +11,7 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
     - **Pilot & Exosuit:** The "Infiltration Layer." Pilots use specialized **Exosuits** for stealth, hacking, and exploring areas inaccessible to heavy vehicles.
 - **Modular NFT Assembly:** Every part (Railgun, Shield, Pilot Suit, Transformation Module) is an individual NFT. AI dynamically synthesizes these parts into a single visual representation.
 - **Resonance & Dominance:** A progression system where high **Pilot Resonance** and gear quality grant **Dominance** over lower-tier sectors, allowing for "Annihilation" of threats and efficient farming. This "Power vs. Strategy" balance is a core design philosophy.
-- **Web2.5 Onboarding (Seamless Entry):** Players can join using Google, Email, or Social accounts via Privy. A **Stage Change Model** allows immediate gameplay with virtual assets in the database, with optional wallet linking and on-chain minting later.
+- **Web2.5 Onboarding (Seamless Entry):** Players can join using Google, Email, or Social accounts via Privy. A **Stage Change Model** allows immediate gameplay with **Manifested Assets** in the database, with optional wallet linking and on-chain minting later.
 - **Deep Durability System (DDS):** A multi-tiered item condition system (Pristine, Worn, Damaged, Critical, Broken) that affects gameplay performance and visual fidelity.
 - **AI Narrative Timeline (Expedition & Encounters):** 
     - **The Expedition:** The core narrative anchor or mission objective defined by the Director (e.g., "Repairing the Radar"). It provides the context and constraints for the AI.
@@ -77,8 +77,8 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 
 ### 2. Authentication & Onboarding (Web2.5)
 - **Auth Flow:** Implemented a hybrid authentication system. Initial login is via **Guest ID** (Local Storage) or **Social Login** (Email/Google via Privy).
-- **Wallet Strategy:** Wallet linking is **NOT** required for initial login. It is treated as an optional step for later stages, specifically for minting virtual assets into on-chain NFTs.
-- **Pilot Registration:** New users must complete a "Pilot Registration" (Character Creation) which initializes their `pilot_stats` and assigns a starter vehicle in the database.
+- **Wallet Strategy:** Wallet linking is **NOT** required for initial login. It is treated as an optional step for later stages, specifically for minting manifested assets into on-chain NFTs.
+- **Pilot Registration:** New users must complete a "Pilot Registration" (Character Creation) which initializes their `pilot_stats` and assigns a **Starter Pack** in the database.
 
 ### 3. Security & Anti-Cheat (Hardening)
 - **JWT Middleware:** Implemented a robust authentication layer in Go to protect all sensitive API routes.
@@ -98,6 +98,9 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 - **Transformation Logic:** Introduced the concept of **Transformation Modules**, allowing heavy vehicles like Tanks and Ships to convert into Robot modes for tactical flexibility.
 - **Infiltration Layer:** Established the **Pilot & Exosuit** system for "boots-on-the-ground" gameplay, enabling exploration of tight spaces and stealth missions.
 - **Resonance Progression:** Implemented **Pilot Resonance** as a core stat that scales with player experience, influencing the **Combat Rating (CR)** and unlocking "Dominance" mechanics for high-level players.
+- **Visual Equipment System:** Implemented a visual mapping interface in the Bastion for equipping modules. Items are now mapped to specific anatomical slots (**HEAD, CORE, ARM_L, ARM_R, LEGS**) overlaid on a pilot/vehicle silhouette.
+- **Starter Pack Initialization:** New characters are now automatically granted a **Starter Vehicle** and two equipped modules (**Starter Kinetic Arm** and **Starter Plating**) upon creation, ensuring a "Ready-to-Play" experience.
+- **Combat Power (CP) Calculation:** Implemented a standardized CP formula `(Total ATK * 3) + (Total DEF * 2) + (Total HP / 5)` to provide a clear power metric for players.
 - **Modular Equipment:** Expanded the item system to include dedicated slots for both Pilots (Body, Head, Utility, Weapon) and Vehicles (Core, Armor, Weapons, Transformation, Tools).
 
 ## Directory Structure

@@ -1,6 +1,7 @@
 package gacha
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"time"
@@ -94,12 +95,12 @@ func (u *gachaUseCase) Pull(req GachaPullRequest) (*GachaPullResponse, error) {
 				Rarity:   rarity,
 			}
 		} else {
-			p := u.generateRandomPart(req.UserID, rarity)
-			if err := u.vehicleRepo.CreatePart(p); err != nil {
+			item := u.generateRandomItem(req.UserID, rarity)
+			if err := u.vehicleRepo.CreateItem(context.Background(), item); err != nil {
 				return nil, err
 			}
 			result = GachaResult{
-				Item:     p,
+				Item:     item,
 				ItemType: "PART",
 				Rarity:   rarity,
 			}
@@ -184,18 +185,26 @@ func (u *gachaUseCase) generateRandomVehicle(userID uuid.UUID, rarity vehicle.Ra
 	return v
 }
 
-func (u *gachaUseCase) generateRandomPart(userID uuid.UUID, rarity vehicle.RarityTier) *vehicle.Part {
-	return &vehicle.Part{
+func (u *gachaUseCase) generateRandomItem(userID uuid.UUID, rarity vehicle.RarityTier) *vehicle.Item {
+	slots := []string{"ARM_L", "ARM_R", "CORE", "LEG_L", "LEG_R", "HEAD"}
+	slot := slots[rand.Intn(len(slots))]
+	
+	return &vehicle.Item{
 		ID:            uuid.New(),
 		OwnerID:       userID,
-		Slot:          "ARM_L",
-		Name:          "Void Striker Arm",
+		Name:          fmt.Sprintf("Void %s Module", slot),
+		ItemType:      vehicle.ItemTypePart,
 		Rarity:        rarity,
 		Tier:          1,
-		IsVoidTouched: true,
-		Stats: vehicle.PartStats{
-			BonusAttack: 5,
+		Slot:          &slot,
+		Durability:    1000,
+		MaxDurability: 1000,
+		Condition:     vehicle.ConditionPristine,
+		Stats: vehicle.ItemStats{
+			BonusAttack:  rand.Intn(10) + 5,
+			BonusDefense: rand.Intn(5) + 2,
 		},
+		IsEquipped: false,
 	}
 }
 
@@ -203,8 +212,8 @@ func (u *gachaUseCase) getItemID(item interface{}) uuid.UUID {
 	if v, ok := item.(*vehicle.Vehicle); ok {
 		return v.ID
 	}
-	if p, ok := item.(*vehicle.Part); ok {
-		return p.ID
+	if i, ok := item.(*vehicle.Item); ok {
+		return i.ID
 	}
 	return uuid.Nil
 }

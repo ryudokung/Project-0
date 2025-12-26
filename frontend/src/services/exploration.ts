@@ -2,6 +2,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
   ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1` 
   : 'http://localhost:8080/api/v1';
 
+export type TerrainType = 'URBAN' | 'ISLANDS' | 'SKY' | 'DESERT' | 'VOID' | 'SPACE';
+
 export interface PlanetLocation {
   id: string;
   name: string;
@@ -10,6 +12,8 @@ export interface PlanetLocation {
   requirements: string[];
   allowedModes: string[];
   requiresAtmosphere: boolean;
+  terrain: TerrainType;
+  detectionThreshold: number;
   suitability: {
     pilot: number;
     vehicle: number;
@@ -26,6 +30,8 @@ export interface SubSector {
   requirements: string[];
   allowedModes: string[];
   requiresAtmosphere: boolean;
+  terrain: TerrainType;
+  detectionThreshold: number;
   suitability: {
     pilot: number;
     vehicle: number;
@@ -64,6 +70,8 @@ interface BackendSubSector {
   requirements: string[];
   allowed_modes: string[];
   requires_atmosphere: boolean;
+  terrain: TerrainType;
+  detection_threshold: number;
   suitability_pilot: number;
   suitability_vehicle: number;
   coordinates_x: number;
@@ -79,6 +87,8 @@ interface BackendPlanetLocation {
   requirements: string[];
   allowed_modes: string[];
   requires_atmosphere: boolean;
+  terrain: TerrainType;
+  detection_threshold: number;
   suitability_pilot: number;
   suitability_vehicle: number;
   coordinates_x: number;
@@ -87,10 +97,16 @@ interface BackendPlanetLocation {
 
 export interface PilotStats {
   user_id: string;
+  character_id: string;
   resonance_level: number;
   resonance_exp: number;
+  stress: number;
+  xp: number;
+  rank: number;
   current_o2: number;
   current_fuel: number;
+  scrap_metal: number;
+  research_data: number;
   updated_at: string;
 }
 
@@ -113,6 +129,8 @@ export interface Node {
   position_index: number;
   choices: StrategicChoice[];
   is_resolved: boolean;
+  terrain: TerrainType;
+  detectionThreshold: number;
 }
 
 export interface Encounter {
@@ -123,6 +141,8 @@ export interface Encounter {
   visualPrompt: string;
   image: string;
   enemy_id?: string;
+  terrain: TerrainType;
+  detectionThreshold: number;
 }
 
 interface BackendEncounter {
@@ -132,6 +152,8 @@ interface BackendEncounter {
   description: string;
   visual_prompt: string;
   enemy_id?: string;
+  terrain: TerrainType;
+  detection_threshold: number;
 }
 
 export interface ExplorationStartResponse {
@@ -200,6 +222,8 @@ export const explorationService = {
         requirements: ss.requirements || [],
         allowedModes: ss.allowed_modes as any || [],
         requiresAtmosphere: ss.requires_atmosphere,
+        terrain: ss.terrain,
+        detectionThreshold: ss.detection_threshold,
         suitability: {
           pilot: ss.suitability_pilot,
           vehicle: ss.suitability_vehicle
@@ -213,6 +237,8 @@ export const explorationService = {
           requirements: l.requirements || [],
           allowedModes: l.allowed_modes as any || [],
           requiresAtmosphere: l.requires_atmosphere,
+          terrain: l.terrain,
+          detectionThreshold: l.detection_threshold,
           suitability: {
             pilot: l.suitability_pilot,
             vehicle: l.suitability_vehicle
@@ -248,6 +274,8 @@ export const explorationService = {
         description: e.description,
         visualPrompt: e.visual_prompt,
         enemy_id: e.enemy_id,
+        terrain: e.terrain,
+        detectionThreshold: e.detection_threshold,
         image: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1000&auto=format&fit=crop'
       }))
     };
@@ -260,7 +288,8 @@ export const explorationService = {
       body: JSON.stringify({ expedition_id: expeditionId, vehicle_id: vehicleId }),
     });
     if (!response.ok) {
-      throw new Error('Failed to advance timeline');
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to advance timeline');
     }
     const data: BackendAdvanceTimelineResponse = await response.json();
     return {
@@ -272,6 +301,8 @@ export const explorationService = {
         description: data.encounter.description,
         visualPrompt: data.encounter.visual_prompt,
         enemy_id: data.encounter.enemy_id,
+        terrain: data.encounter.terrain,
+        detectionThreshold: data.encounter.detection_threshold,
         image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop'
       }
     };
@@ -285,13 +316,31 @@ export const explorationService = {
     return response.json();
   },
 
-  async resolveChoice(nodeId: string, choice: string): Promise<Node> {
+  async resolveChoice(nodeId: string, choice: string): Promise<{ node: Node, pilot_stats: PilotStats }> {
     const response = await fetch(`${API_BASE_URL}/exploration/resolve`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ node_id: nodeId, choice }),
     });
     if (!response.ok) throw new Error('Failed to resolve choice');
+    return response.json();
+  },
+
+  async resolveNode(nodeId: string): Promise<Node> {
+    const response = await fetch(`${API_BASE_URL}/exploration/resolve-node`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ node_id: nodeId }),
+    });
+    if (!response.ok) throw new Error('Failed to resolve node');
+    return response.json();
+  },
+
+  async getPilotStats(characterId: string): Promise<PilotStats> {
+    const response = await fetch(`${API_BASE_URL}/game/pilot-stats?character_id=${characterId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error('Failed to fetch pilot stats');
     return response.json();
   }
 };

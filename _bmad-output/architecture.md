@@ -48,7 +48,7 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 - **Decision:** Use **Saga Pattern (Orchestration-based)**.
 - **Rationale:** Essential for managing long-running, multi-step processes across heterogeneous systems (Go Backend, Fal.ai API, Base L2 Smart Contracts).
 - **Key Implementation Details:**
-    - Centralized Orchestrator in Go to manage the **"Vehicle Assembly"** state machine (Ships, Mechs, Tanks).
+    - Centralized Orchestrator in Go to manage the **"Vehicle Assembly"** state machine (Mechs, Tanks, Ships, etc.).
     - Mandatory **Idempotency Keys** for all external service calls to prevent duplicate transactions.
     - Compensating transactions (e.g., credit refunds) for failed steps in the assembly pipeline.
     - **New Sagas:**
@@ -69,17 +69,17 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
     - `users` table supports multiple auth methods: `privy_did`, `guest_id`, `username` + `password_hash`.
     - `active_character_id` in `users` table points to the currently selected character.
     - **Character Creation Flow:** New users are redirected to a creation screen to set `name` and `gender` (Male/Female).
-    - **Starter Asset:** Every new character is automatically assigned a **Starter Ship (FS-01)** to enable immediate exploration.
-    - **Wallet Strategy:** Wallet linking is **NOT** required for initial login. It is an optional step for later stages (e.g., minting virtual assets to on-chain NFTs).
+    - **Starter Asset:** Every new character is automatically assigned a **Starter Pack (Vehicle + Modules)** to enable immediate exploration.
+    - **Wallet Strategy:** Wallet linking is **NOT** required for initial login. It is an optional step for later stages (e.g., minting manifested assets to on-chain NFTs).
     - **Account Upgrade Flow:** Logic to link a `privy_did` or `password_hash` to an existing `guest_id` record, preserving all characters and assets.
 
 #### ADR 004: Decoupled Game Engine Architecture
-- **Decision:** Implement a **Decoupled Game Engine** pattern using a global **Event Bus** and **Singleton Systems**.
+- **Decision:** Implement a **Decoupled Game Engine** pattern using a global **Event Bus**, **Singleton Systems**, and **XState v5**.
 - **Rationale:** Traditional React state management becomes brittle as game complexity grows. Decoupling game logic from UI components allows for better testability, easier maintenance, and a more "Unity-like" development experience.
 - **Key Implementation Details:**
     - **Event Bus (`EventBus.ts`)**: Centralized, type-safe event system for cross-component communication.
-    - **Singleton Systems**: Standalone logic classes (e.g., `ExplorationSystem.ts`, `BastionSystem.ts`) that manage game state and API interactions.
-    - **XState Machine (`gameMachine.ts`)**: Controls high-level game stages (Landing -> Character Creation -> Bridge -> Hangar -> Exploration).
+    - **Singleton Systems**: Standalone logic classes (e.g., `ExplorationSystem.ts`, `BastionSystem.ts`, `CombatSystem.ts`) that manage game state and API interactions.
+    - **XState Machine (`gameMachine.ts`)**: Controls high-level game stages (Landing -> Character Creation -> Bastion -> Map -> Exploration -> Combat -> Debrief).
     - **React UI Layer**: Functional components that listen to events and trigger system methods.
     - **Persistent HUD:** Global HUD elements remain mounted across stage transitions to maintain visual continuity.
 
@@ -87,17 +87,26 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 - **Decision:** Implement a data-driven combat system where encounters are linked to persistent NPC entities in the database.
 - **Rationale:** Moving beyond random placeholders allows for meaningful progression, specific enemy types with unique behaviors, and a foundation for a complex loot/reward system based on the specific enemy defeated.
 - **Key Implementation Details:**
-    - **Schema Update:** Added `enemy_id` (UUID) to the `encounters` table to link combat nodes to specific NPC Mechs.
-    - **NPC Seeding:** A migration script seeds the database with a set of "SYSTEM_NPC" owned Mechs (e.g., Striker, Guardian, Scout) to serve as initial opponents.
+    - **Schema Update:** Added `enemy_id` (UUID) to the `encounters` table to link combat nodes to specific NPC Vehicles.
+    - **NPC Seeding:** A migration script seeds the database with a set of "SYSTEM_NPC" owned Vehicles (e.g., Striker, Guardian, Scout) to serve as initial opponents.
     - **Service Logic:** The `ExplorationService` now assigns a random `enemy_id` from the NPC pool when generating a `COMBAT` encounter.
     - **Frontend Integration:** The `UnifiedGameController` passes the `enemy_id` to the `CombatStage` component, which then uses the `CombatService` to simulate a battle against that specific entity.
 
-#### ADR 006: Security, Anti-Cheat & Concurrency Control
+#### ADR 006: Anatomical Equipment & CP System
+- **Decision:** Implement a visual mapping system for equipment and a standardized Combat Power (CP) formula.
+- **Rationale:** Provides a clear sense of progression and customization. The CP formula allows for easy comparison of power levels across different vehicle types and equipment configurations.
+- **Key Implementation Details:**
+    - **Visual Map:** UI in the Bastion that maps items to specific slots (HEAD, CORE, ARM_L, ARM_R, LEGS).
+    - **CP Formula:** `(Total ATK * 3) + (Total DEF * 2) + (Total HP / 5)`.
+    - **Unified Item System:** Both Vehicles and Parts are treated as "Items" in the database, allowing for cross-referencing and modular assembly.
+    - **Manifested Assets:** Items are created in the database first and can be "Minted" to NFTs later (V2O Model).
+
+#### ADR 007: Security, Anti-Cheat & Concurrency Control
 - **Decision:** Implement server-authoritative validation, JWT-based identity, and atomic database updates.
 - **Rationale:** In a Web2.5 game with real-world value (NFTs/Credits), client-side trust is zero. We must prevent common cheats like "Double Spending" resources, skipping combat encounters, or manipulating HP.
 - **Key Implementation Details:**
     - **JWT Middleware:** All protected routes require a valid JWT, with `user_id` injected into the request context for secure ownership checks.
-    - **Ownership Verification:** Every action (e.g., `SimulateAttack`, `StartExploration`) verifies that the user owns the Mechs or Expeditions involved.
+    - **Ownership Verification:** Every action (e.g., `SimulateAttack`, `StartExploration`) verifies that the user owns the Vehicles or Expeditions involved.
     - **Atomic SQL Updates:** Uses `UPDATE ... WHERE` with interval/resource checks (e.g., `last_free_pull_at < NOW() - INTERVAL '24 hours'`) to prevent race conditions without complex locking.
     - **Server-Authoritative State:** HP and Resources (O2/Fuel) are updated and validated on the server. Advancing in exploration is blocked if the current combat encounter is not resolved.
 
@@ -115,7 +124,7 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 เพื่อให้ระบบมีความยืดหยุ่นและรองรับ Saga Pattern เราจะใช้โครงสร้างแบบ **Modular Monolith** ด้วย **Clean Architecture** ในภาษา Go โดยแบ่ง Service/Module หลักดังนี้:
 
 ### 3.1 Orchestrator Service (The Brain)
-- **หน้าที่:** ควบคุม State Machine ของการสร้าง Mech (Saga Pattern).
+- **หน้าที่:** ควบคุม State Machine ของการสร้าง Vehicle (Saga Pattern).
 - **Logic:** ประสานงานระหว่าง AI Service และ Blockchain Service เพื่อให้มั่นใจว่าถ้า AI Gen สำเร็จ ต้องมีการ Mint NFT ตามมา หรือถ้า Mint พลาดต้องมีการ Rollback/Refund.
 
 ### 3.2 AI Integration Service
@@ -129,7 +138,7 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 - **หน้าที่:** สื่อสารกับ Base L2 Smart Contracts.
 - **Logic:** 
     - **Stage Change NFT Model:** จัดการกระบวนการเปลี่ยนสถานะจาก Virtual Asset (Server-side) เป็น On-chain NFT เมื่อผู้เล่นกด Mint หรือต้องการขาย โดยยังคงรักษาค่า Durability และ Stats เดิมไว้.
-    - **ERC-6551 (Token Bound Accounts):** ใช้มาตรฐาน ERC-6551 เพื่อให้ NFT หลัก (เช่น Mech Chassis) มี Wallet ของตัวเองสำหรับเก็บชิ้นส่วนอุปกรณ์ (Weapons, Shields) ทำให้การซื้อขายใน Marketplace ทำได้แบบยกชุด (Bundled Assets).
+    - **ERC-6551 (Token Bound Accounts):** ใช้มาตรฐาน ERC-6551 เพื่อให้ NFT หลัก (เช่น Vehicle Chassis) มี Wallet ของตัวเองสำหรับเก็บชิ้นส่วนอุปกรณ์ (Weapons, Shields) ทำให้การซื้อขายใน Marketplace ทำได้แบบยกชุด (Bundled Assets).
     - **Modular NFT Management:** จัดการการ Mint และโอน NFT แยกตามชิ้นส่วน.
     - **Metadata Sync:** อัปเดต Metadata ของ NFT แต่ละชิ้นตามสถานะความเสียหาย (Durability) ที่เกิดขึ้นจริง.
 
@@ -146,6 +155,8 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
     - **Multi-Stage Exploration:** 
         - **Space Travel:** บังคับใช้ `Ship` (The Bastion).
         - **Orbital Approach & Atmospheric Entry:** ตรวจสอบเงื่อนไขการลงจอด (Atmospheric Shielding).
+        - **Planetary Surface:** บังคับใช้ `Vehicle` ในการสำรวจและทำภารกิจ.
+        - **Interior/Precision Salvage:** บังคับใช้ `Pilot` (Character) ในการลงจากหุ่นเพื่อเก็บไอเทมหายาก.
 
 ### 3.5 Frontend Design System ([UI/UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/))
 - **หน้าที่:** จัดการความสวยงามและการใช้งานของผู้ใช้งาน (User Experience).
@@ -153,7 +164,7 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
     - **UI Styles:** ใช้ Glassmorphism สำหรับ HUD/Cockpit และ Bento Grid สำหรับ Dashboard ข้อมูล.
     - **Color Systems:** ใช้ Industry-specific palettes (Fintech/SaaS) สำหรับ Marketplace และ Cyberpunk/Neon สำหรับ Gameplay.
     - **Animation:** ใช้ Framer Motion และ React Three Fiber สำหรับการเปลี่ยนผ่านที่ลื่นไหล (Seamless Transitions).
-        - **Planetary Surface:** บังคับใช้ `Mech` ในการสำรวจและทำภารกิจ.
+        - **Planetary Surface:** บังคับใช้ `Vehicle` ในการสำรวจและทำภารกิจ.
         - **Interior/Precision Salvage:** บังคับใช้ `Pilot` (Character) ในการลงจากหุ่นเพื่อเก็บไอเทมหายาก.
     - **Combat Mode:** คำนวณผลการต่อสู้ตาม Stats ของ The Bastion, Mech, และ Pilot.
     - **Star Discovery:** ระบบ Trigger สำหรับการขยายจักรวาลตามเงื่อนไขที่กำหนด.
@@ -224,7 +235,7 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 
 ### 4.2 Seamless Transition Logic
 - **Single Canvas Architecture:** ใช้ Canvas เดียวกันทั้งแอปเพื่อหลีกเลี่ยงการ Re-mount 3D Scene เมื่อเปลี่ยนหน้า.
-- **Camera Interpolation:** ใช้การคำนวณพิกัดกล้องเพื่อทำ Smooth Zoom/Pan ระหว่าง Mothership -> Mech -> Pilot EVA.
+- **Camera Interpolation:** ใช้การคำนวณพิกัดกล้องเพื่อทำ Smooth Zoom/Pan ระหว่าง Bastion -> Vehicle -> Pilot EVA.
 - **Asset Preloading:** ใช้ระบบ Background Loading สำหรับโมเดล 3D และพื้นผิวดาวเคราะห์ขณะที่ผู้เล่นกำลังดูหน้าจอ Radar.
 
 ## 5. Microservices Architecture (Alternative/Evolution)
@@ -283,7 +294,7 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 *   `xp`: integer
 *   `is_starter`: boolean (True for the initial character)
 
-#### 3. Mech (NFT) Entity
+#### 3. Vehicle (NFT) Entity
 *   `id`: UUID (Primary Key)
 *   `token_id`: uint256 (On-chain ID, Nullable until minted)
 *   `owner_id`: UUID (FK to User)
@@ -346,8 +357,8 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 
 ### 5.3 Saga Flow Definitions
 
-#### Flow A: Mech Assembly (Premium)
-1.  **User:** กดปุ่ม "Assemble Premium Mech" -> จ่าย USDT.
+#### Flow A: Vehicle Assembly (Premium)
+1.  **User:** กดปุ่ม "Assemble Premium Vehicle" -> จ่าย USDT.
 2.  **Orchestrator:** สร้าง Saga Record (Status: `STARTED`) -> ล็อคทรัพยากร.
 3.  **AI Service:** รับ Job -> Gen ภาพด้วย FLUX.1 -> ส่งเข้า HITL Queue.
 4.  **Admin:** ตรวจสอบภาพ -> กด Approve.
@@ -362,9 +373,9 @@ Project-0 is a high-complexity hybrid system integrating Web3 (Blockchain), AI (
 5.  **AI Service:** Gen ภาพ "Action Shot" ของการปะทะ.
 6.  **Orchestrator:** บันทึก Combat Log (Status: `TEMP`) -> ตั้งเวลา Housekeeping (7 วัน).
 
-#### Flow C: Virtual-to-On-chain (V2O) Promotion
-1.  **User:** เลือก Virtual Mech -> กด "Mint to Chain" (จ่าย Gas/USDT).
-2.  **Orchestrator:** เปลี่ยนสถานะ Mech เป็น `MINTING` -> ล็อคการใช้งานชั่วคราว.
+#### Flow C: Manifested-to-On-chain (V2O) Promotion
+1.  **User:** เลือก Virtual Vehicle -> กด "Mint to Chain" (จ่าย Gas/USDT).
+2.  **Orchestrator:** เปลี่ยนสถานะ Vehicle เป็น `MINTING` -> ล็อคการใช้งานชั่วคราว.
 3.  **Blockchain Service:** ส่ง Transaction ไปยัง Base L2 (Mint ERC-721 + Setup ERC-6551).
 4.  **Blockchain Service:** รอการ Confirm จาก Chain.
 5.  **Orchestrator:** อัปเดตสถานะเป็น `ON_CHAIN` -> ปลดล็อคให้ใช้งานหรือลงขายใน Marketplace ได้.

@@ -14,6 +14,32 @@ export interface Vehicle {
   };
   character_id?: string;
   rarity: string;
+  tier: number;
+  cr: number;
+  is_void_touched: boolean;
+}
+
+export interface Item {
+  id: string;
+  name: string;
+  item_type: string;
+  rarity: string;
+  tier: number;
+  slot?: string;
+  durability: number;
+  max_durability: number;
+  condition: string;
+  stats: {
+    hp?: number;
+    attack?: number;
+    defense?: number;
+    speed?: number;
+    bonus_hp?: number;
+    bonus_attack?: number;
+    bonus_defense?: number;
+  };
+  is_equipped: boolean;
+  parent_item_id?: string;
 }
 
 const getAuthHeaders = () => {
@@ -40,5 +66,48 @@ export const vehicleService = {
 
     const data = await response.json();
     return data || [];
+  },
+
+  async getItems(): Promise<Item[]> {
+    const response = await fetch(`${API_BASE_URL}/items`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch items');
+    }
+    return await response.json();
+  },
+
+  async getVehicleCP(vehicleId: string): Promise<number> {
+    const response = await fetch(`${API_BASE_URL}/vehicles/cp?id=${vehicleId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch vehicle CP');
+    }
+    const data = await response.json();
+    return data.cp;
+  },
+
+  async equipItem(itemId: string, vehicleId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/vehicles/equip`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ item_id: itemId, vehicle_id: vehicleId }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to equip item');
+    }
+  },
+
+  async unequipItem(itemId: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/vehicles/unequip`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ item_id: itemId }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to unequip item');
+    }
   }
 };

@@ -10,10 +10,10 @@ To support a high-fidelity, real-time 3D experience with complex modular assets,
 ## 2. Core Game Loop & State Management
 
 ### 2.1 Single-Page Game Loop (Unified Controller)
-- **Architecture:** The entire game experience is managed by a single React entry point (`/play`), acting as a **Unified Game Controller**.
-- **State Machine:** Uses a centralized state machine to manage `GameStage` transitions (Hangar -> Map -> Exploration -> Combat).
+- **Architecture:** The entire game experience is managed by a single React entry point (`/`), acting as a **Unified Game Controller**.
+- **State Machine:** Uses **XState v5** to manage `GameStage` transitions (Bastion -> Map -> Exploration -> Combat).
 - **Immersion:** Eliminates page reloads, allowing for persistent background audio, seamless visual transitions (Framer Motion), and consistent state sharing (O2, Fuel, Pilot Stats) across all stages.
-- **Frontend (WebGPU + R3F):** Uses a lightweight **ECS (Entity Component System)** pattern for managing 3D entities (Ships, Mechs, VFX, UI) within the unified scene.
+- **Frontend (WebGPU + R3F):** Uses a lightweight **ECS (Entity Component System)** pattern for managing 3D entities (Vehicles, VFX, UI) within the unified scene.
 - **State Synchronization:** The frontend maintains a "Local Mirror" of the game state, updated via WebSockets or REST from the Go Backend.
 
 ### 2.2 Backend Game Logic (Go)
@@ -34,8 +34,9 @@ To support a high-fidelity, real-time 3D experience with complex modular assets,
 4. **AI Generation (FLUX.1):** Generates the high-fidelity "Master Image."
 5. **3D Asset Mapping:** The frontend maps the V-DNA to specific 3D models and shaders in the React Three Fiber scene.
 
-### 3.2 Showcase System (Hangar & Profile)
+### 3.2 Showcase System (Bastion & Profile)
 - **Dynamic Lighting:** Uses WebGPU's advanced compute shaders for real-time reflections on the vehicle's surface.
+- **Visual Equipment Map:** A silhouette-based interface for mapping modules to anatomical slots (HEAD, CORE, ARMS, LEGS).
 - **Photo Mode Engine:** A dedicated R3F scene with adjustable camera parameters (FOV, Aperture, Bloom) to capture the "Perfect Flex."
 - **Public API:** Allows external sites (or the Hall of Fame) to fetch and render the 3D model of a player's vehicle.
 

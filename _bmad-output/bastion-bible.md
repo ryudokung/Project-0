@@ -5,12 +5,12 @@
 ## 1. The Bastion: The Command Hub
 The Bastion is the player's primary hub, experienced through the **Bridge View**. It is a living entity that requires maintenance and upgrades to survive the deep void.
 
-### 1.1 Modular Hardpoints (The Slots)
-The Bastion has specific slots where components can be installed:
-- **Warp Drive Slot:** Determines travel distance and speed.
-- **Shield Projector Slot:** Provides defense during atmospheric entry and space encounters.
-- **Weapon Hardpoints (x2):** Defensive turrets visible from the Bridge.
-- **Utility Slot:** Scanners, Labs, or Resource Refineries.
+### 1.1 Visual Equipment Map (Anatomical Slots)
+The Bastion features a strategic interface for managing vehicle equipment. Players map items to specific anatomical slots on a vehicle's silhouette:
+- **HEAD:** Sensors, Neural Interfaces, and Targeting Systems.
+- **CORE:** Power Source, Armor Plating, and Life Support.
+- **ARM_L / ARM_R:** Weapons, Shields, and Utility Tools.
+- **LEGS:** Mobility Systems, Thrusters, and Stability Anchors.
 
 ### 1.2 Bastion Facilities (The Tech Tree)
 Upgrading facilities unlocks new gameplay mechanics:
@@ -36,7 +36,7 @@ How the player reaches the surface determines the risk and cost of the mission.
 - **Requirement:** Bastion Upgrade: **"Quantum Gate" (Level 8 Bridge)**.
 - **Risk:** Zero (Bypasses the atmospheric entry phase).
 - **Cost:** High (Requires "Core Fragments" or massive Energy consumption).
-- **Limitation:** Cannot teleport Heavy Vehicles (Tanks/Heavy Mechs) until Level 10.
+- **Limitation:** Cannot teleport Heavy Vehicles (Tanks) until Level 10.
 
 ## 3. The Maintenance Loop: Repair & Refit
 Items in Project-0 (Virtual or NFT) are tools that wear down with use. The Bastion provides the facilities to keep them operational.
@@ -46,11 +46,11 @@ Items in Project-0 (Virtual or NFT) are tools that wear down with use. The Basti
 - **The Repair Station:** Located in the Bastion Ops. Players use gathered resources (Scrap, Energy) to restore durability.
 - **NFT Status:** Minting an item to NFT doesn't make it indestructible; it just changes its "Stage" to be tradeable and verified. It still needs to be repaired like any other tool.
 
-## 4. Item Lifecycle: The "Stage Change" Model
+## 4. Item Lifecycle: The "Stage Change" Model (V2O)
 1. **Discovery:** Explore planets to find Blueprints and raw materials.
-2. **Crafting:** Create a Virtual Component in the Lab. Stats are randomized.
+2. **Crafting:** Create a "Manifested Asset" (Virtual Component) in the Lab. Stats are randomized.
 3. **Maintenance:** Use the item, repair it when low, and keep it in top shape.
-4. **Minting (Stage Change):** If the item is valuable, the player "Mints" it to show it off on the blockchain or sell it. It remains fully functional and repairable in-game.
+4. **Minting (Stage Change):** If the item is valuable, the player "Mints" it to the blockchain as an NFT. It remains fully functional and repairable in-game.
 
 ## 5. Bridge Immersion
 - **Visual DNA:** The Bridge reflects the current state of the Bastion.

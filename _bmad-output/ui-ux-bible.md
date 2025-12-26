@@ -18,30 +18,31 @@ Rendered using **WebGPU + R3F**, the HUD is part of the 3D world:
 - **Side Monitors:** Real-time AI Narrative logs and Pilot status.
 
 ## 3. The Showcase Engine (The "Flex" View)
-The Hangar is the primary social space:
+The Bastion is the primary social and management space:
+- **Visual Equipment Map:** A silhouette-based interface for mapping modules to anatomical slots (HEAD, CORE, ARMS, LEGS).
 - **Dynamic Lighting:** High-fidelity shadows and reflections to make the AI-generated textures pop.
 - **Photo Mode:** A dedicated UI to take high-res snapshots of the vehicle with custom filters.
-- **Social Sharing:** One-click sharing to X (Twitter) or Discord with the vehicle's stats and rarity.
+- **Social Sharing:** One-click sharing to X (Twitter) or Discord with the vehicle's stats, CP, and rarity.
 
 ## 4. The Narrative Timeline: "Expedition and Encounters" UX
 The exploration interface is designed around the "Expedition and Encounters" model, focusing on the feeling of a journey unfolding in real-time:
 
-### 4.1 The Timeline String (The Expedition)
-- **Visual:** A glowing, data-driven line that runs across the top or side of the HUD.
-- **Encounters:** As the player clicks "Advance," new nodes (Encounters) appear on the string.
+### 4.1 The Timeline Tracker (The Expedition)
+- **Visual:** A glowing, data-driven line that runs across the top of the HUD.
+- **Nodes:** As the player clicks "Proceed," the current node is highlighted, and the next node is revealed.
 - **Color Coding:** 
-    - **Red Encounters:** Combat encounters.
-    - **Blue Encounters:** Resource/Salvage points.
-    - **White Encounters:** Narrative/Lore fragments.
-    - **Gold Encounters:** Major Anchors (Fixed plot points).
+    - **Pink Nodes:** Combat encounters.
+    - **Blue Nodes:** Resource/Salvage points.
+    - **White Nodes:** Standard/Narrative fragments.
+    - **Yellow Nodes:** Outposts/Safe zones.
 
-### 4.2 The Visual Reveal (AI Image Display)
-- **Presentation:** The AI-generated image (based on Visual DNA) appears as a "Main Viewport" or a "Tactical Feed" in the center of the cockpit.
-- **Transition:** When a new Encounter is generated, the image "glitches" or "scans" into view, emphasizing the AI-generated nature of the world.
-- **Metadata Overlay:** Small, monospaced text at the corner of the image showing the "DNA Keywords" used to generate it (e.g., `FACTION: IRON_SYNDICATE | STYLE: BRUTALIST`).
+### 4.2 The Visual DNA Synthesis (AI Image Display)
+- **Presentation:** The AI-generated image (based on Visual DNA) appears as a "Main Viewport" in the center of the screen.
+- **Transition:** When a new node is reached, the image "synthesizes" into view with a scanline effect.
+- **Metadata Overlay:** Small, monospaced text at the corner of the image showing the "DNA Keywords" used to generate it (e.g., `VISUAL DNA SYNTHESIS: BRUTALIST | INDUSTRIAL_STEEL`).
 
 ### 4.3 Resource-Driven Interaction
-- **The "Advance" Button:** The primary interaction. It displays the O2/Fuel cost for the next step.
+- **The "Proceed" Button:** The primary interaction. It appears once a node is resolved (e.g., after combat or a choice).
 - **DDS Alerts:** When an item enters "Damaged" or "Critical" status, the HUD triggers visual glitches, flickering lights, and warning sirens.
 
 ## 5. User Journey: The "Single-Page Game Loop"
@@ -51,25 +52,23 @@ The exploration interface is designed around the "Expedition and Encounters" mod
 - **Character Creation:** Immediate transition to the **Pilot Registration** screen.
 - **Selection:** Visual choice between **Male** or **Female** pilot using high-fidelity AI-generated portraits.
 - **UI Element:** Interactive cards that highlight on selection, with a grayscale-to-color transition effect.
-- **Transition:** Cinematic zoom-out from the pilot's profile to the full Hangar view.
-    - **UI Style:** Bento Grid layout for selecting Gender, Face, and Hair.
-    - **Visuals:** Real-time preview of the character's appearance.
-- **First Contact:** After registration, the player enters the Hangar where their **Starter Ship** is waiting.
-- **Late Binding:** A subtle "Link External Wallet" button in the Hangar settings or profile, framed as "Securing Assets to the Void-Chain."
+- **Transition:** Cinematic zoom-out from the pilot's profile to the full Bastion view.
+- **First Contact:** After registration, the player enters the Bastion where their **Starter Vehicle** is waiting.
+- **Late Binding:** A subtle "Link External Wallet" button in the Bastion settings or profile, framed as "Securing Assets to the Void-Chain."
 
 ### 5.2 The Unified Play Page (The Loop)
-The entire game experience is contained within a single route (`/play`), managed by a **Decoupled Systems Architecture**:
+The entire game experience is contained within a single route (`/`), managed by a **Decoupled Systems Architecture**:
+- **XState v5 Orchestration:** Controls the high-level game stages (Landing -> Bastion -> Map -> Exploration -> Combat -> Debrief).
 - **EventBus Communication:** UI components are "dumb" views that subscribe to events from the **ExplorationSystem**, **CombatSystem**, and **BastionSystem**.
-- **Seamless Transitions:** Using Framer Motion `AnimatePresence`, the UI morphs between stages (Bridge, Hangar, Map, Exploration) without page reloads.
+- **Seamless Transitions:** Using Framer Motion `AnimatePresence`, the UI morphs between stages without page reloads.
 - **Persistent HUD:** The Pilot ID Badge, O2 levels, and Fuel reserves remain visible or transition smoothly between stages, maintaining the "Cockpit" feel.
 - **Stage Flow:**
-    1. **The Bastion (Bridge):** Command and Navigation.
-    2. **Hangar:** Manage Pilot/Vehicle & Repairs (DDS).
-    3. **Universe Map:** Select Sector.
-    4. **Location Scan:** Identify POIs.
-    5. **Exploration Loop:** Advance through encounters.
-    6. **Combat:** Tactical engagement.
-    7. **Debrief:** Return to The Bastion.
+    1. **The Bastion:** Manage Vehicle, Equipment (Visual Map), and Repairs.
+    2. **Universe Map:** Select Sector.
+    3. **Location Scan:** Identify POIs.
+    4. **Exploration Loop:** Advance through nodes on the timeline.
+    5. **Combat:** Tactical engagement.
+    6. **Debrief:** Return to The Bastion.
 
 ### 5.3 The Pilot ID Badge (Hangar UI)
 - **Visual:** A glassmorphic "ID Card" displayed in the Hangar.
