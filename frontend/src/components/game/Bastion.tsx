@@ -76,6 +76,27 @@ export default function Bastion({ onDeploy, onGacha }: BastionProps) {
               </div>
             </div>
           </div>
+
+          {/* Bastion Global Modules */}
+          <div className="bg-zinc-900/80 border border-zinc-700 p-4 rounded-lg backdrop-blur-md shadow-xl flex flex-col gap-2">
+            <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-1 mb-1">
+              Bastion Global Modules
+            </div>
+            <div className="flex gap-4">
+              <div className="flex flex-col items-center">
+                <div className="text-[8px] text-zinc-400 uppercase">Radar</div>
+                <div className="text-lg font-black text-cyan-400">LV.{bastionState.pilotStats?.metadata?.radar_level || 1}</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="text-[8px] text-zinc-400 uppercase">Lab</div>
+                <div className="text-lg font-black text-purple-400">LV.{bastionState.pilotStats?.metadata?.lab_level || 1}</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="text-[8px] text-zinc-400 uppercase">Warp</div>
+                <div className="text-lg font-black text-orange-400">LV.{bastionState.pilotStats?.metadata?.warp_level || 1}</div>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div className="mt-4 flex flex-col gap-2">

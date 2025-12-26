@@ -37,6 +37,7 @@ const (
 	StatusBurned    VehicleStatus = "BURNED"
 
 	ItemTypeVehicle       ItemType = "VEHICLE"
+	ItemTypeExosuit       ItemType = "EXOSUIT"
 	ItemTypePart          ItemType = "PART"
 	ItemTypeBastionModule ItemType = "BASTION_MODULE"
 	ItemTypeConsumable    ItemType = "CONSUMABLE"
@@ -100,6 +101,7 @@ type Vehicle struct {
 	IsVoidTouched   bool          `json:"is_void_touched"`
 	Season          *string       `json:"season,omitempty"`
 	Status          VehicleStatus `json:"status"`
+	Metadata        interface{}   `json:"metadata"`
 	CreatedAt       time.Time     `json:"created_at"`
 }
 

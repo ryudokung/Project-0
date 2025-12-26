@@ -16,17 +16,24 @@ All vehicles are composed of modular slots mapped to a visual silhouette. The **
 - **Tank:** Heavy-armored siege units. High defense.
 - **Ship:** High-speed aerial/space units.
 - **Speeder:** Hoverbikes for high-velocity scouting.
-- **Pilot & Exosuit:** The operative's "Infiltration Layer" for areas inaccessible to heavy assets.
+- **Pilot & Exosuit:** The operative's "Infiltration Layer." Exosuits are **Character Gear** worn by the Pilot, providing a base layer of protection and utility.
+
+### 1.3 Layered Equipment System
+- **Inner Layer (Pilot):** The Pilot wears an **Exosuit**. This gear is bound to the character and provides bonuses even when inside a vehicle.
+- **Outer Layer (Vehicle):** The Pilot operates a **Vehicle**. This is the primary asset for heavy combat and long-distance travel.
+- **Set Synergy:** Equipping an Exosuit and a Vehicle from the same **Series** (e.g., "Void-Walker") unlocks unique **Set Passives**.
 
 ## 2. Progression & Performance Metrics
 
 ### 2.1 Combat Power (CP)
 The **Combat Power (CP)** is the primary indicator of a vehicle's power. It is calculated dynamically based on the synergy of the vehicle and its equipped parts:
-- **Formula:** `(Total ATK * 3) + (Total DEF * 2) + (Total HP / 5)`
+- **Formula:** `(Total ATK * 2) + (Total DEF * 2) + (Total HP / 10)`
+- **Effective CP (ECP):** `(Vehicle_CP + Exosuit_CP) * Suitability_Mod * Resonance_Sync * (1 - Fatigue_Penalty) * Synergy_Mod`.
 - **Base Stats:** HP, Attack, Defense, Speed.
 - **Pilot Resonance:** A multiplier based on the Pilot's rank and synchronization.
 - **Equipment Quality:** The rarity and tier of equipped parts.
 - **Void-Touch Status:** A multiplier for assets corrupted by the void.
+- **Set Synergy:** +15% ECP bonus when Exosuit and Vehicle share the same **Series** metadata.
 
 ### 2.2 Suitability System
 Vehicles possess **Suitability Tags** (e.g., `urban`, `desert`, `void`, `high-gravity`) that determine their effectiveness in specific environments.
@@ -69,10 +76,13 @@ The AI (FLUX.1) uses "Visual Keywords" derived from metadata to synthesize a coh
 - **TM-02: "Siege-to-Stride":** Heavy-duty transformation for Tanks.
 
 ## 5. Pilot Gear (Exosuit Focus)
-- **Exosuit Chassis:** O2 Capacity, Agility, Armor.
-- **Neural Interface:** Resonance Level, Accuracy.
-- **Utility Gadget:** Hacking tools, Scanners, Stealth Field.
-- **Personal Weapon:** Sidearm for CQC combat.
+Exosuits use the same **Anatomical Mapping** (HEAD, CORE, ARMS, LEGS) as vehicles but at a personal scale.
+- **HEAD (Neural Interface):** Resonance Level, Accuracy, HUD enhancements.
+- **CORE (Exosuit Chassis):** O2 Capacity, Armor, Life Support.
+- **ARMS (Power Grips):** Melee damage, Hacking speed, Recoil control.
+- **LEGS (Kinetic Actuators):** Agility, Jump height, Stealth movement.
+- **Utility Gadget:** Specialized tools like Cloaking Fields or Scanners.
+- **Personal Weapon:** Sidearm for CQC combat when outside the vehicle.
 
 ## 6. Economy & Salvage
 - **Scrap:** Common currency for repairs.

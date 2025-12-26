@@ -13,30 +13,48 @@ The Bastion features a strategic interface for managing vehicle equipment. Playe
 - **LEGS:** Mobility Systems, Thrusters, and Stability Anchors.
 
 ### 1.2 Bastion Facilities (The Tech Tree)
-Upgrading facilities unlocks new gameplay mechanics:
+Upgrading facilities unlocks new gameplay mechanics and global bonuses:
 
 | Facility | Level 1 (Starter) | Level 5 (Advanced) | Level 10 (Elite) |
 | :--- | :--- | :--- | :--- |
-| **Bastion Ops** | Basic Repairs (Slow) | Auto-Repair (Fast) | Modular Refit (Instant) |
-| **Scanner/Radar** | **Broken (Requires Repair)** | Deep Scan (Sector) | Void Probe (Inter-Sector) |
-| **Lab** | Basic Scrap Refining | Core Synthesis | Blueprint Overclocking |
-| **Bridge** | Manual Navigation | AI Autopilot | Tactical Command (Fleet) |
+| **Radar** | -20% Detection Threshold | -100% Detection Threshold | -200% Detection Threshold |
+| **Lab** | +10% Reward / +15% XP | +50% Reward / +75% XP | +100% Reward / +150% XP |
+| **Warp Drive** | -10% Fuel Cost | -50% Fuel Cost | -100% Fuel Cost |
 
-## 2. Deployment Technologies (The "Entry" Choice)
-How the player reaches the surface determines the risk and cost of the mission.
+## 2. Bastion Modular System (Global Support Layer)
+The Bastion is not just a static hub; it is a modular entity. Players can upgrade **Bastion Modules** to provide global buffs and unlock advanced features across all game systems.
 
-### 2.1 Atmospheric Entry (Standard)
-- **Mechanic:** The vehicle is launched in a drop-pod or flies down manually.
-- **Requirement:** Vehicle must have high **Heat Shielding** and **Armor**.
-- **Risk:** High. Random "Entry Events" (Turbulence, AA Fire, Heat Damage).
-- **Cost:** Low (Fuel only).
+### 2.1 Systemic Integration & Bonuses
+| Module | Implementation | Core Bonus |
+| :--- | :--- | :--- |
+| **Warp Drive** | `ExplorationService` | Reduces Fuel cost per node transition (10% reduction per level). |
+| **Radar** | `TimelineGenerator` | Reduces **Detection Threshold** (20% reduction per level), making stealth easier. |
+| **Lab** | `RewardSystem` | Increases **Scrap Metal** (+10%/lvl) and **XP** (+15%/lvl) gains from all nodes. |
 
-### 2.2 Quantum Teleportation (Advanced Upgrade)
-- **Mechanic:** Instant deployment of the Pilot or a Light Vehicle (Speeder/Exosuit) to the surface.
-- **Requirement:** Bastion Upgrade: **"Quantum Gate" (Level 8 Bridge)**.
-- **Risk:** Zero (Bypasses the atmospheric entry phase).
-- **Cost:** High (Requires "Core Fragments" or massive Energy consumption).
-- **Limitation:** Cannot teleport Heavy Vehicles (Tanks) until Level 10.
+### 2.2 Layered Equipment & Set Synergy
+The Bastion manages the "Triple-Layer" gear system:
+1.  **Pilot Layer (Exosuit):** Worn by the pilot. Provides base CP and unique passives.
+2.  **Vehicle Layer (Chassis/Parts):** The primary combat unit.
+3.  **Bastion Layer (Modules):** Global buffs affecting the entire expedition.
+
+**Set Synergy Bonus:**
+When the **Exosuit** and **Vehicle** belong to the same **Series** (e.g., *Void-Walker*), the system grants a **+15% ECP (Effective Combat Power) bonus**.
+
+### 2.3 Emergency Retrieval Protocol (Fail-Safe)
+A system that auto-warps the pilot back to the Bastion when Fuel or O2 reaches 0.
+- **Penalty:** +50 Stress, 50% Reward loss, and a "Critical Fatigue" flag (reduces ECP by 50% in the next mission).
+
+### 2.4 Neural Overdrive (Active Skills)
+Tactical skills powered by **Neural Energy (NE)** (Max 100, +10 per node).
+- **Overclock:** +30% ECP for 1 node (Cost: 50 NE).
+- **Emergency Repair:** Restore 30% Vehicle HP (Cost: 40 NE).
+
+### 2.5 Module Synergy & Energy Management
+- **Energy Allocation:** Each equipped module consumes a portion of the Bastion's **Core Energy**. Players must balance which modules are active based on their current mission goals.
+- **Fleet-Wide Buffs:** Unlike Vehicle parts, Bastion Modules provide **Global Passives** that affect every Pilot and Vehicle deployed from that Bastion.
+- **Architecture Support:** These modules interact directly with the backend services (e.g., the `ExplorationService` checks for Radar modules to determine node visibility).
+
+## 3. Deployment Technologies (The "Entry" Choice)
 
 ## 3. The Maintenance Loop: Repair & Refit
 Items in Project-0 (Virtual or NFT) are tools that wear down with use. The Bastion provides the facilities to keep them operational.
@@ -51,6 +69,7 @@ Items in Project-0 (Virtual or NFT) are tools that wear down with use. The Basti
 2. **Crafting:** Create a "Manifested Asset" (Virtual Component) in the Lab. Stats are randomized.
 3. **Maintenance:** Use the item, repair it when low, and keep it in top shape.
 4. **Minting (Stage Change):** If the item is valuable, the player "Mints" it to the blockchain as an NFT. It remains fully functional and repairable in-game.
+    - **Minting Rules:** Epic+ rarity, 10+ Expeditions completed, and >80% Durability.
 
 ## 5. Bridge Immersion
 - **Visual DNA:** The Bridge reflects the current state of the Bastion.
@@ -61,9 +80,11 @@ Items in Project-0 (Virtual or NFT) are tools that wear down with use. The Basti
 - **Fuel:** Required for all travel and node transitions.
 - **Energy:** Required for Scanning and Teleportation.
 - **O2 Reserves:** Refills Pilot EVA tanks.
+- **Neural Energy (NE):** Required for Active Skills.
 - **Radar Status:** If Radar is broken (Level 0), no mission nodes are visible. Repairing it is the first objective.
 
 ## 7. Technical Implementation
 - **Unified Database:** A single `items` table tracks all components, including their `current_durability` and `max_durability`.
 - **Repair API:** `POST /api/v1/bastion/repair` - Consumes resources to reset an item's durability.
 - **Ownership Sync:** If an NFT is sold, the database record (including its current durability state) is transferred to the new owner.
+- **Metadata Storage:** Bastion Module levels are stored in the `pilot_stats.metadata` JSONB field.

@@ -27,13 +27,12 @@ import NotificationSystem from '@/components/game/NotificationSystem';
 type GameStage = 'LANDING' | 'CHARACTER_CREATION' | 'BASTION' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'COMBAT' | 'DEBRIEF' | 'GACHA';
 type DeploymentMode = 'PILOT' | 'SPEEDER' | 'MECH' | 'TANK' | 'SHIP' | 'EXOSUIT' | 'HAULER';
 
-interface MothershipUpgrades {
+interface BastionModules {
+  radar: number;
+  lab: number;
+  warpDrive: number;
   atmosphericEntry: boolean;
   quantumGate: boolean;
-  miningDrill: boolean;
-  hackingModule: boolean;
-  radarLevel: number;
-  scannerLevel: number;
 }
 
 export default function UnifiedGamePage() {
@@ -49,15 +48,14 @@ export default function UnifiedGamePage() {
   const [sectors, setSectors] = useState<Sector[]>([]);
   const [isTransitioning, setIsTransitioning] = useState(false);
   
-  // Mothership & Inventory
+  // Bastion & Inventory
   const [inventory, setInventory] = useState<string[]>(['Basic O2 Tank']);
-  const [upgrades, setUpgrades] = useState<MothershipUpgrades>({
+  const [modules, setModules] = useState<BastionModules>({
+    radar: 1,
+    lab: 1,
+    warpDrive: 1,
     atmosphericEntry: false,
-    quantumGate: false,
-    miningDrill: false,
-    hackingModule: false,
-    radarLevel: 1,
-    scannerLevel: 1
+    quantumGate: false
   });
 
   // Sync User to Machine

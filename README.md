@@ -19,7 +19,8 @@ Project-0 is not just a game; it's an evolving universe. Players take on the rol
 - **Ships:** High-speed aerial/space units. Can **Transform** into Robot mode for precision landing and combat.
 - **Speeders:** Hoverbikes for high-velocity scouting and stealth.
 - **Haulers:** Industrial units for bulk transport and massive salvage.
-- **Pilot & Exosuits:** The operative's "Infiltration Layer." Exosuits provide power armor for indoor salvage, boarding actions, and stealth missions where vehicles cannot enter.
+- **Pilot & Exosuits:** The operative's "Infiltration Layer." Exosuits are **Character Gear** worn by the Pilot, providing protection and utility both inside and outside vehicles.
+- **Set Synergy:** Equipping matching Exosuits and Vehicles (e.g., Void-Walker series) unlocks powerful set bonuses and unique visual effects.
 
 ## ✨ Unique Selling Points
 - **AI-Generated Visual DNA:** Vehicles and parts are synthesized by AI (FLUX.1) based on their specific Metadata and Visual DNA keywords. The appearance changes dynamically based on the item's condition and rarity.

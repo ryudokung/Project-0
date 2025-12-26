@@ -2,17 +2,17 @@
 
 **Goal:** Define the mathematical formulas, status effects, and turn-based logic for the "Asynchronous 3D Battle Engine".
 
-## 1. Damage Formulas
+## 1. Damage Matrix (Elemental Types)
 The core calculation for any attack:
 
 $$FinalDamage = (BaseAttack \times TypeMultiplier) - (TargetDefense \times DefenseEfficiency)$$
 
-### 1.1 Type Multipliers (Rock-Paper-Scissors)
-| Attacker \ Defender | Kinetic | Energy | Explosive |
-| :--- | :--- | :--- | :--- |
-| **Kinetic** | 1.0x | 1.5x | 0.5x |
-| **Energy** | 0.5x | 1.0x | 1.5x |
-| **Explosive** | 1.5x | 0.5x | 1.0x |
+### 1.1 Damage Matrix
+| Type | Core Characteristic | Bonus Effect |
+| :--- | :--- | :--- |
+| **Kinetic** | Standard physical damage | Balanced performance |
+| **Energy** | High frequency pulses | +20% Damage vs Shields |
+| **Void** | Reality-warping energy | Ignores 30% of Target Defense |
 
 ### 1.2 Critical Hits
 - **Crit Chance:** Base 5% + (Accuracy / 100).
@@ -23,33 +23,42 @@ Combat Power is the primary metric for evaluating the strength of a Vehicle and 
 
 ### 2.1 The Base CP Formula
 The CP is calculated using the following weights:
-- **Attack (ATK):** Weight 3
+- **Attack (ATK):** Weight 2
 - **Defense (DEF):** Weight 2
-- **Health (HP):** Weight 0.2 (HP / 5)
+- **Health (HP):** Weight 0.1 (HP / 10)
 
 **Formula:**
-$$CP = (Total ATK \times 3) + (Total DEF \times 2) + (Total HP / 5)$$
+$$CP = (Total ATK \times 2) + (Total DEF \times 2) + (Total HP / 10)$$
 
 ### 2.2 Effective CP (ECP) & The "Anti-Pump" Logic
 The ECP is the actual power applied during an encounter, modified by environmental and synergy factors.
 
 **ECP Formula:**
-$$ECP = (Base CP \times Suitability\_Mod) \times Resonance\_Sync\_Ratio \times (1 - Fatigue\_Penalty)$$
+$$ECP = (Vehicle\_CP + Exosuit\_CP) \times Suitability\_Mod \times Resonance\_Sync \times (1 - Fatigue\_Penalty) \times Synergy\_Mod$$
 
 1. **Suitability Modifier (Terrain):**
     - **Perfect Match (1.2x):** e.g., Tank in Desert, Ship in Islands.
     - **Neutral (1.0x):** Standard conditions.
     - **Incompatible (0.5x):** e.g., Tank in Islands, Ship in Desert.
 2. **Resonance Sync Ratio:**
-    - If `Pilot_Resonance < Vehicle_Tier`, the ratio is calculated as `Pilot_Resonance / Vehicle_Tier`.
+    - If `Pilot_Resonance < Vehicle_Tier_Requirement`, the ratio is calculated as `Pilot_Resonance / Vehicle_Tier_Requirement`.
     - This ensures that a high-tier vehicle cannot be fully utilized by an inexperienced pilot.
 3. **Fatigue Penalty:**
     - Derived from the Pilot's **Stress** level. `Penalty = Stress / 200`. At 100 Stress, the penalty is 50%.
+    - **Critical Fatigue:** If the pilot was recently retrieved via Emergency Protocol, an additional 50% penalty is applied (Max total penalty 90%).
+4. **Synergy Modifier:**
+    - **Set Synergy (1.15x):** Granted when Exosuit and Vehicle share the same **Series** metadata.
 
-### 2.3 Infiltration & Detection Gates
+### 2.3 Neural Overdrive (Active Skills)
+Tactical skills powered by **Neural Energy (NE)** (Max 100, +10 per node).
+- **Overclock:** +30% ECP for 1 node (Cost: 50 NE).
+- **Emergency Repair:** Restore 30% Vehicle HP (Cost: 40 NE).
+
+### 2.4 Infiltration & Detection Gates
 High-CP Vehicles have a high **Signature Rating**.
 - **Detection Threshold:** Some nodes have a threshold (e.g., 500 Signature).
 - **Alarm Trigger:** If `Vehicle_Signature > Threshold`, the node triggers **ALARM MODE**, increasing enemy stats by 200%.
+- **Bastion Radar:** Reduces the effective Signature or increases the Threshold by 20% per level.
 - **The Solution:** Players must switch to **Pilot/Exosuit** mode (Low CP, Low Signature) or use a **Transformation** to a stealth-focused mode to bypass the gate.
 
 ### 2.4 Transformation Mechanics (Mid-Combat & Mid-Expedition)

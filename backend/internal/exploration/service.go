@@ -145,6 +145,7 @@ type Expedition struct {
 	Title            string     `json:"title"`
 	Description      string     `json:"description"`
 	Goal             string     `json:"goal"`
+	Status           string     `json:"status"`
 }
 
 type Encounter struct {
@@ -224,7 +225,13 @@ func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSec
 	}
 
 	// 2. Generate Timeline (5-7 nodes)
-	nodes := s.GenerateTimeline(expedition.ID, 6)
+	radarLevel := 1
+	if pilot != nil && pilot.Metadata != nil {
+		if lv, ok := pilot.Metadata["radar_level"].(float64); ok {
+			radarLevel = int(lv)
+		}
+	}
+	nodes := s.GenerateTimeline(expedition.ID, 6, radarLevel)
 	if err := s.repo.CreateNodes(nodes); err != nil {
 		return nil, err
 	}
@@ -239,7 +246,7 @@ func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSec
 	return expedition, nil
 }
 
-func (s *Service) GenerateTimeline(expeditionID uuid.UUID, length int) []Node {
+func (s *Service) GenerateTimeline(expeditionID uuid.UUID, length int, radarLevel int) []Node {
 	nodes := make([]Node, length)
 	types := []NodeType{NodeStandard, NodeResource, NodeCombat, NodeAnomaly}
 	terrains := []TerrainType{TerrainUrban, TerrainIslands, TerrainSky, TerrainDesert, TerrainVoid, TerrainSpace}
@@ -253,6 +260,10 @@ func (s *Service) GenerateTimeline(expeditionID uuid.UUID, length int) []Node {
 		terrain := terrains[rand.Intn(len(terrains))]
 		tmpl := GetTemplateForType(nodeType)
 
+		// Radar reduces the detection threshold (making it easier to navigate stealthily)
+		baseThreshold := 500 + rand.Intn(500)
+		detectionThreshold := int(float64(baseThreshold) / (1.0 + float64(radarLevel-1)*0.2))
+
 		nodes[i] = Node{
 			ID:                     uuid.New(),
 			ExpeditionID:           expeditionID,
@@ -264,7 +275,7 @@ func (s *Service) GenerateTimeline(expeditionID uuid.UUID, length int) []Node {
 			Choices:                tmpl.Choices,
 			IsResolved:             false,
 			Terrain:                terrain,
-			DetectionThreshold:     500 + rand.Intn(500), // 500-1000
+			DetectionThreshold:     detectionThreshold,
 		}
 	}
 	return nodes
@@ -272,6 +283,8 @@ func (s *Service) GenerateTimeline(expeditionID uuid.UUID, length int) []Node {
 
 // CalculateEffectiveCP implements the blueprint formula:
 // ECP = (Base_CP * Suitability_Mod) * Resonance_Sync * (1 - Fatigue_Penalty)
+// CalculateEffectiveCP implements the blueprint formula:
+// ECP = (Vehicle_CP + Exosuit_CP) * Suitability_Mod * Resonance_Sync * (1 - Fatigue_Penalty) * Synergy_Mod
 func (s *Service) CalculateEffectiveCP(ctx context.Context, userID uuid.UUID, vehicleID uuid.UUID, terrain TerrainType) (int, error) {
 	// 1. Get Pilot Stats
 	pilot, err := s.gameRepo.GetActivePilotStats(userID)
@@ -288,25 +301,48 @@ func (s *Service) CalculateEffectiveCP(ctx context.Context, userID uuid.UUID, ve
 		if fatiguePenalty > 0.5 {
 			fatiguePenalty = 0.5
 		}
+
+		// Check for Critical Fatigue (from Emergency Retrieval)
+		if pilot.Metadata != nil {
+			if critical, ok := pilot.Metadata["critical_fatigue"].(bool); ok && critical {
+				fatiguePenalty += 0.5 // Additional 50% penalty
+				if fatiguePenalty > 0.9 {
+					fatiguePenalty = 0.9 // Max penalty 90%
+				}
+			}
+		}
+
 		ecp := 50.0 * (1.0 - fatiguePenalty)
 		return int(ecp), nil
 	}
 
-	// 3. Get Base CP
-	baseCP, err := s.vehicleUseCase.GetVehicleCP(ctx, vehicleID)
+	// 3. Get Vehicle Base CP
+	vehicleCP, err := s.vehicleUseCase.GetVehicleCP(ctx, vehicleID)
 	if err != nil {
 		return 0, err
 	}
 
-	// 4. Get Vehicle for Suitability
+	// 4. Get Vehicle for Metadata and Suitability
 	v, err := s.vehicleUseCase.GetVehicleByID(ctx, vehicleID)
 	if err != nil {
 		return 0, err
 	}
 
-	// 5. Calculate Suitability Modifier
+	// 5. Get Exosuit CP and Metadata
+	exosuitCP := 0
+	var exosuit *vehicle.Vehicle
+	if pilot.EquippedExosuitID != nil {
+		exosuitCP, err = s.vehicleUseCase.GetVehicleCP(ctx, *pilot.EquippedExosuitID)
+		if err != nil {
+			// Log error but continue without exosuit
+			fmt.Printf("Error getting exosuit CP: %v\n", err)
+		} else {
+			exosuit, _ = s.vehicleUseCase.GetVehicleByID(ctx, *pilot.EquippedExosuitID)
+		}
+	}
+
+	// 6. Calculate Suitability Modifier
 	suitabilityMod := 1.0
-	// Simple mapping for now: check if terrain is in suitability_tags
 	isSuitable := false
 	for _, tag := range v.SuitabilityTags {
 		if string(terrain) == tag {
@@ -318,16 +354,15 @@ func (s *Service) CalculateEffectiveCP(ctx context.Context, userID uuid.UUID, ve
 	if isSuitable {
 		suitabilityMod = 1.2
 	} else {
-		// Check for incompatible types (e.g. Tank in Islands)
-		if (v.VehicleType == TypeTank && terrain == TerrainIslands) ||
-			(v.VehicleType == TypeShip && terrain == TerrainDesert) {
+		// Check for incompatible types
+		if (v.VehicleType == vehicle.TypeTank && terrain == TerrainIslands) ||
+			(v.VehicleType == vehicle.TypeShip && terrain == TerrainDesert) {
 			suitabilityMod = 0.5
 		}
 	}
 
-	// 6. Calculate Resonance Sync
+	// 7. Calculate Resonance Sync
 	// Formula: Min(1.0, Pilot_Resonance / Vehicle_Tier_Requirement)
-	// Assuming Tier 1 needs 20, Tier 2 needs 40, etc.
 	tierReq := v.Tier * 20
 	resonanceSync := 1.0
 	if tierReq > 0 && pilot.ResonanceLevel < tierReq {
@@ -337,15 +372,26 @@ func (s *Service) CalculateEffectiveCP(ctx context.Context, userID uuid.UUID, ve
 		resonanceSync = 0.1 // Minimum sync
 	}
 
-	// 7. Calculate Fatigue Penalty
+	// 8. Calculate Fatigue Penalty
 	// Formula: Stress / 200 (Max 50% penalty at 100 Stress)
 	fatiguePenalty := float64(pilot.Stress) / 200.0
 	if fatiguePenalty > 0.5 {
 		fatiguePenalty = 0.5
 	}
 
-	// 8. Final ECP Calculation
-	ecp := float64(baseCP) * suitabilityMod * resonanceSync * (1.0 - fatiguePenalty)
+	// 9. Calculate Set Synergy
+	synergyMod := 1.0
+	if exosuit != nil && v.Metadata != nil && exosuit.Metadata != nil {
+		vSeries := v.Metadata["Series"]
+		eSeries := exosuit.Metadata["Series"]
+		if vSeries != "" && vSeries == eSeries {
+			synergyMod = 1.15 // +15% Synergy Bonus
+		}
+	}
+
+	// 10. Final ECP Calculation
+	totalBaseCP := float64(vehicleCP + exosuitCP)
+	ecp := totalBaseCP * suitabilityMod * resonanceSync * (1.0 - fatiguePenalty) * synergyMod
 
 	return int(ecp), nil
 }
@@ -428,26 +474,48 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 	// 5. Apply Consequences
 	stats, err := s.gameRepo.GetActivePilotStats(expedition.UserID)
 	if err == nil && stats != nil {
+		// Get Bastion Module Levels
+		labLevel := 1.0
+		warpLevel := 1.0
+		if stats.Metadata != nil {
+			if lv, ok := stats.Metadata["lab_level"].(float64); ok {
+				labLevel = lv
+			}
+			if lv, ok := stats.Metadata["warp_level"].(float64); ok {
+				warpLevel = lv
+			}
+		}
+
 		// Every node resolution increases Stress
 		stats.Stress += 5 + rand.Intn(5) // 5-10 stress per node
 		if stats.Stress > 100 {
 			stats.Stress = 100
 		}
 
+		// Fuel Consumption (Warp Drive reduces this)
+		fuelCost := 5.0 / (1.0 + (warpLevel-1)*0.1) // 10% reduction per level
+		stats.CurrentFuel -= fuelCost
+		if stats.CurrentFuel < 0 {
+			stats.CurrentFuel = 0
+		}
+
 		if success {
-			// Apply Rewards
+			// Apply Rewards (Lab increases these)
+			rewardMod := 1.0 + (labLevel-1)*0.1 // 10% bonus per level
+			xpMod := 1.0 + (labLevel-1)*0.15    // 15% bonus per level
+
 			for _, reward := range selectedChoice.Rewards {
 				switch reward {
 				case "Scrap Metal":
-					stats.ScrapMetal += 50
+					stats.ScrapMetal += int(50.0 * rewardMod)
 				case "Research Data":
-					stats.ResearchData += 20
+					stats.ResearchData += int(20.0 * rewardMod)
 				case "Rare Ore":
-					stats.ScrapMetal += 150
+					stats.ScrapMetal += int(150.0 * rewardMod)
 				}
 			}
 			// Always give some XP on success
-			stats.XP += 15
+			stats.XP += int(15.0 * xpMod)
 		} else {
 			// Apply Damage and Stress on failure
 			stats.Stress += 10 // Extra stress on failure

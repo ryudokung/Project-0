@@ -7,8 +7,16 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 - **Adaptive Universe:** AI-driven ecosystem with evolving narratives and combat logs.
 - **Unified Vehicle & Pilot System:** 
     - **Mothership (The Bastion):** The strategic hub for managing the fleet and pilot progression.
+    - **Bastion Modules:** Global buffs stored in the Bastion (Radar: -20% Detection/lvl, Lab: +10% Rewards/lvl, Warp: -10% Fuel/lvl).
     - **Vehicles:** Modular assets including **Mechs, Tanks, Ships, Speeders, and Haulers**. Certain classes (Tank, Ship) feature **Transformation Modules** to adapt to terrain.
     - **Pilot & Exosuit:** The "Infiltration Layer." Pilots use specialized **Exosuits** for stealth, hacking, and exploring areas inaccessible to heavy vehicles.
+- **Deep Gameplay Logic (Triple-Layer Gear):**
+    - **Combat Power (CP):** Standardized formula: `CP = (ATK*2) + (DEF*2) + (HP/10)`.
+    - **Effective CP (ECP):** `(Vehicle_CP + Exosuit_CP) * Suitability_Mod * Resonance_Sync * (1 - Fatigue_Penalty) * Synergy_Mod`.
+    - **Set Synergy:** +15% ECP bonus when Exosuit and Vehicle share the same "Series" metadata.
+    - **Emergency Retrieval Protocol:** A fail-safe system that auto-warps the pilot back to the Bastion when Fuel or O2 reaches 0, with penalties (Stress, Critical Fatigue, and Reward loss).
+    - **Neural Overdrive (Active Skills):** Tactical skills like **Overclock** (+30% ECP) and **Emergency Repair** (Restore HP) powered by **Neural Energy (NE)**.
+    - **Damage Matrix:** Elemental damage types (**Kinetic, Energy, Void**) with specific strengths and weaknesses.
 - **Modular NFT Assembly:** Every part (Railgun, Shield, Pilot Suit, Transformation Module) is an individual NFT. AI dynamically synthesizes these parts into a single visual representation.
 - **Resonance & Dominance:** A progression system where high **Pilot Resonance** and gear quality grant **Dominance** over lower-tier sectors, allowing for "Annihilation" of threats and efficient farming. This "Power vs. Strategy" balance is a core design philosophy.
 - **Web2.5 Onboarding (Seamless Entry):** Players can join using Google, Email, or Social accounts via Privy. A **Stage Change Model** allows immediate gameplay with **Manifested Assets** in the database, with optional wallet linking and on-chain minting later.
@@ -62,11 +70,21 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 - [x] JWT Security Middleware & Ownership Verification
 - [x] Anti-Cheat & Race Condition Prevention (Atomic SQL Updates)
 - [x] Real Combat Integration (NPC Seeding & Exploration Wiring)
-- [ ] Exploration UseCase (Node selection & Event handling)
+- [x] Triple-Layer Gear & ECP Logic (Pilot, Vehicle, Bastion)
+- [x] Bastion Module System (Radar, Lab, Warp Drive)
+- [ ] Emergency Retrieval Protocol (Implementation)
+- [ ] Neural Overdrive (Active Skills) Framework
+- [ ] Damage Matrix (Kinetic, Energy, Void) Integration
 - [ ] AI Image Generation Integration (FLUX.1)
 
 ## Recent Technical Updates (December 2025)
-### 1. Game Engine Architecture (Decoupled Systems)
+### 1. Deep Gameplay Design Expansion
+- **Emergency Retrieval Protocol:** Implemented a "No-Cost" fail-safe for resource depletion (0 Fuel/O2). Triggers an auto-warp with penalties: +50 Stress, 50% Reward loss, and a "Critical Fatigue" flag that reduces ECP by 50% in the next mission.
+- **Neural Overdrive (Active Skills):** Designed a skill system powered by **Neural Energy (NE)**. Skills include **Overclock** (+30% ECP for 1 node) and **Emergency Repair** (Restore 30% Vehicle HP).
+- **Damage Matrix:** Introduced elemental damage types. **Kinetic** (Standard), **Energy** (+20% vs Shields), and **Void** (Ignores 30% Defense).
+- **V2O Minting Rules:** Established criteria for minting manifested assets: Epic+ rarity, 10+ Expeditions completed, and >80% Durability.
+
+### 2. Game Engine Architecture (Decoupled Systems)
 - **Architecture:** Refactored the frontend into a "Game Engine" pattern using a global **Event Bus** (`EventBus.ts`) and **Singleton Systems** (e.g., `ExplorationSystem.ts`).
 - **Core Components:**
     - **Event Bus (`EventBus.ts`)**: Acts as the central nervous system. Components and systems communicate via asynchronous events, reducing direct dependencies and preventing "prop drilling".
@@ -100,7 +118,7 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 - **Resonance Progression:** Implemented **Pilot Resonance** as a core stat that scales with player experience, influencing the **Combat Rating (CR)** and unlocking "Dominance" mechanics for high-level players.
 - **Visual Equipment System:** Implemented a visual mapping interface in the Bastion for equipping modules. Items are now mapped to specific anatomical slots (**HEAD, CORE, ARM_L, ARM_R, LEGS**) overlaid on a pilot/vehicle silhouette.
 - **Starter Pack Initialization:** New characters are now automatically granted a **Starter Vehicle** and two equipped modules (**Starter Kinetic Arm** and **Starter Plating**) upon creation, ensuring a "Ready-to-Play" experience.
-- **Combat Power (CP) Calculation:** Implemented a standardized CP formula `(Total ATK * 3) + (Total DEF * 2) + (Total HP / 5)` to provide a clear power metric for players.
+- **Combat Power (CP) Calculation:** Implemented a standardized CP formula `(Total ATK * 2) + (Total DEF * 2) + (Total HP / 10)` to provide a clear power metric for players.
 - **Modular Equipment:** Expanded the item system to include dedicated slots for both Pilots (Body, Head, Utility, Weapon) and Vehicles (Core, Armor, Weapons, Transformation, Tools).
 
 ## Directory Structure

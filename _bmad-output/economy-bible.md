@@ -16,6 +16,10 @@
 The core mechanic for asset ownership:
 - **Lazy Minting:** All items start as "Virtual Assets" in the database.
 - **Stage Change:** To trade an item on the marketplace or verify its rarity, the player must "Mint" it to the Base L2 blockchain.
+- **Minting Eligibility (The Rules):**
+    - **Rarity:** Must be **Epic** rarity or higher.
+    - **Experience:** Must have completed at least **10 Expeditions**.
+    - **Condition:** Must have **>80% Durability** (Pristine or Worn condition).
 - **Digital Twin:** The NFT remains fully functional in-game. It still follows the **Deep Durability System (DDS)** and requires repairs at The Bastion.
 - **Cost:** Requires a "Minting Key" (purchasable or rare drop) and a small amount of Scrap.
 - **Benefit:** Once on-chain, the item is a true NFT (ERC-721) with permanent metadata and visual DNA.

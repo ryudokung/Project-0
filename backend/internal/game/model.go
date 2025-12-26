@@ -6,18 +6,20 @@ import (
 )
 
 type PilotStats struct {
-	UserID         uuid.UUID `json:"user_id"`
-	CharacterID    uuid.UUID `json:"character_id"`
-	ResonanceLevel int       `json:"resonance_level"`
-	ResonanceExp   int       `json:"resonance_exp"`
-	Stress         int       `json:"stress"`
-	XP             int       `json:"xp"`
-	Rank           int       `json:"rank"`
-	CurrentO2      float64   `json:"current_o2"`
-	CurrentFuel    float64   `json:"current_fuel"`
-	ScrapMetal     int       `json:"scrap_metal"`
-	ResearchData   int       `json:"research_data"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	UserID            uuid.UUID              `json:"user_id"`
+	CharacterID       uuid.UUID              `json:"character_id"`
+	EquippedExosuitID *uuid.UUID             `json:"equipped_exosuit_id,omitempty"`
+	ResonanceLevel    int                    `json:"resonance_level"`
+	ResonanceExp      int                    `json:"resonance_exp"`
+	Stress            int                    `json:"stress"`
+	XP                int                    `json:"xp"`
+	Rank              int                    `json:"rank"`
+	CurrentO2         float64                `json:"current_o2"`
+	CurrentFuel       float64                `json:"current_fuel"`
+	ScrapMetal        int                    `json:"scrap_metal"`
+	ResearchData      int                    `json:"research_data"`
+	Metadata          map[string]interface{} `json:"metadata"`
+	UpdatedAt         time.Time              `json:"updated_at"`
 }
 
 type GachaStats struct {

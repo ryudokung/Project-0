@@ -73,15 +73,21 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
     1. **Teleport System (Dimensional Tech):** For instant travel across dangerous sectors. High energy cost and instability. Some ships cannot install this due to structural mass.
     2. **Atmospheric Entry System (Structural Tech):** For safe landing on planets. Manages heat and gravity. Independent of Teleport capabilities.
     - **Strategic Choice:** Players choose between Speed (Teleport) vs. Safety (Entry) vs. Cost. Not a linear upgrade.
-- **Unified Vehicle & Pilot System:** Motherships, Vehicles (Mechs, Tanks, Ships), and Pilot Gear with distinct gameplay roles.
+- **Unified Vehicle & Pilot System:** Motherships (The Bastion), Vehicles (Mechs, Tanks, Ships), and Pilot Gear with distinct gameplay roles.
+- **Deep Gameplay Expansion:**
+    - **Emergency Retrieval Protocol:** A fail-safe system for resource depletion (0 Fuel/O2) that auto-warps the pilot back to the Bastion with penalties (Stress, Critical Fatigue, and Reward loss).
+    - **Neural Overdrive (Active Skills):** Tactical skills like **Overclock** (+30% ECP) and **Emergency Repair** (Restore HP) powered by **Neural Energy (NE)**.
+    - **Damage Matrix:** Elemental damage types (**Kinetic, Energy, Void**) with specific strengths and weaknesses.
 - **Engineering & Assembly System:** A story-driven crafting system (Synthesize) where asset generation requires resources, time, and engineers. Unlocked after the first mission.
 - **Tiered AI Assets:** 
     - **Tiers (T1 - T5):** Power levels.
     - **Rarity Classes:** Standard (White), Refined (Green), Prototype (Blue), Relic (Purple), Singularity (Gold).
+- **V2O Minting Rules:** Manifested assets must meet specific criteria (Epic+ rarity, 10+ Expeditions, >80% Durability) to be eligible for on-chain minting.
 - **Void Signals (Gacha):** A "Hoyoverse-style" pull system for high-tier assets with a pity mechanism.
 - **Seasonal Temporal Wormholes:** Limited-time exploration zones requiring specific gear compatibility, offering exclusive "Lost Tech" and "Rare DNA Fragments."
-- **Complex Combat Engine:** Stat-based battle system integrating vehicle attributes (Mothership, Vehicle, Pilot) and AI-generated item "Options."
-    - **Combat Power (CP):** A weighted sum of stats: `(ATK*3) + (DEF*2) + (HP/5)`.
+- **Complex Combat Engine:** Stat-based battle system integrating vehicle attributes (Bastion, Vehicle, Pilot) and AI-generated item "Options."
+    - **Combat Power (CP):** A weighted sum of stats: `(ATK*2) + (DEF*2) + (HP/10)`.
+    - **Effective CP (ECP):** `(Vehicle_CP + Exosuit_CP) * Suitability_Mod * Resonance_Sync * (1 - Fatigue_Penalty) * Synergy_Mod`.
     - **Real Combat Integration:** Transitioning from placeholder combat to a functional system where encounters are linked to real backend data.
     - **Backend Enemy Seeding:** A system to generate and persist specific NPC enemies (e.g., Striker, Guardian, Scout) within combat encounters, allowing for persistent enemy stats and unique loot tables.
 - **Monetization Engine:** Season Pass, Void Signals, and Minting fees for "Void-Touched" (Premium) items.

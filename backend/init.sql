@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
     is_void_touched BOOLEAN DEFAULT FALSE,
     season VARCHAR(50),
     status vehicle_status DEFAULT 'PENDING',
+    metadata JSONB NOT NULL DEFAULT '{}', -- Series, Faction, etc.
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -136,6 +137,7 @@ CREATE TABLE IF NOT EXISTS parts (
 CREATE TABLE IF NOT EXISTS pilot_stats (
     user_id UUID REFERENCES users(id),
     character_id UUID PRIMARY KEY REFERENCES characters(id),
+    equipped_exosuit_id UUID REFERENCES items(id), -- The Exosuit currently worn by the pilot
     resonance_level INTEGER DEFAULT 0,
     resonance_exp INTEGER DEFAULT 0,
     stress INTEGER DEFAULT 0,
@@ -145,6 +147,7 @@ CREATE TABLE IF NOT EXISTS pilot_stats (
     current_fuel DECIMAL(5, 2) DEFAULT 100.00,
     scrap_metal INTEGER DEFAULT 0,
     research_data INTEGER DEFAULT 0,
+    metadata JSONB DEFAULT '{}',
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -318,14 +321,16 @@ CREATE TABLE IF NOT EXISTS gacha_history (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Mothership Upgrades table
-CREATE TABLE IF NOT EXISTS mothership_upgrades (
+-- Bastion Modules (Global Buffs)
+CREATE TABLE IF NOT EXISTS bastion_modules (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id),
-    node_id VARCHAR(100) NOT NULL, -- e.g., 'SIGNAL_BOOSTER_1'
-    path VARCHAR(50) NOT NULL, -- 'TELEPORT' or 'ENTRY'
+    module_type VARCHAR(50) NOT NULL, -- 'RADAR', 'LAB', 'WARP_DRIVE'
+    level INTEGER DEFAULT 1,
+    is_active BOOLEAN DEFAULT TRUE,
+    metadata JSONB DEFAULT '{}',
     unlocked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, node_id)
+    UNIQUE(user_id, module_type)
 );
 
 -- Indexes for performance

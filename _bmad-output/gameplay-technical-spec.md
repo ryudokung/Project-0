@@ -11,8 +11,12 @@ The game follows a high-stakes "Extraction RPG" loop centered around **The Basti
 ### Phase 1: The Bastion (Strategic Hub)
 *   **Energy Management:** Players allocate the Bastion's limited power core between systems (Shields, Warp Drive, Auto-Repair).
 *   **Anatomical Equipment System:** A visual mapping interface (Silhouette Map) where players install modules onto specific anatomical slots (HEAD, CORE, ARM_L, ARM_R, LEGS).
+*   **Dual-Layer Customization:**
+    *   **Vehicle View:** Manage heavy assets (Tanks, Ships, Mechs).
+    *   **Pilot View:** Manage Character Gear (Exosuits, Neural Interfaces, Sidearms).
+*   **Bastion Modular System:** Equipping **Bastion Modules** to provide global buffs (e.g., Radar range, Crafting efficiency, Stress recovery).
 *   **Bastion Operations:** Maintenance of Vehicles and Pilot Gear. Repairing items consumes resources gathered from The Void.
-*   **Combat Power (CP) Calculation:** A standardized formula to measure the synergy of the vehicle and its parts: `(Total ATK * 3) + (Total DEF * 2) + (Total HP / 5)`.
+*   **Combat Power (CP) Calculation:** A standardized formula to measure the synergy of the vehicle and its parts: `(Total ATK * 2) + (Total DEF * 2) + (Total HP / 10)`.
 *   **Pilot Resonance:** Training and neural synchronization to increase the Pilot's base stats.
 
 ### Phase 2: The Warp (Deployment)
@@ -39,9 +43,13 @@ The game follows a high-stakes "Extraction RPG" loop centered around **The Basti
 
 ### Phase 4: Extraction (Risk vs Reward)
 *   **Safe Extraction:** Reaching a Warp Gate node secures all loot.
-*   **Emergency Warp:** Immediate retreat with a 50% chance of cargo loss and high stress on vehicle durability.
+*   **Emergency Retrieval Protocol:** A fail-safe system that auto-warps the pilot back to the Bastion when Fuel or O2 reaches 0.
+    *   **Effect:** Immediate mission termination.
+    *   **Penalty:** +50 Stress, 50% Reward loss, and a "Critical Fatigue" flag (reduces ECP by 50% in the next mission).
+*   **Emergency Warp:** Manual retreat with a 50% chance of cargo loss and high stress on vehicle durability.
 *   **Total Failure:** If durability reaches zero, all loot is lost.
 *   **Stage Change (V2O):** Players can choose to "Mint" their manifested assets (items in the database) to on-chain NFTs on Base L2.
+    *   **Minting Rules:** Epic+ rarity, 10+ Expeditions completed, and >80% Durability.
 
 ---
 
@@ -51,12 +59,13 @@ The game's progression is built on a dual-track system that balances raw power w
 
 ### 2.1 The Power Fantasy: Combat Power (CP) & Annihilation
 *   **CP as a Milestone:** Combat Power is the primary measure of a player's growth. It represents the synergy between Pilot Resonance, Vehicle Stats, and Equipment.
+*   **Standardized CP Formula:** `CP = (Total ATK * 2) + (Total DEF * 2) + (Total HP / 10)`.
 *   **Annihilation (ถล่มยับ):** When a player's CP significantly exceeds a node's difficulty, they unlock the ability to **Annihilate**. This allows them to bypass the encounter and claim rewards instantly.
 
 ### 2.2 The Tactical Counterweight: The "Anti-Pump" Mechanisms
 
 #### 2.2.1 Suitability System (ความเหมาะสมของพื้นที่)
-Every node and sub-sector is assigned a **Terrain Type**. Vehicles have a `SuitabilityRating` (0-100) for each terrain.
+Every node and sub-sector is assigned a **Terrain Type**. Vehicles and Exosuits have a `SuitabilityRating` (0-100) for each terrain.
 
 *   **Terrain Types:**
     *   **URBAN:** High density, tight corners. Favors MECH/EXOSUIT.
@@ -64,24 +73,39 @@ Every node and sub-sector is assigned a **Terrain Type**. Vehicles have a `Suita
     *   **SKY:** High altitude. Favors JET/SPEEDER.
     *   **DESERT:** Open, harsh. Favors TANK/MECH.
     *   **VOID:** Zero-G, neural interference. Favors specialized VOID-TYPE vehicles.
-*   **The Penalty Logic:**
-    *   `ECP = Base_CP * (Suitability_Rating / 100)`
-    *   If `Suitability < 40%`, Fuel consumption increases by 2x.
-    *   If `Suitability < 20%`, the vehicle suffers "Structural Stress" (HP decay per click).
+*   **The Layered ECP Formula:**
+    *   `Total_ECP = (Vehicle_CP + Exosuit_CP) * Suitability_Mod * Resonance_Sync * (1 - Fatigue_Penalty) * Synergy_Mod`
+    *   **Suitability_Mod:** 1.2x for matching terrain, 0.5x for incompatible terrain.
+    *   **Fatigue_Penalty:** Based on Pilot **Stress** (0-100). Max 50% penalty at 100 Stress.
+    *   **Synergy_Mod:** 1.15x bonus if Exosuit and Vehicle are from the same **Series** (e.g., *Void-Walker*).
 
-#### 2.2.2 Infiltration & Detection (ด่านลอบเร้น)
+#### 2.2.2 Neural Overdrive (Active Skills)
+Tactical skills powered by **Neural Energy (NE)** (Max 100, +10 per node).
+*   **Overclock:** +30% ECP for 1 node (Cost: 50 NE).
+*   **Emergency Repair:** Restore 30% Vehicle HP (Cost: 40 NE).
+
+#### 2.2.3 Damage Matrix (Elemental Types)
+*   **Kinetic:** Standard physical damage.
+*   **Energy:** +20% vs Shields.
+*   **Void:** Ignores 30% Defense.
+
+#### 2.2.4 Infiltration & Detection (ด่านลอบเร้น)
 Nodes have a `DetectionThreshold` (Signature Limit).
 
 *   **Signature Calculation:**
     *   `Signature = (Vehicle_Size_Factor * 100) + (Current_CP / 10)`
     *   Tanks/Ships have high `Size_Factor` (3.0+). Pilots/Exosuits have low (0.5).
+*   **Bastion Modules:**
+    *   **Radar:** Reduces `DetectionThreshold` by 20% per level.
+    *   **Lab:** Increases Rewards by 10% and XP by 15% per level.
+    *   **Warp Drive:** Reduces Fuel consumption by 10% per level.
 *   **Detection States:**
     *   **STEALTH:** `Signature < Threshold`. Normal encounter rates.
     *   **CAUTION:** `Signature` within 20% of `Threshold`. Enemy detection range increases.
     *   **ALARM:** `Signature > Threshold`. Triggers "Reinforcement Waves" (Enemies +200% Stats, 0% Loot drop).
 *   **Tactical Choice:** Players can "Deploy Pilot" to enter a node in EVA mode to sabotage sensors, lowering the `Threshold` for the main Vehicle.
 
-#### 2.2.3 Resonance & Synergy (เพดานความซิงโคร)
+#### 2.2.5 Resonance & Synergy (เพดานความซิงโคร)
 The bond between Pilot and Machine.
 
 *   **Resonance Level (RL):** A value from 1 to 100, unique to each Pilot-Vehicle pair.
@@ -90,7 +114,7 @@ The bond between Pilot and Machine.
     *   A Tier 5 Vehicle might require RL 80 to function at 100% power.
 *   **Resonance Growth:** Increases through "Sync Actions" (Perfect dodges, critical hits, and successful mission completions).
 
-#### 2.2.4 Transformation Strategy (การเปลี่ยนร่าง)
+#### 2.2.6 Transformation Strategy (การเปลี่ยนร่าง)
 Vehicles with the "Transformable" trait can switch modes mid-mission.
 
 *   **Modes:** e.g., **CRUISER MODE** (High Speed, Low ATK) vs. **ASSAULT MODE** (Low Speed, High ATK).

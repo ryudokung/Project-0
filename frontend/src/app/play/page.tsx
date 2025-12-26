@@ -16,13 +16,12 @@ import CombatStage from '@/components/game/CombatStage';
 type GameStage = 'BASTION' | 'MAP' | 'LOCATION_SCAN' | 'PLANET_SURFACE' | 'EXPLORATION' | 'COMBAT' | 'DEBRIEF';
 type DeploymentMode = 'PILOT' | 'SPEEDER' | 'MECH' | 'TANK' | 'SHIP' | 'EXOSUIT' | 'HAULER';
 
-interface MothershipUpgrades {
+interface BastionModules {
+  radar: number;
+  lab: number;
+  warpDrive: number;
   atmosphericEntry: boolean;
   quantumGate: boolean;
-  miningDrill: boolean;
-  hackingModule: boolean;
-  radarLevel: number;
-  scannerLevel: number;
 }
 
 export default function PlayPage() {
@@ -50,15 +49,14 @@ export default function PlayPage() {
   const [loading, setLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   
-  // Mothership & Inventory
+  // Bastion & Inventory
   const [inventory, setInventory] = useState<string[]>(['Basic O2 Tank']);
-  const [upgrades, setUpgrades] = useState<MothershipUpgrades>({
+  const [modules, setModules] = useState<BastionModules>({
+    radar: 1,
+    lab: 1,
+    warpDrive: 1,
     atmosphericEntry: false,
-    quantumGate: false,
-    miningDrill: false,
-    hackingModule: false,
-    radarLevel: 1,
-    scannerLevel: 1
+    quantumGate: false
   });
 
   // Fetch Universe Map
