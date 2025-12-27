@@ -1,0 +1,36 @@
+enemies:
+  - id: "e0000000-0000-0000-0000-000000000001"
+    name: "Syndicate Striker"
+    type: "MECH"
+    class: "STRIKER"
+    rarity: "COMMON"
+    cr: 150
+    stats:
+      hp: 80
+      attack: 15
+      defense: 5
+      speed: 60
+
+  - id: "e0000000-0000-0000-0000-000000000002"
+    name: "Iron Guardian"
+    type: "TANK"
+    class: "GUARDIAN"
+    rarity: "RARE"
+    cr: 300
+    stats:
+      hp: 200
+      attack: 10
+      defense: 20
+      speed: 30
+
+  - id: "e0000000-0000-0000-0000-000000000003"
+    name: "Void Scout"
+    type: "SHIP"
+    class: "SCOUT"
+    rarity: "COMMON"
+    cr: 120
+    stats:
+      hp: 60
+      attack: 12
+      defense: 3
+      speed: 100

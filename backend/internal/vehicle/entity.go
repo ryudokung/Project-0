@@ -14,9 +14,10 @@ type ItemType string
 type ItemCondition string
 
 const (
-	TypeMech VehicleType = "MECH"
-	TypeTank VehicleType = "TANK"
-	TypeShip VehicleType = "SHIP"
+	TypeMech    VehicleType = "MECH"
+	TypeTank    VehicleType = "TANK"
+	TypeShip    VehicleType = "SHIP"
+	TypeSpeeder VehicleType = "SPEEDER"
 
 	ClassStriker   VehicleClass = "STRIKER"
 	ClassGuardian  VehicleClass = "GUARDIAN"

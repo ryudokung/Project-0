@@ -135,6 +135,11 @@ export default function PlayPage() {
   const confirmDeployment = async () => {
     if (!selectedSubSector) return;
     
+    if (!selectedVehicle) {
+      alert("Please select a vehicle before deploying.");
+      return;
+    }
+    
     if (selectedSubSector.type === 'PLANET' && selectedSubSector.locations) {
       setStage('PLANET_SURFACE');
       setSelectedPlanetLocation(null);
@@ -178,6 +183,11 @@ export default function PlayPage() {
 
   const confirmPlanetDeployment = async () => {
     if (!selectedPlanetLocation || !selectedSubSector) return;
+    
+    if (!selectedVehicle) {
+      alert("Please select a vehicle before deploying.");
+      return;
+    }
     
     try {
       setIsTransitioning(true);

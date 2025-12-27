@@ -86,13 +86,13 @@ func main() {
 	ctx := context.Background()
 	aVehicle, _ := vehicleRepo.GetByID(ctx, attackerID)
 	dVehicle, _ := vehicleRepo.GetByID(ctx, defenderID)
-	aParts, _ := vehicleRepo.GetPartsByVehicleID(attackerID)
-	dParts, _ := vehicleRepo.GetPartsByVehicleID(defenderID)
+	aItems, _ := vehicleRepo.GetItemsByParentItemID(ctx, attackerID)
+	dItems, _ := vehicleRepo.GetItemsByParentItemID(ctx, defenderID)
 	aPilot, _ := gameRepo.GetActivePilotStats(aVehicle.OwnerID)
 	dPilot, _ := gameRepo.GetActivePilotStats(dVehicle.OwnerID)
 
-	aStats := combatService.MapVehicleToUnitStats(aVehicle, aParts, aPilot)
-	dStats := combatService.MapVehicleToUnitStats(dVehicle, dParts, dPilot)
+	aStats := combatService.MapVehicleToUnitStats(aVehicle, aItems, aPilot)
+	dStats := combatService.MapVehicleToUnitStats(dVehicle, dItems, dPilot)
 
 	fmt.Printf("\n--- BATTLE START ---\n")
 	fmt.Printf("Attacker: %s (HP: %d, ATK: %d)\n", aVehicle.Class, aStats.HP, aStats.BaseAttack)

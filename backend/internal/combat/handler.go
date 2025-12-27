@@ -61,20 +61,33 @@ func (h *Handler) SimulateAttack(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 1. Fetch Vehicles
-	attacker, err := h.vehicleRepo.GetByID(r.Context(), attackerUUID)
-	if err != nil {
-		http.Error(w, "Error fetching attacker: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if attacker == nil {
-		http.Error(w, "Attacker vehicle not found", http.StatusNotFound)
-		return
-	}
+	var attacker *vehicle.Vehicle
+	var attackerItems []vehicle.Item
+	var attackerPilot *game.PilotStats
 
-	// Ownership Check (Anti-Cheat)
-	if attacker.OwnerID != userID {
-		http.Error(w, "You do not own this vehicle", http.StatusForbidden)
-		return
+	if attackerUUID != uuid.Nil {
+		var err error
+		attacker, err = h.vehicleRepo.GetByID(r.Context(), attackerUUID)
+		if err != nil {
+			http.Error(w, "Error fetching attacker: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if attacker == nil {
+			http.Error(w, "Attacker vehicle not found", http.StatusNotFound)
+			return
+		}
+
+		// Ownership Check (Anti-Cheat)
+		if attacker.OwnerID != userID {
+			http.Error(w, "You do not own this vehicle", http.StatusForbidden)
+			return
+		}
+
+		attackerItems, _ = h.vehicleRepo.GetItemsByParentItemID(r.Context(), attackerUUID)
+		attackerPilot, _ = h.gameRepo.GetActivePilotStats(attacker.OwnerID)
+	} else {
+		// Pilot Only Mode
+		attackerPilot, _ = h.gameRepo.GetActivePilotStats(userID)
 	}
 
 	defender, err := h.vehicleRepo.GetByID(r.Context(), defenderUUID)
@@ -93,12 +106,10 @@ func (h *Handler) SimulateAttack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2. Fetch Items (Equipped)
-	attackerItems, _ := h.vehicleRepo.GetItemsByParentItemID(r.Context(), attackerUUID)
+	// 2. Fetch Items (Equipped) for Defender
 	defenderItems, _ := h.vehicleRepo.GetItemsByParentItemID(r.Context(), defenderUUID)
 
-	// 3. Fetch Pilot Stats (for Resonance bonus)
-	attackerPilot, _ := h.gameRepo.GetActivePilotStats(attacker.OwnerID)
+	// 3. Fetch Pilot Stats for Defender
 	defenderPilot, _ := h.gameRepo.GetActivePilotStats(defender.OwnerID)
 
 	// 4. Map to Combat Stats

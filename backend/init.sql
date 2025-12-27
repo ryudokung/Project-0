@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Enum Types (Idempotent)
 DO $$ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_type') THEN
-        CREATE TYPE vehicle_type AS ENUM ('MECH', 'TANK', 'SHIP');
+        CREATE TYPE vehicle_type AS ENUM ('MECH', 'TANK', 'SHIP', 'SPEEDER');
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vehicle_class') THEN
         CREATE TYPE vehicle_class AS ENUM ('STRIKER', 'GUARDIAN', 'SCOUT', 'ARTILLERY');
@@ -25,7 +25,7 @@ DO $$ BEGIN
         CREATE TYPE item_condition AS ENUM ('PRISTINE', 'WORN', 'DAMAGED', 'CRITICAL', 'BROKEN');
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'terrain_type') THEN
-        CREATE TYPE terrain_type AS ENUM ('URBAN', 'ISLANDS', 'SKY', 'DESERT', 'VOID', 'SPACE');
+        CREATE TYPE terrain_type AS ENUM ('URBAN', 'ISLANDS', 'SKY', 'DESERT', 'VOID', 'SPACE', 'INDUSTRIAL', 'MINING', 'CYBER', 'ANCIENT');
     END IF;
 END $$;
 
@@ -169,6 +169,8 @@ CREATE TABLE IF NOT EXISTS stars (
 
 -- Nodes (Encounters on an Expedition)
 CREATE TYPE node_type AS ENUM ('STANDARD', 'RESOURCE', 'COMBAT', 'ANOMALY', 'OUTPOST', 'NARRATIVE', 'REST', 'BOSS');
+CREATE TYPE zone_type AS ENUM ('ORBITAL', 'SURFACE', 'EVA', 'CORRIDOR');
+CREATE TYPE hazard_type AS ENUM ('NONE', 'EMP_STORM', 'CORROSIVE_RAIN', 'SOLAR_FLARE', 'VOID_ECHO');
 
 -- Universe Map Structure
 CREATE TABLE IF NOT EXISTS sectors (
@@ -253,6 +255,8 @@ CREATE TABLE IF NOT EXISTS nodes (
     expedition_id UUID REFERENCES expeditions(id),
     name VARCHAR(100) NOT NULL,
     type node_type NOT NULL,
+    zone zone_type DEFAULT 'SURFACE',
+    hazard hazard_type DEFAULT 'NONE',
     environment_description TEXT, -- e.g., "Acid Rain Desert", "Neon Slums"
     difficulty_multiplier DECIMAL(3, 2) DEFAULT 1.0,
     position_index INTEGER NOT NULL, -- Order on the "Expedition"

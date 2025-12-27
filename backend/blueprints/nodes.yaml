@@ -1,0 +1,68 @@
+nodes:
+  - id: "STANDARD_SECTOR"
+    name: "Quiet Sector"
+    description: "A relatively calm area of space with minimal interference."
+    type: "STANDARD"
+    min_cp: 50
+    choices:
+      - label: "Standard Scan"
+        description: "Perform a routine scan of the area."
+        success_chance: 0.9
+        rewards: ["Research Data"]
+      - label: "Deep Analysis"
+        description: "Spend more time analyzing the environment."
+        success_chance: 0.7
+        rewards: ["Research Data", "Scrap Metal"]
+        risks: ["Fuel Consumption"]
+        requirements: ["PILOT_INTEL > 40"]
+
+  - id: "MINING_OUTPOST"
+    name: "Abandoned Mining Outpost"
+    description: "A cluster of rusted drills and storage containers."
+    type: "RESOURCE"
+    min_cp: 100
+    choices:
+      - label: "Deep Drill"
+        description: "Extract rare minerals from the core."
+        success_chance: 0.4
+        rewards: ["Rare Ore", "Scrap Metal"]
+        risks: ["Structural Stress"]
+        requirements: ["CP > 150"]
+      - label: "Surface Scavenge"
+        description: "Quickly gather loose materials."
+        success_chance: 0.9
+        rewards: ["Scrap Metal"]
+
+  - id: "SYNDICATE_AMBUSH"
+    name: "Syndicate Ambush Point"
+    description: "Hostile signatures detected behind the asteroid belt."
+    type: "COMBAT"
+    min_cp: 250
+    choices:
+      - label: "Full Assault"
+        description: "Direct confrontation with maximum firepower."
+        success_chance: 0.6
+        risks: ["High Damage"]
+        requirements: ["CP > 300"]
+      - label: "Tactical Flank"
+        description: "Use agility to find a weak spot."
+        success_chance: 0.8
+        risks: ["Medium Damage"]
+        requirements: ["PILOT_AGILITY > 40", "CP > 200"]
+
+  - id: "VOID_ANOMALY"
+    name: "Shimmering Void Anomaly"
+    description: "Space itself seems to be folding here."
+    type: "ANOMALY"
+    min_cp: 300
+    choices:
+      - label: "Scientific Study"
+        description: "Analyze the anomaly for data."
+        success_chance: 0.7
+        rewards: ["Research Data", "Void Shard"]
+        requirements: ["PILOT_INTEL > 50"]
+      - label: "Brute Force"
+        description: "Push through the anomaly."
+        success_chance: 0.5
+        rewards: ["Void Shard"]
+        risks: ["Hull Damage"]

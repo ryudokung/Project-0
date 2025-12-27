@@ -22,15 +22,15 @@ func (r *explorationRepository) CreateNodes(nodes []Node) error {
 	}
 	defer tx.Rollback()
 
-	query := `INSERT INTO nodes (id, expedition_id, name, type, environment_description, difficulty_multiplier, position_index, choices, is_resolved, terrain, detection_threshold) 
-	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
+	query := `INSERT INTO nodes (id, expedition_id, name, type, zone, hazard, environment_description, difficulty_multiplier, position_index, choices, is_resolved, terrain, detection_threshold) 
+	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
 
 	for _, n := range nodes {
 		choicesJSON, err := json.Marshal(n.Choices)
 		if err != nil {
 			return err
 		}
-		_, err = tx.Exec(query, n.ID, n.ExpeditionID, n.Name, n.Type, n.EnvironmentDescription, n.DifficultyMultiplier, n.PositionIndex, choicesJSON, n.IsResolved, n.Terrain, n.DetectionThreshold)
+		_, err = tx.Exec(query, n.ID, n.ExpeditionID, n.Name, n.Type, n.Zone, n.Hazard, n.EnvironmentDescription, n.DifficultyMultiplier, n.PositionIndex, choicesJSON, n.IsResolved, n.Terrain, n.DetectionThreshold)
 		if err != nil {
 			return err
 		}
@@ -40,7 +40,7 @@ func (r *explorationRepository) CreateNodes(nodes []Node) error {
 }
 
 func (r *explorationRepository) GetNodesByExpeditionID(expeditionID uuid.UUID) ([]Node, error) {
-	query := `SELECT id, expedition_id, name, type, environment_description, difficulty_multiplier, position_index, choices, is_resolved, terrain, detection_threshold 
+	query := `SELECT id, expedition_id, name, type, zone, hazard, environment_description, difficulty_multiplier, position_index, choices, is_resolved, terrain, detection_threshold 
 	          FROM nodes WHERE expedition_id = $1 ORDER BY position_index ASC`
 	rows, err := r.db.Query(query, expeditionID)
 	if err != nil {
@@ -52,7 +52,7 @@ func (r *explorationRepository) GetNodesByExpeditionID(expeditionID uuid.UUID) (
 	for rows.Next() {
 		var n Node
 		var choicesJSON []byte
-		if err := rows.Scan(&n.ID, &n.ExpeditionID, &n.Name, &n.Type, &n.EnvironmentDescription, &n.DifficultyMultiplier, &n.PositionIndex, &choicesJSON, &n.IsResolved, &n.Terrain, &n.DetectionThreshold); err != nil {
+		if err := rows.Scan(&n.ID, &n.ExpeditionID, &n.Name, &n.Type, &n.Zone, &n.Hazard, &n.EnvironmentDescription, &n.DifficultyMultiplier, &n.PositionIndex, &choicesJSON, &n.IsResolved, &n.Terrain, &n.DetectionThreshold); err != nil {
 			return nil, err
 		}
 		if err := json.Unmarshal(choicesJSON, &n.Choices); err != nil {
@@ -67,11 +67,11 @@ func (r *explorationRepository) GetNodesByExpeditionID(expeditionID uuid.UUID) (
 }
 
 func (r *explorationRepository) GetNodeByID(id uuid.UUID) (*Node, error) {
-	query := `SELECT id, expedition_id, name, type, environment_description, difficulty_multiplier, position_index, choices, is_resolved, terrain, detection_threshold 
+	query := `SELECT id, expedition_id, name, type, zone, hazard, environment_description, difficulty_multiplier, position_index, choices, is_resolved, terrain, detection_threshold 
 	          FROM nodes WHERE id = $1`
 	var n Node
 	var choicesJSON []byte
-	err := r.db.QueryRow(query, id).Scan(&n.ID, &n.ExpeditionID, &n.Name, &n.Type, &n.EnvironmentDescription, &n.DifficultyMultiplier, &n.PositionIndex, &choicesJSON, &n.IsResolved, &n.Terrain, &n.DetectionThreshold)
+	err := r.db.QueryRow(query, id).Scan(&n.ID, &n.ExpeditionID, &n.Name, &n.Type, &n.Zone, &n.Hazard, &n.EnvironmentDescription, &n.DifficultyMultiplier, &n.PositionIndex, &choicesJSON, &n.IsResolved, &n.Terrain, &n.DetectionThreshold)
 	if err != nil {
 		return nil, err
 	}

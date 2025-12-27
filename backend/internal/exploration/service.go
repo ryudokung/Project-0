@@ -20,6 +20,26 @@ const (
 	NodeCombat    NodeType = "COMBAT"
 	NodeAnomaly   NodeType = "ANOMALY"
 	NodeOutpost   NodeType = "OUTPOST"
+	NodeNarrative NodeType = "NARRATIVE"
+)
+
+type ZoneType string
+
+const (
+	ZoneOrbital  ZoneType = "ORBITAL"
+	ZoneSurface  ZoneType = "SURFACE"
+	ZoneEVA      ZoneType = "EVA"
+	ZoneCorridor ZoneType = "CORRIDOR"
+)
+
+type HazardType string
+
+const (
+	HazardNone          HazardType = "NONE"
+	HazardEMPStorm      HazardType = "EMP_STORM"
+	HazardCorrosiveRain HazardType = "CORROSIVE_RAIN"
+	HazardSolarFlare    HazardType = "SOLAR_FLARE"
+	HazardVoidEcho      HazardType = "VOID_ECHO"
 )
 
 type ApproachType string
@@ -33,12 +53,16 @@ const (
 type TerrainType string
 
 const (
-	TerrainUrban   TerrainType = "URBAN"
-	TerrainIslands TerrainType = "ISLANDS"
-	TerrainSky     TerrainType = "SKY"
-	TerrainDesert  TerrainType = "DESERT"
-	TerrainVoid    TerrainType = "VOID"
-	TerrainSpace   TerrainType = "SPACE"
+	TerrainIndustrial TerrainType = "INDUSTRIAL"
+	TerrainMining     TerrainType = "MINING"
+	TerrainCyber      TerrainType = "CYBER"
+	TerrainAncient    TerrainType = "ANCIENT"
+	TerrainUrban      TerrainType = "URBAN"
+	TerrainIslands    TerrainType = "ISLANDS"
+	TerrainSky        TerrainType = "SKY"
+	TerrainDesert     TerrainType = "DESERT"
+	TerrainVoid       TerrainType = "VOID"
+	TerrainSpace      TerrainType = "SPACE"
 )
 
 type StrategicChoice struct {
@@ -55,6 +79,8 @@ type Node struct {
 	ExpeditionID           uuid.UUID         `json:"expedition_id"`
 	Name                   string            `json:"name"`
 	Type                   NodeType          `json:"type"`
+	Zone                   ZoneType          `json:"zone"`
+	Hazard                 HazardType        `json:"hazard"`
 	EnvironmentDescription string            `json:"environment_description"`
 	DifficultyMultiplier   float64           `json:"difficulty_multiplier"`
 	PositionIndex          int               `json:"position_index"`
@@ -164,10 +190,16 @@ type Service struct {
 	repo           Repository
 	vehicleUseCase vehicle.UseCase
 	gameRepo       game.Repository
+	blueprints     *game.BlueprintRegistry
 }
 
-func NewService(repo Repository, vehicleUseCase vehicle.UseCase, gameRepo game.Repository) *Service {
-	return &Service{repo: repo, vehicleUseCase: vehicleUseCase, gameRepo: gameRepo}
+func NewService(repo Repository, vehicleUseCase vehicle.UseCase, gameRepo game.Repository, blueprints *game.BlueprintRegistry) *Service {
+	return &Service{
+		repo:           repo,
+		vehicleUseCase: vehicleUseCase,
+		gameRepo:       gameRepo,
+		blueprints:     blueprints,
+	}
 }
 
 func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSectorID uuid.UUID, planetLocationID *uuid.UUID, vehicleID uuid.UUID) (*Expedition, error) {
@@ -248,17 +280,71 @@ func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSec
 
 func (s *Service) GenerateTimeline(expeditionID uuid.UUID, length int, radarLevel int) []Node {
 	nodes := make([]Node, length)
-	types := []NodeType{NodeStandard, NodeResource, NodeCombat, NodeAnomaly}
-	terrains := []TerrainType{TerrainUrban, TerrainIslands, TerrainSky, TerrainDesert, TerrainVoid, TerrainSpace}
+	types := []NodeType{NodeStandard, NodeResource, NodeCombat, NodeAnomaly, NodeNarrative}
+	terrains := []TerrainType{TerrainIndustrial, TerrainMining, TerrainCyber, TerrainAncient}
+	hazards := []HazardType{HazardNone, HazardEMPStorm, HazardCorrosiveRain, HazardSolarFlare, HazardVoidEcho}
 
 	for i := 0; i < length; i++ {
 		nodeType := types[rand.Intn(len(types))]
-		if i == length-1 {
-			nodeType = NodeOutpost // Last node is always an outpost/boss
+		zone := ZoneSurface
+		
+		// Logic for Zone distribution
+		if i == 0 {
+			zone = ZoneOrbital // Start with Orbital
+			nodeType = NodeStandard
+		} else if i == length-1 {
+			zone = ZoneSurface
+			nodeType = NodeOutpost // End with Outpost
+		} else {
+			// Randomly assign EVA or Corridor for variety
+			r := rand.Float64()
+			if r < 0.2 {
+				zone = ZoneEVA
+			} else if r < 0.4 {
+				zone = ZoneCorridor
+			}
 		}
 
 		terrain := terrains[rand.Intn(len(terrains))]
-		tmpl := GetTemplateForType(nodeType)
+		hazard := HazardNone
+		if rand.Float64() < 0.3 { // 30% chance of hazard
+			hazard = hazards[1+rand.Intn(len(hazards)-1)]
+		}
+
+		// Find matching blueprint
+		var blueprint game.NodeBlueprint
+		found := false
+		for _, b := range s.blueprints.Nodes {
+			if b.Type == string(nodeType) {
+				blueprint = b
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			// Fallback
+			blueprint = game.NodeBlueprint{
+				Name:        "Unknown Sector",
+				Description: "A mysterious area of space.",
+				Choices: []game.ChoiceBlueprint{
+					{Label: "Proceed", Description: "Move forward carefully.", SuccessChance: 1.0},
+				},
+			}
+		}
+
+		// Map blueprint choices to StrategicChoice
+		choices := make([]StrategicChoice, len(blueprint.Choices))
+		for j, c := range blueprint.Choices {
+			choices[j] = StrategicChoice{
+				Label:         c.Label,
+				Description:   c.Description,
+				SuccessChance: c.SuccessChance,
+				Rewards:       c.Rewards,
+				Risks:         c.Risks,
+				Requirements:  c.Requirements,
+			}
+		}
 
 		// Radar reduces the detection threshold (making it easier to navigate stealthily)
 		baseThreshold := 500 + rand.Intn(500)
@@ -267,12 +353,14 @@ func (s *Service) GenerateTimeline(expeditionID uuid.UUID, length int, radarLeve
 		nodes[i] = Node{
 			ID:                     uuid.New(),
 			ExpeditionID:           expeditionID,
-			Name:                   tmpl.Name,
+			Name:                   blueprint.Name,
 			Type:                   nodeType,
-			EnvironmentDescription: tmpl.Description,
+			Zone:                   zone,
+			Hazard:                 hazard,
+			EnvironmentDescription: blueprint.Description,
 			DifficultyMultiplier:   1.0 + (float64(i) * 0.1),
 			PositionIndex:          i,
-			Choices:                tmpl.Choices,
+			Choices:                choices,
 			IsResolved:             false,
 			Terrain:                terrain,
 			DetectionThreshold:     detectionThreshold,
@@ -290,6 +378,16 @@ func (s *Service) CalculateEffectiveCP(ctx context.Context, userID uuid.UUID, ve
 	pilot, err := s.gameRepo.GetActivePilotStats(userID)
 	if err != nil {
 		return 0, err
+	}
+
+	// Handle System NPC or Missing Pilot
+	if pilot == nil {
+		// Default stats for System NPC
+		if vehicleID == uuid.Nil {
+			return 50, nil
+		}
+		vehicleCP, _ := s.vehicleUseCase.GetVehicleCP(ctx, vehicleID)
+		return vehicleCP, nil
 	}
 
 	// 2. Handle Pilot Only Mode
@@ -479,12 +577,35 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 		return nil, err
 	}
 
-	// 4. Calculate Effective CP (ECP)
+	// 3.5 Zone Requirements Check (Option 2B: Warning/Penalty Logic)
+	requirementPenalty := 0.0
 	vehicleID := uuid.Nil
 	if expedition.VehicleID != nil {
 		vehicleID = *expedition.VehicleID
 	}
 
+	if node.Zone == ZoneEVA && vehicleID != uuid.Nil {
+		// Penalty for bringing a heavy vehicle into tight EVA spaces
+		requirementPenalty -= 0.5
+		fmt.Printf("WARNING: Heavy vehicle in EVA zone. Applying 50%% penalty.\n")
+	}
+
+	if node.Zone == ZoneCorridor {
+		if vehicleID == uuid.Nil {
+			// Penalty for being on foot in a high-speed corridor
+			requirementPenalty -= 0.6
+			fmt.Printf("WARNING: On foot in high-speed corridor. Applying 60%% penalty.\n")
+		} else {
+			v, _ := s.vehicleUseCase.GetVehicleByID(ctx, vehicleID)
+			if v != nil && v.VehicleType != vehicle.TypeSpeeder {
+				// Penalty for non-speeder vehicle
+				requirementPenalty -= 0.4
+				fmt.Printf("WARNING: Non-speeder in high-speed corridor. Applying 40%% penalty.\n")
+			}
+		}
+	}
+
+	// 4. Calculate Effective CP (ECP)
 	ecp, err := s.CalculateEffectiveCP(ctx, expedition.UserID, vehicleID, node.Terrain)
 	if err != nil {
 		// Fallback if calculation fails
@@ -495,6 +616,37 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 	// Base difficulty is 200 * DifficultyMultiplier
 	baseDifficulty := 200.0 * node.DifficultyMultiplier
 
+	// Detection Logic (Alarm Mode)
+	isAlarmMode := false
+	if vehicleID != uuid.Nil {
+		// Calculate Signature (Base on CP for now)
+		signature := float64(ecp)
+		
+		// Bastion Radar reduces effective signature
+		radarLevel := 1.0
+		modules, err := s.gameRepo.GetBastionModules(expedition.UserID)
+		if err == nil {
+			for _, m := range modules {
+				if m.IsActive && m.ModuleType == "RADAR" {
+					radarLevel = float64(m.Level)
+				}
+			}
+		}
+		
+		effectiveSignature := signature / (1.0 + (radarLevel-1)*0.2)
+		
+		if int(effectiveSignature) > node.DetectionThreshold {
+			isAlarmMode = true
+			// Alarm Mode increases difficulty significantly
+			baseDifficulty *= 2.0
+			fmt.Printf("ALARM MODE TRIGGERED: Signature %v > Threshold %v\n", int(effectiveSignature), node.DetectionThreshold)
+		}
+	}
+
+	if isAlarmMode {
+		// Could add more alarm-specific logic here
+	}
+
 	// Success chance formula: 0.5 + (ECP - Difficulty) / 1000
 	ecpBonus := (float64(ecp) - baseDifficulty) / 1000.0
 	if ecpBonus < -0.3 {
@@ -504,7 +656,7 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 		ecpBonus = 0.4 // Max bonus
 	}
 
-	finalSuccessChance := selectedChoice.SuccessChance + ecpBonus
+	finalSuccessChance := selectedChoice.SuccessChance + ecpBonus + requirementPenalty
 	if finalSuccessChance > 0.98 {
 		finalSuccessChance = 0.98
 	}
@@ -537,15 +689,47 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 
 		// Every node resolution increases Stress
 		stats.Stress += 5 + rand.Intn(5) // 5-10 stress per node
+		
+		// Apply Hazard Effects
+		switch node.Hazard {
+		case HazardVoidEcho:
+			stats.Stress += 10 // Extra stress from Void Echoes
+		case HazardSolarFlare:
+			stats.Stress += 5
+			// Could add Heat mechanic here
+		case HazardCorrosiveRain:
+			if expedition.VehicleID != nil {
+				// Apply durability damage to vehicle
+				_, _ = s.vehicleUseCase.ApplyDamage(ctx, *expedition.VehicleID, 5)
+			}
+		case HazardEMPStorm:
+			// EMP reduces success chance or affects energy weapons in combat
+		}
+
 		if stats.Stress > 100 {
 			stats.Stress = 100
 		}
 
 		// Fuel Consumption (Warp Drive reduces this)
 		fuelCost := 5.0 / (1.0 + (warpLevel-1)*0.1) // 10% reduction per level
+		if node.Zone == ZoneOrbital {
+			fuelCost *= 1.5 // Orbital travel costs more fuel
+		}
 		stats.CurrentFuel -= fuelCost
 		if stats.CurrentFuel < 0 {
 			stats.CurrentFuel = 0
+		}
+
+		// O2 Consumption (Surface and EVA nodes)
+		if node.Zone == ZoneSurface || node.Zone == ZoneEVA {
+			o2Cost := 3.0
+			if node.Zone == ZoneEVA {
+				o2Cost = 8.0 // EVA is much more taxing
+			}
+			stats.CurrentO2 -= o2Cost
+			if stats.CurrentO2 < 0 {
+				stats.CurrentO2 = 0
+			}
 		}
 
 		// Clear Active Skill Flags (Overclock)
@@ -632,83 +816,32 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 }
 
 func (s *Service) GenerateChoicesForType(t NodeType) []StrategicChoice {
-	choices := []StrategicChoice{}
-	switch t {
-	case NodeCombat:
-		choices = []StrategicChoice{
-			{
-				Label: "Full Assault", 
-				Description: "Direct confrontation with maximum firepower.", 
-				SuccessChance: 0.6, 
-				Risks: []string{"High Damage"},
-				Requirements: []string{},
-				Rewards: []string{},
-			},
-			{
-				Label: "Tactical Flank", 
-				Description: "Use agility to find a weak spot.", 
-				Requirements: []string{"PILOT_AGILITY > 40"}, 
-				SuccessChance: 0.8, 
-				Risks: []string{"Medium Damage"},
-				Rewards: []string{},
-			},
+	// Find matching blueprint
+	var blueprint game.NodeBlueprint
+	found := false
+	for _, b := range s.blueprints.Nodes {
+		if b.Type == string(t) {
+			blueprint = b
+			found = true
+			break
 		}
-	case NodeResource:
-		choices = []StrategicChoice{
-			{
-				Label: "Deep Drill", 
-				Description: "Extract rare minerals from the core.", 
-				SuccessChance: 0.4, 
-				Rewards: []string{"Rare Ore"}, 
-				Risks: []string{"Structural Stress"},
-				Requirements: []string{},
-			},
-			{
-				Label: "Surface Scavenge", 
-				Description: "Quickly gather loose materials.", 
-				SuccessChance: 0.9, 
-				Rewards: []string{"Scrap Metal"},
-				Risks: []string{},
-				Requirements: []string{},
-			},
+	}
+
+	if !found {
+		return []StrategicChoice{
+			{Label: "Proceed", Description: "Move forward carefully.", SuccessChance: 1.0},
 		}
-	case NodeAnomaly:
-		choices = []StrategicChoice{
-			{
-				Label: "Scientific Study", 
-				Description: "Analyze the anomaly for data.", 
-				Requirements: []string{"PILOT_INTEL > 50"}, 
-				SuccessChance: 0.7, 
-				Rewards: []string{"Research Data"},
-				Risks: []string{},
-			},
-			{
-				Label: "Brute Force", 
-				Description: "Push through the anomaly.", 
-				SuccessChance: 0.5, 
-				Risks: []string{"System Glitch"},
-				Requirements: []string{},
-				Rewards: []string{},
-			},
-		}
-	default:
-		choices = []StrategicChoice{
-			{
-				Label: "Full Speed", 
-				Description: "Travel quickly to the next sector.", 
-				SuccessChance: 0.9, 
-				Risks: []string{"Fuel Consumption"},
-				Requirements: []string{},
-				Rewards: []string{},
-			},
-			{
-				Label: "Eco-Drive", 
-				Description: "Conserve energy while moving.", 
-				SuccessChance: 1.0,
-				Risks: []string{},
-				Requirements: []string{},
-				Rewards: []string{},
-			},
+	}
+
+	choices := make([]StrategicChoice, len(blueprint.Choices))
+	for i, c := range blueprint.Choices {
+		choices[i] = StrategicChoice{
+			Label:         c.Label,
+			Description:   c.Description,
+			SuccessChance: c.SuccessChance,
+			Rewards:       c.Rewards,
+			Risks:         c.Risks,
+			Requirements:  c.Requirements,
 		}
 	}
 	return choices
@@ -794,13 +927,14 @@ func (s *Service) GenerateNewEncounter(ctx context.Context, expeditionID uuid.UU
 	encounterType := targetNode.Type
 
 	// Consume resources (only if advancing, not for the first encounter)
-	if pilot != nil && currentIndex > 0 {
+	// Skip for system expeditions or if pilot stats are missing
+	if expedition.UserID != uuid.Nil && pilot != nil && currentIndex > 0 {
 		success, err := s.gameRepo.ConsumeResources(pilot.CharacterID, 15.0, 5.0)
 		if err != nil {
 			return nil, err
 		}
 		if !success {
-			return nil, fmt.Errorf("insufficient resources to advance")
+			return nil, fmt.Errorf("insufficient resources to advance (O2: %.1f, Fuel: %.1f)", pilot.CurrentO2, pilot.CurrentFuel)
 		}
 	}
 
@@ -828,14 +962,16 @@ func (s *Service) GenerateNewEncounter(ctx context.Context, expeditionID uuid.UU
 
 	var enemyID *uuid.UUID
 	if encounterType == NodeCombat {
-		enemies := []string{
-			"e0000000-0000-0000-0000-000000000001",
-			"e0000000-0000-0000-0000-000000000002",
-			"e0000000-0000-0000-0000-000000000003",
+		var enemyIDs []string
+		for id := range s.blueprints.Enemies {
+			enemyIDs = append(enemyIDs, id)
 		}
-		selected := enemies[rand.Intn(len(enemies))]
-		uid := uuid.MustParse(selected)
-		enemyID = &uid
+		
+		if len(enemyIDs) > 0 {
+			selected := enemyIDs[rand.Intn(len(enemyIDs))]
+			uid := uuid.MustParse(selected)
+			enemyID = &uid
+		}
 	}
 
 	encounter := &Encounter{

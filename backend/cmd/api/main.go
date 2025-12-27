@@ -31,6 +31,15 @@ func main() {
 	}
 	defer db.Close()
 
+	// Initialize Blueprints
+	blueprints := game.NewBlueprintRegistry()
+	if err := blueprints.LoadNodes("blueprints/nodes.yaml"); err != nil {
+		log.Printf("Warning: Failed to load node blueprints: %v", err)
+	}
+	if err := blueprints.LoadEnemies("blueprints/enemies.yaml"); err != nil {
+		log.Printf("Warning: Failed to load enemy blueprints: %v", err)
+	}
+
 	// Initialize Game/Pilot Module
 	gameRepo := game.NewRepository(db)
 	vehicleRepo := vehicle.NewRepository(db) // Move up to use in gameUseCase
@@ -56,7 +65,7 @@ func main() {
 
 	// Initialize Exploration Module
 	explorationRepo := exploration.NewRepository(db)
-	explorationService := exploration.NewService(explorationRepo, vehicleUseCase, gameRepo)
+	explorationService := exploration.NewService(explorationRepo, vehicleUseCase, gameRepo, blueprints)
 	explorationHandler := exploration.NewHandler(explorationService)
 
 	// Initialize Game Handler

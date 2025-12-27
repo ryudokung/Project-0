@@ -83,13 +83,13 @@ func initialModel(db *sql.DB) model {
 	ctx := context.Background()
 	aVehicle, _ := vehicleRepo.GetByID(ctx, ids[0])
 	dVehicle, _ := vehicleRepo.GetByID(ctx, ids[1])
-	aParts, _ := vehicleRepo.GetPartsByVehicleID(ids[0])
-	dParts, _ := vehicleRepo.GetPartsByVehicleID(ids[1])
+	aItems, _ := vehicleRepo.GetItemsByParentItemID(ctx, ids[0])
+	dItems, _ := vehicleRepo.GetItemsByParentItemID(ctx, ids[1])
 	aPilot, _ := gameRepo.GetActivePilotStats(aVehicle.OwnerID)
 	dPilot, _ := gameRepo.GetActivePilotStats(dVehicle.OwnerID)
 
-	aStats := combatService.MapVehicleToUnitStats(aVehicle, aParts, aPilot)
-	dStats := combatService.MapVehicleToUnitStats(dVehicle, dParts, dPilot)
+	aStats := combatService.MapVehicleToUnitStats(aVehicle, aItems, aPilot)
+	dStats := combatService.MapVehicleToUnitStats(dVehicle, dItems, dPilot)
 
 	return model{
 		db:            db,

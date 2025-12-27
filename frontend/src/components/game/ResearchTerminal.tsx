@@ -25,14 +25,26 @@ export const ResearchTerminal = () => {
   const [error, setError] = useState<string | null>(null);
 
   const { research, pilotStats } = state.context;
-  const unlockedResearch = pilotStats?.metadata?.unlocked_research || [];
+  const unlockedResearch = React.useMemo(() => 
+    pilotStats?.metadata?.unlocked_research || [], 
+    [pilotStats?.metadata?.unlocked_research]
+  );
 
   useEffect(() => {
     // Update unlocked status based on pilot stats
-    setNodes(prev => prev.map(node => ({
-      ...node,
-      unlocked: unlockedResearch.includes(node.id)
-    })));
+    setNodes(prev => {
+      const hasChanged = prev.some(node => {
+        const isUnlocked = unlockedResearch.includes(node.id);
+        return node.unlocked !== isUnlocked;
+      });
+      
+      if (!hasChanged) return prev;
+
+      return prev.map(node => ({
+        ...node,
+        unlocked: unlockedResearch.includes(node.id)
+      }));
+    });
   }, [unlockedResearch]);
 
   const handleUnlock = async (nodeId: string) => {

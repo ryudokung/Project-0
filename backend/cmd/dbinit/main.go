@@ -43,6 +43,9 @@ func main() {
 		DROP TYPE IF EXISTS item_type CASCADE;
 		DROP TYPE IF EXISTS item_condition CASCADE;
 		DROP TYPE IF EXISTS node_type CASCADE;
+		DROP TYPE IF EXISTS terrain_type CASCADE;
+		DROP TYPE IF EXISTS zone_type CASCADE;
+		DROP TYPE IF EXISTS hazard_type CASCADE;
 		DROP FUNCTION IF EXISTS update_updated_at_column CASCADE;
 	`
 	_, err = db.Exec(dropQuery)

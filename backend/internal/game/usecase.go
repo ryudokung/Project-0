@@ -105,9 +105,13 @@ func (u *gameUseCase) InitializeNewCharacter(userID, charID uuid.UUID) error {
 }
 
 func (uc *gameUseCase) UnlockResearch(ctx context.Context, userID uuid.UUID, researchID string) (*PilotStats, error) {
-	stats, err := uc.repo.GetPilotStats(userID)
+	stats, err := uc.repo.GetActivePilotStats(userID)
 	if err != nil {
 		return nil, err
+	}
+
+	if stats == nil {
+		return nil, errors.New("pilot stats not found")
 	}
 
 	cost, ok := ResearchCosts[researchID]
