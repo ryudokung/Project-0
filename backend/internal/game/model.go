@@ -11,9 +11,10 @@ type PilotStats struct {
 	EquippedExosuitID *uuid.UUID             `json:"equipped_exosuit_id,omitempty"`
 	ResonanceLevel    int                    `json:"resonance_level"`
 	ResonanceExp      int                    `json:"resonance_exp"`
+	ResonanceGauge    float64                `json:"resonance_gauge"` // 0-100
 	Stress            int                    `json:"stress"`
 	XP                int                    `json:"xp"`
-	Rank              int                    `json:"rank"`
+	SyncLevel         int                    `json:"sync_level"`
 	CurrentO2         float64                `json:"current_o2"`
 	CurrentFuel       float64                `json:"current_fuel"`
 	CurrentNE         float64                `json:"current_ne"`
@@ -43,4 +44,10 @@ type BastionModule struct {
 	IsActive    bool                   `json:"is_active"`
 	Metadata    map[string]interface{} `json:"metadata"`
 	UnlockedAt  time.Time              `json:"unlocked_at"`
+}
+
+type ScriptEvent struct {
+	Trigger  string `json:"trigger" yaml:"trigger"`
+	Action   string `json:"action" yaml:"action"`
+	Dialogue string `json:"dialogue" yaml:"dialogue"`
 }

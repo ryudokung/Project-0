@@ -14,7 +14,18 @@ $$FinalDamage = (BaseAttack \times TypeMultiplier) - (TargetDefense \times Defen
 | **Energy** | High frequency pulses | +20% Damage vs Shields |
 | **Void** | Reality-warping energy | Ignores 30% of Target Defense |
 
-### 1.2 Critical Hits
+### 1.2 Scale Suppression & Resonance
+The "Scale" of a unit determines its natural dominance in combat.
+
+1. **Vehicle vs. Human (Normal):**
+    - **Human Attacking Vehicle:** 90% Damage Reduction ($FinalDamage \times 0.1$).
+    - **Vehicle Attacking Human:** 300% Damage ($FinalDamage \times 3.0$).
+2. **Resonance Mode (The Great Equalizer):**
+    - When a Human activates **Resonance Mode**, they bypass Scale Suppression.
+    - **Human (Resonant) vs. Vehicle:** Deals 100% Damage + Resonance Bonus ($1.0 + ResonanceLevel \times 0.5$).
+    - **Vehicle vs. Human (Resonant):** Damage is reduced to 50% ($FinalDamage \times 0.5$) as the Resonant Pilot "deflects" or "dodges" the massive impact.
+
+### 1.3 Critical Hits
 - **Crit Chance:** Base 5% + (Accuracy / 100).
 - **Crit Damage:** 1.5x Final Damage.
 
@@ -34,15 +45,15 @@ $$CP = (Total ATK \times 2) + (Total DEF \times 2) + (Total HP / 10)$$
 The ECP is the actual power applied during an encounter, modified by environmental and synergy factors.
 
 **ECP Formula:**
-$$ECP = (Vehicle\_CP + Exosuit\_CP) \times Suitability\_Mod \times Resonance\_Sync \times (1 - Fatigue\_Penalty) \times Synergy\_Mod$$
+$$ECP = (Vehicle\_CP + Exosuit\_CP) \times Sync\_Rate \times Suitability\_Mod \times (1 - Fatigue\_Penalty) \times Synergy\_Mod$$
 
 1. **Suitability Modifier (Terrain):**
     - **Perfect Match (1.2x):** e.g., Tank in Desert, Ship in Islands.
     - **Neutral (1.0x):** Standard conditions.
     - **Incompatible (0.5x):** e.g., Tank in Islands, Ship in Desert.
-2. **Resonance Sync Ratio:**
-    - If `Pilot_Resonance < Vehicle_Tier_Requirement`, the ratio is calculated as `Pilot_Resonance / Vehicle_Tier_Requirement`.
-    - This ensures that a high-tier vehicle cannot be fully utilized by an inexperienced pilot.
+2. **Sync Rate:**
+    - A pilot-bound multiplier (e.g., 0.5 to 1.5) representing the neural connection between pilot and machine.
+    - If `Pilot_Sync < Vehicle_Tier_Requirement`, the effective rate may be penalized.
 3. **Fatigue Penalty:**
     - Derived from the Pilot's **Stress** level. `Penalty = Stress / 200`. At 100 Stress, the penalty is 50%.
     - **Critical Fatigue:** If the pilot was recently retrieved via Emergency Protocol, an additional 50% penalty is applied (Max total penalty 90%).

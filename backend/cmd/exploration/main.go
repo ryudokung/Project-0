@@ -48,7 +48,14 @@ func initialModel(db *sql.DB) model {
 	vehicleRepo := vehicle.NewRepository(db)
 	vehicleUseCase := vehicle.NewUseCase(vehicleRepo)
 	gameRepo := game.NewRepository(db)
-	service := exploration.NewService(repo, vehicleUseCase, gameRepo)
+
+	// Load Blueprints
+	blueprints := game.NewBlueprintRegistry()
+	_ = blueprints.LoadNodes("blueprints/nodes.yaml")
+	_ = blueprints.LoadEnemies("blueprints/enemies.yaml")
+	_ = blueprints.LoadExpeditions("blueprints/expeditions.yaml")
+
+	service := exploration.NewService(repo, vehicleUseCase, gameRepo, blueprints)
 
 	// Use the sample expedition ID from init.sql
 	expeditionID := uuid.MustParse("00000000-0000-0000-0000-000000000001")

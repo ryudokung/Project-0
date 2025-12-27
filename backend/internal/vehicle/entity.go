@@ -93,6 +93,7 @@ type Vehicle struct {
 	TokenID         *string       `json:"token_id,omitempty"` // Using string for uint256 compatibility
 	OwnerID         uuid.UUID     `json:"owner_id"`
 	CharacterID     *uuid.UUID    `json:"character_id,omitempty"`
+	Name            string        `json:"name"`
 	VehicleType     VehicleType   `json:"vehicle_type"`
 	Class           VehicleClass  `json:"class"`
 	ImageURL        *string       `json:"image_url,omitempty"`

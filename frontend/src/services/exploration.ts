@@ -102,7 +102,7 @@ export interface PilotStats {
   resonance_exp: number;
   stress: number;
   xp: number;
-  rank: number;
+  sync_level: number;
   current_o2: number;
   current_fuel: number;
   scrap_metal: number;

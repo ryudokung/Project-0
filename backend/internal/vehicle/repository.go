@@ -50,15 +50,15 @@ func (r *vehicleRepository) Create(v *Vehicle) error {
 	metadataJSON, _ := json.Marshal(v.Metadata)
 
 	query := `
-		INSERT INTO vehicles (id, owner_id, character_id, vehicle_type, class, image_url, stats, cr, suitability_tags, rarity, tier, is_void_touched, season, status, metadata)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+		INSERT INTO vehicles (id, owner_id, character_id, name, vehicle_type, class, image_url, stats, cr, suitability_tags, rarity, tier, is_void_touched, season, status, metadata)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 	`
-	_, err = r.db.Exec(query, v.ID, v.OwnerID, v.CharacterID, v.VehicleType, v.Class, v.ImageURL, statsJSON, v.CR, pq.Array(v.SuitabilityTags), v.Rarity, v.Tier, v.IsVoidTouched, v.Season, v.Status, metadataJSON)
+	_, err = r.db.Exec(query, v.ID, v.OwnerID, v.CharacterID, v.Name, v.VehicleType, v.Class, v.ImageURL, statsJSON, v.CR, pq.Array(v.SuitabilityTags), v.Rarity, v.Tier, v.IsVoidTouched, v.Season, v.Status, metadataJSON)
 	return err
 }
 
 func (r *vehicleRepository) GetByID(ctx context.Context, id uuid.UUID) (*Vehicle, error) {
-	query := `SELECT id, token_id, owner_id, character_id, vehicle_type, class, image_url, stats, cr, suitability_tags, rarity, tier, is_void_touched, season, status, metadata, created_at FROM vehicles WHERE id = $1`
+	query := `SELECT id, token_id, owner_id, character_id, name, vehicle_type, class, image_url, stats, cr, suitability_tags, rarity, tier, is_void_touched, season, status, metadata, created_at FROM vehicles WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	var v Vehicle
@@ -67,7 +67,7 @@ func (r *vehicleRepository) GetByID(ctx context.Context, id uuid.UUID) (*Vehicle
 	var tokenID, imageURL, season sql.NullString
 	var charID uuid.NullUUID
 
-	err := row.Scan(&v.ID, &tokenID, &v.OwnerID, &charID, &v.VehicleType, &v.Class, &imageURL, &statsJSON, &v.CR, pq.Array(&suitabilityTags), &v.Rarity, &v.Tier, &v.IsVoidTouched, &season, &v.Status, &metadataJSON, &v.CreatedAt)
+	err := row.Scan(&v.ID, &tokenID, &v.OwnerID, &charID, &v.Name, &v.VehicleType, &v.Class, &imageURL, &statsJSON, &v.CR, pq.Array(&suitabilityTags), &v.Rarity, &v.Tier, &v.IsVoidTouched, &season, &v.Status, &metadataJSON, &v.CreatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -102,15 +102,15 @@ func (r *vehicleRepository) Update(ctx context.Context, v *Vehicle) error {
 	metadataJSON, _ := json.Marshal(v.Metadata)
 	query := `
 		UPDATE vehicles 
-		SET token_id = $1, owner_id = $2, character_id = $3, vehicle_type = $4, class = $5, image_url = $6, stats = $7, cr = $8, suitability_tags = $9, rarity = $10, tier = $11, is_void_touched = $12, season = $13, status = $14, metadata = $15
-		WHERE id = $16
+		SET token_id = $1, owner_id = $2, character_id = $3, name = $4, vehicle_type = $5, class = $6, image_url = $7, stats = $8, cr = $9, suitability_tags = $10, rarity = $11, tier = $12, is_void_touched = $13, season = $14, status = $15, metadata = $16
+		WHERE id = $17
 	`
-	_, err := r.db.ExecContext(ctx, query, v.TokenID, v.OwnerID, v.CharacterID, v.VehicleType, v.Class, v.ImageURL, statsJSON, v.CR, pq.Array(v.SuitabilityTags), v.Rarity, v.Tier, v.IsVoidTouched, v.Season, v.Status, metadataJSON, v.ID)
+	_, err := r.db.ExecContext(ctx, query, v.TokenID, v.OwnerID, v.CharacterID, v.Name, v.VehicleType, v.Class, v.ImageURL, statsJSON, v.CR, pq.Array(v.SuitabilityTags), v.Rarity, v.Tier, v.IsVoidTouched, v.Season, v.Status, metadataJSON, v.ID)
 	return err
 }
 
 func (r *vehicleRepository) GetByOwnerID(ownerID uuid.UUID) ([]Vehicle, error) {
-	query := `SELECT id, token_id, owner_id, character_id, vehicle_type, class, image_url, stats, cr, suitability_tags, rarity, tier, is_void_touched, season, status, metadata, created_at FROM vehicles WHERE owner_id = $1`
+	query := `SELECT id, token_id, owner_id, character_id, name, vehicle_type, class, image_url, stats, cr, suitability_tags, rarity, tier, is_void_touched, season, status, metadata, created_at FROM vehicles WHERE owner_id = $1`
 	rows, err := r.db.Query(query, ownerID)
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ func (r *vehicleRepository) GetByOwnerID(ownerID uuid.UUID) ([]Vehicle, error) {
 		var suitabilityTags []string
 		var tokenID, imageURL, season sql.NullString
 		var charID uuid.NullUUID
-		if err := rows.Scan(&v.ID, &tokenID, &v.OwnerID, &charID, &v.VehicleType, &v.Class, &imageURL, &statsJSON, &v.CR, pq.Array(&suitabilityTags), &v.Rarity, &v.Tier, &v.IsVoidTouched, &season, &v.Status, &metadataJSON, &v.CreatedAt); err != nil {
+		if err := rows.Scan(&v.ID, &tokenID, &v.OwnerID, &charID, &v.Name, &v.VehicleType, &v.Class, &imageURL, &statsJSON, &v.CR, pq.Array(&suitabilityTags), &v.Rarity, &v.Tier, &v.IsVoidTouched, &season, &v.Status, &metadataJSON, &v.CreatedAt); err != nil {
 			return nil, err
 		}
 		if tokenID.Valid {
@@ -148,7 +148,7 @@ func (r *vehicleRepository) GetByOwnerID(ownerID uuid.UUID) ([]Vehicle, error) {
 }
 
 func (r *vehicleRepository) GetByCharacterID(charID uuid.UUID) ([]Vehicle, error) {
-	query := `SELECT id, token_id, owner_id, character_id, vehicle_type, class, image_url, stats, cr, suitability_tags, rarity, tier, is_void_touched, season, status, metadata, created_at FROM vehicles WHERE character_id = $1`
+	query := `SELECT id, token_id, owner_id, character_id, name, vehicle_type, class, image_url, stats, cr, suitability_tags, rarity, tier, is_void_touched, season, status, metadata, created_at FROM vehicles WHERE character_id = $1`
 	rows, err := r.db.Query(query, charID)
 	if err != nil {
 		return nil, err
@@ -162,7 +162,7 @@ func (r *vehicleRepository) GetByCharacterID(charID uuid.UUID) ([]Vehicle, error
 		var suitabilityTags []string
 		var tokenID, imageURL, season sql.NullString
 		var cID uuid.NullUUID
-		if err := rows.Scan(&v.ID, &tokenID, &v.OwnerID, &cID, &v.VehicleType, &v.Class, &imageURL, &statsJSON, &v.CR, pq.Array(&suitabilityTags), &v.Rarity, &v.Tier, &v.IsVoidTouched, &season, &v.Status, &metadataJSON, &v.CreatedAt); err != nil {
+		if err := rows.Scan(&v.ID, &tokenID, &v.OwnerID, &cID, &v.Name, &v.VehicleType, &v.Class, &imageURL, &statsJSON, &v.CR, pq.Array(&suitabilityTags), &v.Rarity, &v.Tier, &v.IsVoidTouched, &season, &v.Status, &metadataJSON, &v.CreatedAt); err != nil {
 			return nil, err
 		}
 		if tokenID.Valid {

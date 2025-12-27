@@ -81,19 +81,19 @@ The goal of Project-0 is not just to find "better gear," but to become a legenda
 
 เพื่อให้ผู้เล่นรู้สึกถึงความ "เก่งขึ้น" และมีเป้าหมายในระยะยาว ระบบจะวัดความก้าวหน้าผ่าน 4 แกนหลัก:
 
-### 7.1 Pilot Rank & Mastery (XP)
+### 7.1 Pilot Sync Rate & Mastery (XP)
 - **Experience Points (XP):** ได้รับจากการทำภารกิจสำเร็จ, การ Salvage ซากหุ่น, และการค้นพบดวงดาวใหม่ๆ
-- **Pilot Rank:** การเลื่อนระดับจะปลดล็อก "Advanced Licenses" เพื่อให้สามารถขับ Vehicle หรือ Bastion ในระดับที่สูงขึ้นได้
-- **Skill Points:** ทุกครั้งที่ Rank อัป จะได้รับแต้มเพื่ออัปเกรดความสามารถเฉพาะตัวของนักบิน (เช่น Agility, O2 Efficiency, Melee/Sidearm Mastery)
+- **Sync Rate:** การเลื่อนระดับจะปลดล็อก "Advanced Licenses" เพื่อให้สามารถขับ Vehicle หรือ Bastion ในระดับที่สูงขึ้นได้ และเป็นตัวคูณหลักของ Effective Combat Power (ECP)
+- **Skill Points:** ทุกครั้งที่ Sync Rate อัป จะได้รับแต้มเพื่ออัปเกรดความสามารถเฉพาะตัวของนักบิน (เช่น Agility, O2 Efficiency, Melee/Sidearm Mastery)
 
 ### 7.2 Modular Gear & "Options" (The Loot Loop)
 - **AI-Generated Stats:** ชิ้นส่วน NFT แต่ละชิ้น (Module, Chassis, Weapon) จะมีค่าพลังสุ่ม (Options) ที่สร้างโดย AI (เช่น +5% Kinetic Resistance, +10% Scanner Range)
 - **Rarity Tiers:** แบ่งระดับความหายากเป็น Standard, Rare, Epic, Legendary และ Seasonal
 - **Visual DNA:** ไอเทมระดับสูงจะมี Visual Traits ที่ซับซ้อนและสวยงามกว่า ซึ่งแสดงถึงความเก่งกาจที่มองเห็นได้ชัดเจนในสังคม
 
-### 7.3 Vehicle Sync Rate (Synergy)
-- **Familiarity:** การใช้ Vehicle หรือชิ้นส่วนเดิมซ้ำๆ จะเพิ่มค่า "Sync Rate"
-- **Bonuses:** ค่า Sync Rate ที่สูงจะมอบ Buff พิเศษ เช่น +Evasion, +Accuracy หรือลดการใช้ Energy ซึ่งเป็นการตอบแทนผู้เล่นที่ดูแลและซ่อมแซมอุปกรณ์คู่ใจแทนการเปลี่ยนใหม่ตลอดเวลา
+### 7.3 Mech Affinity (Synergy)
+- **Familiarity:** การใช้ Vehicle หรือชิ้นส่วนเดิมซ้ำๆ จะเพิ่มค่า "Affinity"
+- **Bonuses:** ค่า Affinity ที่สูงจะมอบ Buff พิเศษ เช่น +Evasion, +Accuracy หรือลดการใช้ Energy ซึ่งเป็นการตอบแทนผู้เล่นที่ดูแลและซ่อมแซมอุปกรณ์คู่ใจแทนการเปลี่ยนใหม่ตลอดเวลา
 
 ### 7.4 Bastion Tech Tree (Base Progression)
 - **Facility Upgrades:** ผู้เล่นต้องลงทุนทรัพยากรเพื่ออัปเกรด Preparation Area (ความเร็วในการซ่อม), Lab (คุณภาพการคราฟต์) และ Scanner (ระยะการค้นหา)

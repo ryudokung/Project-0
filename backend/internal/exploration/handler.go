@@ -146,6 +146,7 @@ func (h *Handler) StartExploration(w http.ResponseWriter, r *http.Request) {
 		SubSectorID      uuid.UUID  `json:"sub_sector_id"`
 		PlanetLocationID *uuid.UUID `json:"planet_location_id"`
 		VehicleID        *uuid.UUID `json:"vehicle_id"`
+		BlueprintID      string     `json:"blueprint_id"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -158,7 +159,15 @@ func (h *Handler) StartExploration(w http.ResponseWriter, r *http.Request) {
 		vID = *req.VehicleID
 	}
 
-	expedition, err := h.service.StartExploration(r.Context(), userID, req.SubSectorID, req.PlanetLocationID, vID)
+	var expedition *Expedition
+	var err error
+
+	if req.BlueprintID != "" {
+		expedition, err = h.service.CreateHandcraftedExpedition(r.Context(), userID, req.BlueprintID, &vID)
+	} else {
+		expedition, err = h.service.StartExploration(r.Context(), userID, req.SubSectorID, req.PlanetLocationID, vID)
+	}
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -116,14 +116,18 @@ func (h *Handler) SimulateAttack(w http.ResponseWriter, r *http.Request) {
 	attackerStats := h.service.MapVehicleToUnitStats(attacker, attackerItems, attackerPilot)
 	defenderStats := h.service.MapVehicleToUnitStats(defender, defenderItems, defenderPilot)
 
-	// 5. Execute Attack
-	result := h.service.ExecuteAttack(attackerStats, defenderStats, DamageType(req.DamageType))
-
-	// 6. Persist State (Anti-Cheat)
-	newHP := defender.Stats.HP - result.FinalDamage
-	if newHP < 0 {
-		newHP = 0
+	// 5. Create Combat Session
+	session := &CombatSession{
+		PlayerStats: attackerStats,
+		EnemyStats:  defenderStats,
+		IsScripted:  false, // Standard combat is not scripted
 	}
+
+	// 6. Execute Attack
+	result := h.service.ExecuteAttack(session, DamageType(req.DamageType))
+
+	// 7. Persist State (Anti-Cheat)
+	newHP := session.EnemyStats.HP
 	
 	err = h.vehicleRepo.UpdateHP(r.Context(), defenderUUID, newHP)
 	if err != nil {

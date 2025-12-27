@@ -80,19 +80,27 @@ Skills provide the tactical edge needed to survive high-risk missions. All progr
 - **Stealth Training:** Reduces detection range from enemy drones.
 
 ### 4.2 Neural Resonance (The "Awakening" System)
-Inspired by the "Newtype" concept, this is a latent power that triggers when a **Character's** intent aligns with their Vehicle's core.
+Inspired by the "Newtype" concept, this is a latent power that triggers when a **Character's** intent aligns with their Vehicle's core or when they are pushed to their physical limits.
 
 - **Resonance Potential:** A hidden stat for every **Character**. Some are born with high potential, others develop it through high-stakes survival.
-- **The Trigger (Willpower):** Triggers during "Critical Moments" (e.g., O2 < 5%, Hull Integrity < 10%, or after 5 consecutive High-Risk successes).
-- **Awakened State: "The Ghost Shift":**
-    - **Visual:** The Vehicle's Visual DNA changes in real-time (AI-generated glowing vents, "Ghost" after-images, or shifting armor plates).
-    - **Gameplay:** 
-        - **Omniscience:** All hidden nodes in the sector are temporarily revealed.
+- **The Trigger (Active Skill):** An "Ultimate" ability powered by the **Resonance Gauge**.
+- **Awakened State: "Resonance Mode":**
+    - **Visual:** The Pilot/Vehicle's Visual DNA changes in real-time (AI-generated glowing vents, "Ghost" after-images, or shifting armor plates).
+    - **Gameplay (Human Mode):** 
+        - **Scale Bypass:** Allows a Human to deal full damage to Vehicles.
+        - **Agility Overdrive:** +50% Evasion and +30% Speed.
+    - **Gameplay (Vehicle Mode):**
+        - **Sync Bonus:** +30% ECP and +20% Accuracy.
         - **Zero-Latency:** The next 3 clicks cost 0 O2/Fuel.
-        - **Perfect Strike:** The next attack ignores all enemy defense.
 - **The Cost:** After the state ends, the Pilot suffers "Neural Strain," requiring a rest period in the Bastion.
+- **Consumables:** **Resonance Stimulants** can be used to instantly refill the Resonance Gauge or force an Awakening.
 
-### 4.3 Vehicle Skills (Active/Part-Based)
+### 4.3 Boss Phase Transitions (Multi-Stage Combat)
+High-tier enemies utilize the "Ejection Mechanic" to remain a threat even after their primary vehicle is destroyed.
+1. **Phase 1 (The Mech):** Standard vehicle-scale combat.
+2. **Phase 2 (The Pilot):** Upon Mech destruction, the **Resonant Pilot** ejects. They are smaller (harder to hit) and utilize **Resonance Mode** to fight the player's vehicle on foot.
+
+### 4.4 Vehicle Skills (Active/Part-Based)
 *Linked to specific Modular Parts (Weapons/Engines).*
 - **Overdrive (Engine):** Increases Speed by 50% for 3 clicks (consumes extra Fuel).
 - **Shield Pulse (Chassis):** Negates the next instance of damage.

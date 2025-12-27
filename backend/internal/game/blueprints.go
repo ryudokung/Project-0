@@ -8,12 +8,19 @@ import (
 )
 
 type NodeBlueprint struct {
-	ID          string            `yaml:"id"`
-	Name        string            `yaml:"name"`
-	Description string            `yaml:"description"`
-	Type        string            `yaml:"type"`
-	MinCP       int               `yaml:"min_cp"`
-	Choices     []ChoiceBlueprint `yaml:"choices"`
+	ID            string            `yaml:"id"`
+	Name          string            `yaml:"name"`
+	Description   string            `yaml:"description"`
+	Type          string            `yaml:"type"`
+	Zone          string            `yaml:"zone"`
+	MinCP         int               `yaml:"min_cp"`
+	RequiredTags  []string          `yaml:"required_tags"`
+	ForbiddenTags []string          `yaml:"forbidden_tags"`
+	ResourceCosts struct {
+		Fuel float64 `yaml:"fuel"`
+		O2   float64 `yaml:"o2"`
+	} `yaml:"resource_costs"`
+	Choices []ChoiceBlueprint `yaml:"choices"`
 }
 
 type ChoiceBlueprint struct {
@@ -40,16 +47,64 @@ type EnemyBlueprint struct {
 	} `yaml:"stats"`
 }
 
+type ExpeditionBlueprint struct {
+	ID          string `yaml:"id"`
+	Title       string `yaml:"title"`
+	Description string `yaml:"description"`
+	Type        string `yaml:"type"`
+	Difficulty  int    `yaml:"difficulty"`
+	MinLevel    int    `yaml:"min_level"`
+	Nodes       []struct {
+		ID                     string        `yaml:"id"`
+		Type                   string        `yaml:"type"`
+		Title                  string        `yaml:"title"`
+		Description            string        `yaml:"description"`
+		ResourceType           string        `yaml:"resource_type,omitempty"`
+		Amount                 int           `yaml:"amount,omitempty"`
+		EnemyBlueprint         string        `yaml:"enemy_blueprint,omitempty"`
+		EnemyCount             int           `yaml:"enemy_count,omitempty"`
+		IsScripted             bool          `yaml:"is_scripted,omitempty"`
+		ScriptEvents           []ScriptEvent `yaml:"script_events,omitempty"`
+		NextNodes              []string      `yaml:"next_nodes,omitempty"`
+		IsEnd                  bool          `yaml:"is_end,omitempty"`
+		EnvironmentDescription string        `yaml:"environment_description,omitempty"`
+	} `yaml:"nodes"`
+}
+
 type BlueprintRegistry struct {
-	Nodes   map[string]NodeBlueprint
-	Enemies map[string]EnemyBlueprint
+	Nodes       map[string]NodeBlueprint
+	Enemies     map[string]EnemyBlueprint
+	Expeditions map[string]ExpeditionBlueprint
 }
 
 func NewBlueprintRegistry() *BlueprintRegistry {
 	return &BlueprintRegistry{
-		Nodes:   make(map[string]NodeBlueprint),
-		Enemies: make(map[string]EnemyBlueprint),
+		Nodes:       make(map[string]NodeBlueprint),
+		Enemies:     make(map[string]EnemyBlueprint),
+		Expeditions: make(map[string]ExpeditionBlueprint),
 	}
+}
+
+func (r *BlueprintRegistry) LoadExpeditions(path string) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	var config struct {
+		Expeditions []ExpeditionBlueprint `yaml:"expeditions"`
+	}
+
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return err
+	}
+
+	for _, exp := range config.Expeditions {
+		r.Expeditions[exp.ID] = exp
+	}
+
+	fmt.Printf("Loaded %d expedition blueprints from %s\n", len(config.Expeditions), path)
+	return nil
 }
 
 func (r *BlueprintRegistry) LoadNodes(path string) error {

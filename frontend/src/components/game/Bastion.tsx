@@ -18,6 +18,7 @@ export default function Bastion({ onDeploy, onGacha, onResearch }: BastionProps)
   const { user: backendUser } = useAuthSync();
   const [bastionState, setBastionState] = useState<BastionState>(bastionSystem.getState());
   const [showInventory, setShowInventory] = useState(false);
+  const [showHangar, setShowHangar] = useState(false);
 
   useEffect(() => {
     const unsubscribe = gameEvents.on(GAME_EVENTS.BASTION_UPDATED, (newState: BastionState) => {
@@ -66,7 +67,7 @@ export default function Bastion({ onDeploy, onGacha, onResearch }: BastionProps)
                   {backendUser?.active_character?.gender || 'UNKNOWN'}
                 </span>
                 <span className="text-[10px] font-mono text-pink-400 bg-pink-400/10 border border-pink-400/20 px-1.5 py-0.5 rounded">
-                  RANK {bastionState.pilotStats?.rank || 1}
+                  SYNC {bastionState.pilotStats?.sync_level || 1}
                 </span>
                 <span className="text-[10px] font-mono text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-1.5 py-0.5 rounded">
                   SCRAP: {bastionState.pilotStats?.scrap_metal || 0}
@@ -111,25 +112,6 @@ export default function Bastion({ onDeploy, onGacha, onResearch }: BastionProps)
         </div>
         {currentVehicle && (
           <div className="mt-4 flex flex-col gap-2">
-            {/* Vehicle Selector */}
-            {vehicles.length > 1 && (
-              <div className="flex gap-1 mb-2 overflow-x-auto pb-2 max-w-[300px]">
-                {vehicles.map(v => (
-                  <button
-                    key={v.id}
-                    onClick={() => bastionSystem.selectVehicle(v.id)}
-                    className={`px-2 py-1 text-[8px] font-bold uppercase border transition-all whitespace-nowrap ${
-                      v.id === currentVehicle.id 
-                        ? 'bg-white text-black border-white' 
-                        : 'bg-black/40 text-zinc-500 border-zinc-800 hover:border-zinc-600'
-                    }`}
-                  >
-                    {v.class}
-                  </button>
-                ))}
-              </div>
-            )}
-            
             <div className="flex gap-2">
               {currentVehicle.is_void_touched && (
                 <span key="void-touched" className="px-2 py-1 bg-purple-900/50 border border-purple-500 text-purple-300 text-[10px] font-bold uppercase tracking-widest">
@@ -144,6 +126,13 @@ export default function Bastion({ onDeploy, onGacha, onResearch }: BastionProps)
               </span>
             </div>
             
+            <div className="bg-black/60 border-l-4 border-white p-3 backdrop-blur-sm">
+              <div className="text-[10px] text-zinc-500 uppercase tracking-widest">Active Vehicle</div>
+              <div className="text-xl font-black text-white italic tracking-tighter uppercase">
+                {currentVehicle.name || `${currentVehicle.class} ${currentVehicle.vehicle_type}`}
+              </div>
+            </div>
+            
             {/* CP Display */}
             <div className="bg-black/60 border-l-4 border-pink-500 p-3 backdrop-blur-sm">
               <div className="text-[10px] text-zinc-500 uppercase tracking-widest">Combat Power</div>
@@ -155,17 +144,84 @@ export default function Bastion({ onDeploy, onGacha, onResearch }: BastionProps)
         )}
       </div>
 
-      {/* Inventory Toggle Button */}
-      <div className="absolute top-8 right-8 z-10">
+      {/* Navigation Buttons */}
+      <div className="absolute top-8 right-8 z-10 flex gap-2">
         <button 
-          onClick={() => setShowInventory(!showInventory)}
+          onClick={() => {
+            setShowHangar(!showHangar);
+            setShowInventory(false);
+          }}
+          className={`p-4 border transition-all ${showHangar ? 'bg-white text-black border-white' : 'bg-black/40 text-white border-zinc-700 hover:border-white'}`}
+        >
+          <div className="text-[10px] font-bold uppercase tracking-widest">Docking Hub</div>
+        </button>
+        <button 
+          onClick={() => {
+            setShowInventory(!showInventory);
+            setShowHangar(false);
+          }}
           className={`p-4 border transition-all ${showInventory ? 'bg-white text-black border-white' : 'bg-black/40 text-white border-zinc-700 hover:border-white'}`}
         >
-          <div className="text-[10px] font-bold uppercase tracking-widest">Vehicle Systems</div>
+          <div className="text-[10px] font-bold uppercase tracking-widest">Neural Interface</div>
         </button>
       </div>
 
-      {/* Inventory Overlay */}
+      {/* Docking Hub Overlay (Vehicle Selection) */}
+      <AnimatePresence>
+        {showHangar && (
+          <motion.div 
+            initial={{ x: 400, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 400, opacity: 0 }}
+            className="absolute top-0 right-0 w-[400px] h-full bg-zinc-950/90 border-l border-zinc-800 backdrop-blur-xl z-20 p-8 overflow-y-auto"
+          >
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-xl font-black italic text-white uppercase tracking-tighter">Docking Hub</h3>
+              <button onClick={() => setShowHangar(false)} className="text-zinc-500 hover:text-white">CLOSE</button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">Active Bays</div>
+              {vehicles.map((v, index) => (
+                <button
+                  key={v.id}
+                  onClick={() => bastionSystem.selectVehicle(v.id)}
+                  className={`w-full p-4 border transition-all text-left group ${
+                    v.id === currentVehicle?.id 
+                      ? 'bg-white/10 border-white' 
+                      : 'bg-black/40 border-zinc-800 hover:border-zinc-600'
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="text-[8px] text-zinc-500 uppercase font-mono mb-1">BAY 0{index + 1}</div>
+                      <div className={`text-lg font-black italic uppercase tracking-tighter ${v.id === currentVehicle?.id ? 'text-white' : 'text-zinc-400'}`}>
+                        {v.name || `${v.class} ${v.vehicle_type}`}
+                      </div>
+                      <div className="text-[10px] text-zinc-500 mt-1">
+                        {v.class} {v.vehicle_type} // {v.rarity} // TIER {v.tier || 1}
+                      </div>
+                    </div>
+                    {v.id === currentVehicle?.id && (
+                      <div className="bg-white text-black text-[8px] font-bold px-2 py-0.5 uppercase">Active</div>
+                    )}
+                  </div>
+                </button>
+              ))}
+              
+              {/* Empty Bays for visual effect */}
+              {[...Array(Math.max(0, 3 - vehicles.length))].map((_, i) => (
+                <div key={`empty-${i}`} className="w-full p-4 border border-dashed border-zinc-900 bg-black/10 opacity-30">
+                  <div className="text-[8px] text-zinc-700 uppercase font-mono mb-1">BAY 0{vehicles.length + i + 1}</div>
+                  <div className="text-lg font-black italic uppercase tracking-tighter text-zinc-800">Empty Slot</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Neural Interface Overlay (Inventory) */}
       <AnimatePresence>
         {showInventory && (
           <motion.div 
@@ -175,7 +231,7 @@ export default function Bastion({ onDeploy, onGacha, onResearch }: BastionProps)
             className="absolute top-0 right-0 w-[400px] h-full bg-zinc-950/90 border-l border-zinc-800 backdrop-blur-xl z-20 p-8 overflow-y-auto"
           >
             <div className="flex justify-between items-center mb-8">
-              <h3 className="text-xl font-black italic text-white uppercase tracking-tighter">System Inventory</h3>
+              <h3 className="text-xl font-black italic text-white uppercase tracking-tighter">Neural Interface</h3>
               <button onClick={() => setShowInventory(false)} className="text-zinc-500 hover:text-white">CLOSE</button>
             </div>
 

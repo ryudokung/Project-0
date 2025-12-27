@@ -4,6 +4,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 export interface Vehicle {
   id: string;
+  name: string;
   class: string;
   vehicle_type: string;
   stats: {

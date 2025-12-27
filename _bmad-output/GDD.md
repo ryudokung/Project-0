@@ -75,14 +75,15 @@ The game utilizes a **Decoupled Systems Architecture** (EventBus + Singletons) t
 
 ## 4. Progression Systems
 
-### 4.1 Pilot Rank & Mastery
+### 4.1 Pilot Sync Rate & Mastery
 - **XP:** Earned from successful missions and star discoveries.
+- **Sync Rate:** A pilot-bound multiplier for Effective Combat Power (ECP).
 - **Licenses:** Unlock higher-tier vehicles (Motherships, Vehicles).
 - **Skill Tree:** Focus on Agility, O2 Efficiency, or Weapon Mastery.
 
-### 4.2 Vehicle Sync Rate
+### 4.2 Mech Affinity
 - Rewards players for sticking with their favorite gear.
-- High Sync = Passive buffs (Accuracy, Evasion).
+- High Affinity = Passive buffs (Accuracy, Evasion).
 
 ### 4.3 The Bastion Tech Tree
 - Upgrade Preparation Area (Repair speed), Lab (Crafting quality), and Scanner (Range).

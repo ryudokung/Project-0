@@ -39,6 +39,9 @@ func main() {
 	if err := blueprints.LoadEnemies("blueprints/enemies.yaml"); err != nil {
 		log.Printf("Warning: Failed to load enemy blueprints: %v", err)
 	}
+	if err := blueprints.LoadExpeditions("blueprints/expeditions.yaml"); err != nil {
+		log.Printf("Warning: Failed to load expedition blueprints: %v", err)
+	}
 
 	// Initialize Game/Pilot Module
 	gameRepo := game.NewRepository(db)

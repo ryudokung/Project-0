@@ -87,7 +87,7 @@ The project aligns with the goal of creating a long-term, sustainable ecosystem 
 - **Seasonal Temporal Wormholes:** Limited-time exploration zones requiring specific gear compatibility, offering exclusive "Lost Tech" and "Rare DNA Fragments."
 - **Complex Combat Engine:** Stat-based battle system integrating vehicle attributes (Bastion, Vehicle, Pilot) and AI-generated item "Options."
     - **Combat Power (CP):** A weighted sum of stats: `(ATK*2) + (DEF*2) + (HP/10)`.
-    - **Effective CP (ECP):** `(Vehicle_CP + Exosuit_CP) * Suitability_Mod * Resonance_Sync * (1 - Fatigue_Penalty) * Synergy_Mod`.
+    - **Effective CP (ECP):** `(Vehicle_CP + Exosuit_CP) * Sync_Rate * Suitability_Mod * (1 - Fatigue_Penalty) * Synergy_Mod`.
     - **Real Combat Integration:** Transitioning from placeholder combat to a functional system where encounters are linked to real backend data.
     - **Backend Enemy Seeding:** A system to generate and persist specific NPC enemies (e.g., Striker, Guardian, Scout) within combat encounters, allowing for persistent enemy stats and unique loot tables.
 - **Monetization Engine:** Season Pass, Void Signals, and Minting fees for "Void-Touched" (Premium) items.
@@ -240,7 +240,7 @@ Project-0 operates as a "Closed-Loop Premium Economy." USDT flows into the syste
 - **FR4:** ระบบสามารถผูกบัญชี Discord เข้ากับบัญชีผู้เล่นเพื่อรับการแจ้งเตือนได้
 - **FR41:** หลังจาก Login ครั้งแรก ผู้เล่นต้องสร้างตัวละคร (Character Creation) โดยกำหนดชื่อตัวละคร (แยกจาก Username), เพศ, และรูปลักษณ์ (หน้าตา, ทรงผม)
 - **FR42:** ระบบตัวละครต้องรองรับการมีหลายตัวละครต่อหนึ่งบัญชี (Character Instances) เพื่อรองรับการสลับตัวละครหลักจากระบบกาชาในอนาคต
-- **FR43:** หน้า Hangar ต้องแสดง **Pilot ID Badge** ที่ระบุรูป Avatar, ชื่อตัวละคร, และ Rank/Level ของตัวละครที่ใช้งานอยู่
+- **FR43:** หน้า Hangar ต้องแสดง **Pilot ID Badge** ที่ระบุรูป Avatar, ชื่อตัวละคร, และ Sync Rate/Level ของตัวละครที่ใช้งานอยู่
 
 ### 9.2 Exploration & Discovery
 - **FR5:** ระบบ Multi-Stage Exploration (Mothership -> Mech -> Pilot EVA) ที่บังคับใช้ประเภท Vehicle และอุปกรณ์ต่างกันตามระยะทางและสภาพแวดล้อม
@@ -303,19 +303,19 @@ Project-0 operates as a "Closed-Loop Premium Economy." USDT flows into the syste
 
 เพื่อให้ผู้เล่นรู้สึกถึงความ "เก่งขึ้น" และมีเป้าหมายในระยะยาว Project-0 จึงมีระบบวัดความก้าวหน้าหลายระดับ:
 
-### 10.1 Pilot Rank & Mastery (XP)
+### 10.1 Pilot Sync Rate & Mastery (XP)
 - **Experience Points (XP):** ได้รับจากการทำภารกิจสำเร็จ, การ Salvage ซากหุ่น, และการค้นพบดวงดาวใหม่ๆ
-- **Pilot Rank:** การเลื่อนระดับจะปลดล็อก "Advanced Licenses" เพื่อให้สามารถขับ Mech, Aircraft หรือ Mothership ในระดับที่สูงขึ้นได้
-- **Skill Points:** ทุกครั้งที่ Rank อัป จะได้รับแต้มเพื่ออัปเกรดความสามารถเฉพาะตัวของนักบิน (เช่น Agility, O2 Efficiency, Melee/Sidearm Mastery)
+- **Sync Rate:** การเลื่อนระดับจะปลดล็อก "Advanced Licenses" เพื่อให้สามารถขับ Mech, Aircraft หรือ Mothership ในระดับที่สูงขึ้นได้ และเป็นตัวคูณหลักของ Effective Combat Power (ECP)
+- **Skill Points:** ทุกครั้งที่ Sync Rate อัป จะได้รับแต้มเพื่ออัปเกรดความสามารถเฉพาะตัวของนักบิน (เช่น Agility, O2 Efficiency, Melee/Sidearm Mastery)
 
 ### 10.2 Modular Gear & "Options" (The Loot Loop)
 - **AI-Generated Stats:** ชิ้นส่วน NFT แต่ละชิ้น (Arm, Chassis, Weapon) จะมีค่าพลังสุ่ม (Options) ที่สร้างโดย AI (เช่น +5% Kinetic Resistance, +10% Scanner Range)
 - **Rarity Tiers:** แบ่งระดับความหายากเป็น Standard, Rare, Epic, Legendary และ Seasonal
 - **Visual DNA:** ไอเทมระดับสูงจะมี Visual Traits ที่ซับซ้อนและสวยงามกว่า ซึ่งแสดงถึงความเก่งกาจที่มองเห็นได้ชัดเจนในสังคม
 
-### 10.3 Mech Sync Rate (Synergy)
-- **Familiarity:** การใช้ Mech หรือชิ้นส่วนเดิมซ้ำๆ จะเพิ่มค่า "Sync Rate"
-- **Bonuses:** ค่า Sync Rate ที่สูงจะมอบ Buff พิเศษ เช่น +Evasion, +Accuracy หรือลดการใช้ Energy ซึ่งเป็นการตอบแทนผู้เล่นที่ดูแลและซ่อมแซมอุปกรณ์คู่ใจแทนการเปลี่ยนใหม่ตลอดเวลา
+### 10.3 Mech Affinity (Synergy)
+- **Familiarity:** การใช้ Mech หรือชิ้นส่วนเดิมซ้ำๆ จะเพิ่มค่า "Affinity"
+- **Bonuses:** ค่า Affinity ที่สูงจะมอบ Buff พิเศษ เช่น +Evasion, +Accuracy หรือลดการใช้ Energy ซึ่งเป็นการตอบแทนผู้เล่นที่ดูแลและซ่อมแซมอุปกรณ์คู่ใจแทนการเปลี่ยนใหม่ตลอดเวลา
 
 ### 10.4 Mothership Engineering Matrix (Tech Web)
 แทนที่ระบบ Tech Tree แบบเดิมด้วย **Engineering Matrix** ที่แบ่งเป็น 2 สายหลัก (Dual-Core Paths) ซึ่งผู้เล่นต้องเลือกทิศทางการพัฒนา:

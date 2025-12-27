@@ -34,3 +34,39 @@ enemies:
       attack: 12
       defense: 3
       speed: 100
+
+  - id: "e0000000-0000-0000-0000-000000000004"
+    name: "Syndicate Grunt"
+    type: "HUMAN"
+    class: "INFANTRY"
+    rarity: "COMMON"
+    cr: 50
+    stats:
+      hp: 30
+      attack: 5
+      defense: 2
+      speed: 40
+
+  - id: "e0000000-0000-0000-0000-000000000005"
+    name: "Security Drone"
+    type: "ROBOT"
+    class: "SCOUT"
+    rarity: "COMMON"
+    cr: 80
+    stats:
+      hp: 40
+      attack: 8
+      defense: 5
+      speed: 70
+
+  - id: "e0000000-0000-0000-0000-000000000006"
+    name: "The Gatekeeper"
+    type: "BOSS"
+    class: "ELITE"
+    rarity: "LEGENDARY"
+    cr: 1000
+    stats:
+      hp: 1500
+      attack: 50
+      defense: 40
+      speed: 80

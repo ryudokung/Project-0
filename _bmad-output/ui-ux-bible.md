@@ -72,7 +72,7 @@ The entire game experience is contained within a single route (`/`), managed by 
 
 ### 5.3 The Pilot ID Badge (Hangar UI)
 - **Visual:** A glassmorphic "ID Card" displayed in the Hangar.
-- **Details:** Shows Character Name, Rank, Gender, and a portrait based on the selected appearance.
+- **Details:** Shows Character Name, Sync Rate, Gender, and a portrait based on the selected appearance.
 - **Functionality:** Serves as the primary entry point for Character Stats and Skill progression.
 
 ## 6. Rarity & Tier Visuals (The "Flex" Hierarchy)

@@ -3,7 +3,11 @@ nodes:
     name: "Quiet Sector"
     description: "A relatively calm area of space with minimal interference."
     type: "STANDARD"
+    zone: "ORBITAL"
     min_cp: 50
+    resource_costs:
+      fuel: 5.0
+      o2: 2.0
     choices:
       - label: "Standard Scan"
         description: "Perform a routine scan of the area."
@@ -20,7 +24,12 @@ nodes:
     name: "Abandoned Mining Outpost"
     description: "A cluster of rusted drills and storage containers."
     type: "RESOURCE"
+    zone: "SURFACE"
     min_cp: 100
+    resource_costs:
+      fuel: 8.0
+      o2: 5.0
+    required_tags: ["LANDING_GEAR"]
     choices:
       - label: "Deep Drill"
         description: "Extract rare minerals from the core."
@@ -37,7 +46,11 @@ nodes:
     name: "Syndicate Ambush Point"
     description: "Hostile signatures detected behind the asteroid belt."
     type: "COMBAT"
+    zone: "ORBITAL"
     min_cp: 250
+    resource_costs:
+      fuel: 10.0
+      o2: 3.0
     choices:
       - label: "Full Assault"
         description: "Direct confrontation with maximum firepower."
@@ -54,7 +67,12 @@ nodes:
     name: "Shimmering Void Anomaly"
     description: "Space itself seems to be folding here."
     type: "ANOMALY"
+    zone: "EVA"
     min_cp: 300
+    resource_costs:
+      fuel: 2.0
+      o2: 15.0
+    forbidden_tags: ["HEAVY"]
     choices:
       - label: "Scientific Study"
         description: "Analyze the anomaly for data."

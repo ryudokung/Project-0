@@ -77,6 +77,7 @@ type StrategicChoice struct {
 type Node struct {
 	ID                     uuid.UUID         `json:"id"`
 	ExpeditionID           uuid.UUID         `json:"expedition_id"`
+	BlueprintID            string            `json:"blueprint_id"`
 	Name                   string            `json:"name"`
 	Type                   NodeType          `json:"type"`
 	Zone                   ZoneType          `json:"zone"`
@@ -88,6 +89,12 @@ type Node struct {
 	IsResolved             bool              `json:"is_resolved"`
 	Terrain                TerrainType       `json:"terrain"`
 	DetectionThreshold     int               `json:"detection_threshold"`
+	NextNodes              []string          `json:"next_nodes,omitempty"`
+	IsScripted             bool              `json:"is_scripted"`
+	ScriptEvents           []game.ScriptEvent `json:"script_events,omitempty"`
+	IsEnd                  bool              `json:"is_end"`
+	EnemyBlueprint         string            `json:"enemy_blueprint,omitempty"`
+	EnemyCount             int               `json:"enemy_count,omitempty"`
 }
 
 type Session struct {
@@ -278,6 +285,56 @@ func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSec
 	return expedition, nil
 }
 
+func (s *Service) CreateHandcraftedExpedition(ctx context.Context, userID uuid.UUID, blueprintID string, vehicleID *uuid.UUID) (*Expedition, error) {
+	blueprint, ok := s.blueprints.Expeditions[blueprintID]
+	if !ok {
+		return nil, fmt.Errorf("expedition blueprint %s not found", blueprintID)
+	}
+
+	// 1. Create Expedition
+	expedition := &Expedition{
+		ID:          uuid.New(),
+		UserID:      userID,
+		VehicleID:   vehicleID,
+		Title:       blueprint.Title,
+		Description: blueprint.Description,
+		Goal:        "Complete the mission objectives.",
+		Status:      "ACTIVE",
+	}
+
+	if err := s.repo.CreateExpedition(expedition); err != nil {
+		return nil, err
+	}
+
+	// 2. Create Nodes from Blueprint
+	var nodes []Node
+	for i, nb := range blueprint.Nodes {
+		node := Node{
+			ID:                     uuid.New(),
+			ExpeditionID:           expedition.ID,
+			BlueprintID:            nb.ID,
+			Name:                   nb.Title,
+			Type:                   NodeType(nb.Type),
+			EnvironmentDescription: nb.Description,
+			PositionIndex:          i,
+			IsResolved:             false,
+			NextNodes:              nb.NextNodes,
+			IsScripted:             nb.IsScripted,
+			ScriptEvents:           nb.ScriptEvents,
+			IsEnd:                  nb.IsEnd,
+			EnemyBlueprint:         nb.EnemyBlueprint,
+			EnemyCount:             nb.EnemyCount,
+		}
+		nodes = append(nodes, node)
+	}
+
+	if err := s.repo.CreateNodes(nodes); err != nil {
+		return nil, err
+	}
+
+	return expedition, nil
+}
+
 func (s *Service) GenerateTimeline(expeditionID uuid.UUID, length int, radarLevel int) []Node {
 	nodes := make([]Node, length)
 	types := []NodeType{NodeStandard, NodeResource, NodeCombat, NodeAnomaly, NodeNarrative}
@@ -325,12 +382,18 @@ func (s *Service) GenerateTimeline(expeditionID uuid.UUID, length int, radarLeve
 		if !found {
 			// Fallback
 			blueprint = game.NodeBlueprint{
+				ID:          "UNKNOWN",
 				Name:        "Unknown Sector",
 				Description: "A mysterious area of space.",
 				Choices: []game.ChoiceBlueprint{
 					{Label: "Proceed", Description: "Move forward carefully.", SuccessChance: 1.0},
 				},
 			}
+		}
+
+		// Use zone from blueprint if available
+		if blueprint.Zone != "" {
+			zone = ZoneType(blueprint.Zone)
 		}
 
 		// Map blueprint choices to StrategicChoice
@@ -353,6 +416,7 @@ func (s *Service) GenerateTimeline(expeditionID uuid.UUID, length int, radarLeve
 		nodes[i] = Node{
 			ID:                     uuid.New(),
 			ExpeditionID:           expeditionID,
+			BlueprintID:            blueprint.ID,
 			Name:                   blueprint.Name,
 			Type:                   nodeType,
 			Zone:                   zone,
@@ -577,13 +641,76 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 		return nil, err
 	}
 
-	// 3.5 Zone Requirements Check (Option 2B: Warning/Penalty Logic)
-	requirementPenalty := 0.0
 	vehicleID := uuid.Nil
 	if expedition.VehicleID != nil {
 		vehicleID = *expedition.VehicleID
 	}
 
+	// 3.1 Fetch Blueprint & Pilot Stats
+	blueprint, hasBlueprint := s.blueprints.Nodes[node.BlueprintID]
+	stats, err := s.gameRepo.GetActivePilotStats(expedition.UserID)
+	if err != nil || stats == nil {
+		return nil, fmt.Errorf("failed to fetch pilot stats")
+	}
+
+	// 3.2 Resource Check (Pre-resolution)
+	fuelCost := 5.0
+	o2Cost := 3.0
+	if hasBlueprint {
+		fuelCost = blueprint.ResourceCosts.Fuel
+		o2Cost = blueprint.ResourceCosts.O2
+	}
+
+	if stats.CurrentFuel < fuelCost || stats.CurrentO2 < o2Cost {
+		// Trigger Emergency Retrieval
+		stats.Stress = 100
+		if stats.Metadata == nil {
+			stats.Metadata = make(map[string]interface{})
+		}
+		stats.Metadata["emergency_retrieval"] = true
+		_ = s.gameRepo.UpdatePilotStats(stats)
+		
+		// Mark expedition as failed/ended
+		expedition.Status = "FAILED"
+		// In a real system, we'd update the expedition status in DB
+		
+		return nil, fmt.Errorf("EMERGENCY RETRIEVAL: Insufficient resources (Fuel: %.1f/%.1f, O2: %.1f/%.1f)", 
+			stats.CurrentFuel, fuelCost, stats.CurrentO2, o2Cost)
+	}
+
+	// 3.3 Suitability Check (Tags)
+	requirementPenalty := 0.0
+	if hasBlueprint && vehicleID != uuid.Nil {
+		v, _ := s.vehicleUseCase.GetVehicleByID(ctx, vehicleID)
+		if v != nil {
+			// Check Required Tags
+			for _, reqTag := range blueprint.RequiredTags {
+				found := false
+				for _, vTag := range v.SuitabilityTags {
+					if vTag == reqTag {
+						found = true
+						break
+					}
+				}
+				if !found {
+					requirementPenalty -= 0.3
+					fmt.Printf("WARNING: Missing required tag %s. Applying penalty.\n", reqTag)
+				}
+			}
+			// Check Forbidden Tags
+			for _, forbTag := range blueprint.ForbiddenTags {
+				for _, vTag := range v.SuitabilityTags {
+					if vTag == forbTag {
+						requirementPenalty -= 0.5
+						fmt.Printf("WARNING: Forbidden tag %s detected. Applying heavy penalty.\n", forbTag)
+						break
+					}
+				}
+			}
+		}
+	}
+
+	// 3.5 Zone Requirements Check (Legacy/Fallback)
 	if node.Zone == ZoneEVA && vehicleID != uuid.Nil {
 		// Penalty for bringing a heavy vehicle into tight EVA spaces
 		requirementPenalty -= 0.5
@@ -667,7 +794,7 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 	success := rand.Float64() < finalSuccessChance
 
 	// 5. Apply Consequences
-	stats, err := s.gameRepo.GetActivePilotStats(expedition.UserID)
+	stats, err = s.gameRepo.GetActivePilotStats(expedition.UserID)
 	if err == nil && stats != nil {
 		// Get Bastion Module Levels (Migrated to Table)
 		labLevel := 1.0
@@ -710,26 +837,16 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 			stats.Stress = 100
 		}
 
-		// Fuel Consumption (Warp Drive reduces this)
-		fuelCost := 5.0 / (1.0 + (warpLevel-1)*0.1) // 10% reduction per level
-		if node.Zone == ZoneOrbital {
-			fuelCost *= 1.5 // Orbital travel costs more fuel
-		}
-		stats.CurrentFuel -= fuelCost
+		actualFuelCost := fuelCost / (1.0 + (warpLevel-1)*0.1)
+		stats.CurrentFuel -= actualFuelCost
 		if stats.CurrentFuel < 0 {
 			stats.CurrentFuel = 0
 		}
 
-		// O2 Consumption (Surface and EVA nodes)
-		if node.Zone == ZoneSurface || node.Zone == ZoneEVA {
-			o2Cost := 3.0
-			if node.Zone == ZoneEVA {
-				o2Cost = 8.0 // EVA is much more taxing
-			}
-			stats.CurrentO2 -= o2Cost
-			if stats.CurrentO2 < 0 {
-				stats.CurrentO2 = 0
-			}
+		// O2 Consumption
+		stats.CurrentO2 -= o2Cost
+		if stats.CurrentO2 < 0 {
+			stats.CurrentO2 = 0
 		}
 
 		// Clear Active Skill Flags (Overclock)
@@ -749,19 +866,15 @@ func (s *Service) ResolveNodeChoice(ctx context.Context, nodeID uuid.UUID, choic
 		isEmergency := false
 		if stats.CurrentFuel <= 0 || stats.CurrentO2 <= 0 {
 			isEmergency = true
-			stats.Stress += 50
-			if stats.Stress > 100 {
-				stats.Stress = 100
-			}
+			stats.Stress = 100
 			if stats.Metadata == nil {
 				stats.Metadata = make(map[string]interface{})
 			}
-			stats.Metadata["critical_fatigue"] = true
-			// In a full implementation, this would trigger an immediate end to the expedition.
+			stats.Metadata["emergency_retrieval"] = true
+			fmt.Printf("CRITICAL: Resources exhausted. Emergency Retrieval initiated.\n")
 		}
 
 		if success {
-			// Apply Rewards (Lab increases these)
 			rewardMod := 1.0 + (labLevel-1)*0.1 // 10% bonus per level
 			xpMod := 1.0 + (labLevel-1)*0.15    // 15% bonus per level
 
@@ -961,16 +1074,30 @@ func (s *Service) GenerateNewEncounter(ctx context.Context, expeditionID uuid.UU
 	prompt := s.GenerateVisualPrompt(item, &targetNode)
 
 	var enemyID *uuid.UUID
-	if encounterType == NodeCombat {
-		var enemyIDs []string
-		for id := range s.blueprints.Enemies {
-			enemyIDs = append(enemyIDs, id)
+	if encounterType == NodeCombat || encounterType == "boss" {
+		if targetNode.EnemyBlueprint != "" {
+			// Find enemy by name in blueprints
+			for id, b := range s.blueprints.Enemies {
+				if b.Name == targetNode.EnemyBlueprint || id == targetNode.EnemyBlueprint {
+					uid := uuid.MustParse(id)
+					enemyID = &uid
+					break
+				}
+			}
 		}
-		
-		if len(enemyIDs) > 0 {
-			selected := enemyIDs[rand.Intn(len(enemyIDs))]
-			uid := uuid.MustParse(selected)
-			enemyID = &uid
+
+		// Fallback to random enemy if not found or not specified
+		if enemyID == nil {
+			var enemyIDs []string
+			for id := range s.blueprints.Enemies {
+				enemyIDs = append(enemyIDs, id)
+			}
+			
+			if len(enemyIDs) > 0 {
+				selected := enemyIDs[rand.Intn(len(enemyIDs))]
+				uid := uuid.MustParse(selected)
+				enemyID = &uid
+			}
 		}
 	}
 

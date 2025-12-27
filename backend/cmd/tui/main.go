@@ -136,12 +136,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) handleAttack(dmgType combat.DamageType) (model, tea.Cmd) {
 	// Attacker hits Defender
-	res := m.combatService.ExecuteAttack(m.aStats, m.dStats, dmgType)
+	session := &combat.CombatSession{
+		PlayerStats: m.aStats,
+		EnemyStats:  m.dStats,
+	}
+	res := m.combatService.ExecuteAttack(session, dmgType)
+	m.aStats = session.PlayerStats
+	m.dStats = session.EnemyStats
+
 	logMsg := fmt.Sprintf("Attacker used %s: ", dmgType)
 	if res.IsMiss {
 		logMsg += "MISS!"
 	} else {
-		m.dStats.HP -= res.FinalDamage
 		logMsg += fmt.Sprintf("HIT for %d damage!", res.FinalDamage)
 		if res.IsCritical {
 			logMsg += " CRITICAL!"
@@ -151,6 +157,9 @@ func (m model) handleAttack(dmgType combat.DamageType) (model, tea.Cmd) {
 		}
 	}
 	m.logs = append(m.logs, logMsg)
+	for _, l := range session.Log {
+		m.logs = append(m.logs, "[EVENT] "+l)
+	}
 
 	if m.dStats.HP <= 0 {
 		m.dStats.HP = 0
@@ -161,15 +170,24 @@ func (m model) handleAttack(dmgType combat.DamageType) (model, tea.Cmd) {
 	}
 
 	// Counter Attack
-	resC := m.combatService.ExecuteAttack(m.dStats, m.aStats, combat.Kinetic)
+	counterSession := &combat.CombatSession{
+		PlayerStats: m.dStats,
+		EnemyStats:  m.aStats,
+	}
+	resC := m.combatService.ExecuteAttack(counterSession, combat.Kinetic)
+	m.dStats = counterSession.PlayerStats
+	m.aStats = counterSession.EnemyStats
+
 	logMsgC := "Defender Counters: "
 	if resC.IsMiss {
 		logMsgC += "MISS!"
 	} else {
-		m.aStats.HP -= resC.FinalDamage
 		logMsgC += fmt.Sprintf("HIT for %d damage!", resC.FinalDamage)
 	}
 	m.logs = append(m.logs, logMsgC)
+	for _, l := range counterSession.Log {
+		m.logs = append(m.logs, "[EVENT] "+l)
+	}
 
 	if m.aStats.HP <= 0 {
 		m.aStats.HP = 0

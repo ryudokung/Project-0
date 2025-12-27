@@ -31,13 +31,13 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (r *gameRepository) GetPilotStats(charID uuid.UUID) (*PilotStats, error) {
-	query := `SELECT user_id, character_id, equipped_exosuit_id, resonance_level, resonance_exp, stress, xp, rank, current_o2, current_fuel, current_ne, max_ne, expeditions_completed, character_attributes, scrap_metal, research_data, metadata, updated_at FROM pilot_stats WHERE character_id = $1`
+	query := `SELECT user_id, character_id, equipped_exosuit_id, resonance_level, resonance_exp, resonance_gauge, stress, xp, sync_level, current_o2, current_fuel, current_ne, max_ne, expeditions_completed, character_attributes, scrap_metal, research_data, metadata, updated_at FROM pilot_stats WHERE character_id = $1`
 	row := r.db.QueryRow(query, charID)
 
 	var s PilotStats
 	var metadataJSON []byte
 	var attributesJSON []byte
-	err := row.Scan(&s.UserID, &s.CharacterID, &s.EquippedExosuitID, &s.ResonanceLevel, &s.ResonanceExp, &s.Stress, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.CurrentNE, &s.MaxNE, &s.ExpeditionsCompleted, &attributesJSON, &s.ScrapMetal, &s.ResearchData, &metadataJSON, &s.UpdatedAt)
+	err := row.Scan(&s.UserID, &s.CharacterID, &s.EquippedExosuitID, &s.ResonanceLevel, &s.ResonanceExp, &s.ResonanceGauge, &s.Stress, &s.XP, &s.SyncLevel, &s.CurrentO2, &s.CurrentFuel, &s.CurrentNE, &s.MaxNE, &s.ExpeditionsCompleted, &attributesJSON, &s.ScrapMetal, &s.ResearchData, &metadataJSON, &s.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -48,7 +48,7 @@ func (r *gameRepository) GetPilotStats(charID uuid.UUID) (*PilotStats, error) {
 
 func (r *gameRepository) GetActivePilotStats(userID uuid.UUID) (*PilotStats, error) {
 	query := `
-		SELECT ps.user_id, ps.character_id, ps.equipped_exosuit_id, ps.resonance_level, ps.resonance_exp, ps.stress, ps.xp, ps.rank, ps.current_o2, ps.current_fuel, ps.current_ne, ps.max_ne, ps.expeditions_completed, ps.character_attributes, ps.scrap_metal, ps.research_data, ps.metadata, ps.updated_at 
+		SELECT ps.user_id, ps.character_id, ps.equipped_exosuit_id, ps.resonance_level, ps.resonance_exp, ps.resonance_gauge, ps.stress, ps.xp, ps.sync_level, ps.current_o2, ps.current_fuel, ps.current_ne, ps.max_ne, ps.expeditions_completed, ps.character_attributes, ps.scrap_metal, ps.research_data, ps.metadata, ps.updated_at 
 		FROM pilot_stats ps
 		JOIN users u ON ps.character_id = u.active_character_id
 		WHERE u.id = $1
@@ -58,7 +58,7 @@ func (r *gameRepository) GetActivePilotStats(userID uuid.UUID) (*PilotStats, err
 	var s PilotStats
 	var metadataJSON []byte
 	var attributesJSON []byte
-	err := row.Scan(&s.UserID, &s.CharacterID, &s.EquippedExosuitID, &s.ResonanceLevel, &s.ResonanceExp, &s.Stress, &s.XP, &s.Rank, &s.CurrentO2, &s.CurrentFuel, &s.CurrentNE, &s.MaxNE, &s.ExpeditionsCompleted, &attributesJSON, &s.ScrapMetal, &s.ResearchData, &metadataJSON, &s.UpdatedAt)
+	err := row.Scan(&s.UserID, &s.CharacterID, &s.EquippedExosuitID, &s.ResonanceLevel, &s.ResonanceExp, &s.ResonanceGauge, &s.Stress, &s.XP, &s.SyncLevel, &s.CurrentO2, &s.CurrentFuel, &s.CurrentNE, &s.MaxNE, &s.ExpeditionsCompleted, &attributesJSON, &s.ScrapMetal, &s.ResearchData, &metadataJSON, &s.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -72,10 +72,10 @@ func (r *gameRepository) UpdatePilotStats(s *PilotStats) error {
 	attributesJSON, _ := json.Marshal(s.CharacterAttributes)
 	query := `
 		UPDATE pilot_stats 
-		SET equipped_exosuit_id = $1, resonance_level = $2, resonance_exp = $3, stress = $4, xp = $5, rank = $6, current_o2 = $7, current_fuel = $8, current_ne = $9, max_ne = $10, expeditions_completed = $11, character_attributes = $12, scrap_metal = $13, research_data = $14, metadata = $15, updated_at = CURRENT_TIMESTAMP
-		WHERE character_id = $16
+		SET equipped_exosuit_id = $1, resonance_level = $2, resonance_exp = $3, resonance_gauge = $4, stress = $5, xp = $6, sync_level = $7, current_o2 = $8, current_fuel = $9, current_ne = $10, max_ne = $11, expeditions_completed = $12, character_attributes = $13, scrap_metal = $14, research_data = $15, metadata = $16, updated_at = CURRENT_TIMESTAMP
+		WHERE character_id = $17
 	`
-	_, err := r.db.Exec(query, s.EquippedExosuitID, s.ResonanceLevel, s.ResonanceExp, s.Stress, s.XP, s.Rank, s.CurrentO2, s.CurrentFuel, s.CurrentNE, s.MaxNE, s.ExpeditionsCompleted, attributesJSON, s.ScrapMetal, s.ResearchData, metadataJSON, s.CharacterID)
+	_, err := r.db.Exec(query, s.EquippedExosuitID, s.ResonanceLevel, s.ResonanceExp, s.ResonanceGauge, s.Stress, s.XP, s.SyncLevel, s.CurrentO2, s.CurrentFuel, s.CurrentNE, s.MaxNE, s.ExpeditionsCompleted, attributesJSON, s.ScrapMetal, s.ResearchData, metadataJSON, s.CharacterID)
 	return err
 }
 
@@ -88,8 +88,8 @@ func (r *gameRepository) InitializePilot(charID uuid.UUID) error {
 	}
 
 	query := `
-		INSERT INTO pilot_stats (user_id, character_id, resonance_level, resonance_exp, stress, xp, rank, current_o2, current_fuel, current_ne, max_ne, expeditions_completed, character_attributes, scrap_metal, research_data, metadata)
-		VALUES ($1, $2, 0, 0, 0, 0, 1, 100.0, 100.0, 0, 100.0, 0, '{}', 0, 0, '{"radar_level": 1, "lab_level": 1, "warp_level": 1}')
+		INSERT INTO pilot_stats (user_id, character_id, resonance_level, resonance_exp, resonance_gauge, stress, xp, sync_level, current_o2, current_fuel, current_ne, max_ne, expeditions_completed, character_attributes, scrap_metal, research_data, metadata)
+		VALUES ($1, $2, 0, 0, 0, 0, 0, 1, 100.0, 100.0, 0, 100.0, 0, '{}', 0, 0, '{"radar_level": 1, "lab_level": 1, "warp_level": 1}')
 		ON CONFLICT (character_id) DO NOTHING
 	`
 	_, err = r.db.Exec(query, userID, charID)

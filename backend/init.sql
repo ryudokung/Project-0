@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
     token_id NUMERIC(78, 0) UNIQUE, -- Supports uint256
     owner_id UUID REFERENCES users(id),
     character_id UUID REFERENCES characters(id),
+    name VARCHAR(100),
     vehicle_type vehicle_type NOT NULL,
     class vehicle_class NOT NULL,
     image_url TEXT,
@@ -142,9 +143,10 @@ CREATE TABLE IF NOT EXISTS pilot_stats (
     equipped_exosuit_id UUID REFERENCES items(id), -- The Exosuit currently worn by the pilot
     resonance_level INTEGER DEFAULT 0,
     resonance_exp INTEGER DEFAULT 0,
+    resonance_gauge DECIMAL(5, 2) DEFAULT 0.00,
     stress INTEGER DEFAULT 0,
     xp INTEGER DEFAULT 0,
-    rank INTEGER DEFAULT 1,
+    sync_level INTEGER DEFAULT 1,
     current_o2 DECIMAL(5, 2) DEFAULT 100.00,
     current_fuel DECIMAL(5, 2) DEFAULT 100.00,
     current_ne DECIMAL(5, 2) DEFAULT 0.00, -- Neural Energy
@@ -264,6 +266,12 @@ CREATE TABLE IF NOT EXISTS nodes (
     is_resolved BOOLEAN DEFAULT FALSE,
     terrain terrain_type DEFAULT 'SPACE',
     detection_threshold INTEGER DEFAULT 1000,
+    next_nodes TEXT[], -- For handcrafted branching paths
+    is_scripted BOOLEAN DEFAULT FALSE,
+    script_events JSONB DEFAULT '[]', -- For boss phases, forced ejections
+    is_end BOOLEAN DEFAULT FALSE,
+    enemy_blueprint VARCHAR(100),
+    enemy_count INTEGER DEFAULT 1,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -379,11 +387,11 @@ VALUES ('00000000-0000-0000-0000-000000000000', '0x00000000000000000000000000000
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. NPC Vehicles (Enemies)
-INSERT INTO vehicles (id, owner_id, vehicle_type, class, rarity, stats, status, cr)
+INSERT INTO vehicles (id, owner_id, name, vehicle_type, class, rarity, stats, status, cr)
 VALUES 
-('e0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000000', 'MECH', 'STRIKER', 'COMMON', '{"hp": 80, "attack": 15, "defense": 5, "speed": 60}', 'MINTED', 150),
-('e0000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000000', 'TANK', 'GUARDIAN', 'RARE', '{"hp": 200, "attack": 10, "defense": 20, "speed": 30}', 'MINTED', 300),
-('e0000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000000', 'SHIP', 'SCOUT', 'COMMON', '{"hp": 60, "attack": 12, "defense": 3, "speed": 100}', 'MINTED', 120)
+('e0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000000', 'Void Drone', 'MECH', 'STRIKER', 'COMMON', '{"hp": 80, "attack": 15, "defense": 5, "speed": 60}', 'MINTED', 150),
+('e0000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000000', 'Iron Sentinel', 'TANK', 'GUARDIAN', 'RARE', '{"hp": 200, "attack": 10, "defense": 20, "speed": 30}', 'MINTED', 300),
+('e0000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000', 'Scout Interceptor', 'SHIP', 'SCOUT', 'COMMON', '{"hp": 60, "attack": 12, "defense": 3, "speed": 100}', 'MINTED', 120)
 ON CONFLICT (id) DO NOTHING;
 
 -- 3. Sample Universe Data (SOL GATE)

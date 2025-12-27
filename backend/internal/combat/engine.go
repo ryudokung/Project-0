@@ -17,13 +17,18 @@ const (
 type UnitStats struct {
 	HP               int     `json:"hp"`
 	MaxHP            int     `json:"max_hp"`
-	Shields          int     `json:"shields"` // Added for Energy damage bonus
+	Shields          int     `json:"shields"`
 	BaseAttack       int     `json:"base_attack"`
 	TargetDefense    int     `json:"target_defense"`
 	DefenseEfficiency float64 `json:"defense_efficiency"`
 	Accuracy         int     `json:"accuracy"`
 	Evasion          int     `json:"evasion"`
 	Speed            int     `json:"speed"`
+	ResonanceLevel   int     `json:"resonance_level"` // 0 = Normal, >0 = Resonant
+	ResonanceGauge   float64 `json:"resonance_gauge"` // 0-100
+	IsResonanceActive bool    `json:"is_resonance_active"`
+	IsVehicle        bool    `json:"is_vehicle"`      // To handle Scale Suppression
+	IsPlayer         bool    `json:"is_player"`       // To handle scripted events
 }
 
 type CombatResult struct {
@@ -82,6 +87,33 @@ func (e *Engine) CalculateDamage(attacker UnitStats, defender UnitStats, dmgType
 	// 2. Calculate Base Damage & Apply Damage Matrix
 	baseDmg := float64(attacker.BaseAttack)
 	
+	// Scale Suppression & Resonance Logic
+	if !attacker.IsVehicle && defender.IsVehicle {
+		// Human attacking Vehicle
+		if attacker.IsResonanceActive {
+			// Resonance bypasses suppression and adds bonus
+			resonanceBonus := 1.0 + (float64(attacker.ResonanceLevel) * GlobalBalance.Resonance.ResonanceDamageMultiplier)
+			baseDmg *= resonanceBonus
+		} else {
+			// Normal human vs Vehicle: 90% damage reduction
+			baseDmg *= GlobalBalance.ScaleSuppression.HumanVsMechDamageReduction
+		}
+	} else if attacker.IsVehicle && !defender.IsVehicle {
+		// Vehicle attacking Human
+		if defender.IsResonanceActive {
+			// Resonant human can partially dodge/deflect vehicle-scale damage
+			if attacker.IsResonanceActive {
+				// If both are resonant, the mech's power is harder to dodge
+				baseDmg *= GlobalBalance.ScaleSuppression.ResonantHumanVsMechDamageMultiplier 
+			} else {
+				baseDmg *= GlobalBalance.ScaleSuppression.ResonantHumanDeflectionRate
+			}
+		} else {
+			// Vehicle vs normal human: 300% damage (Overkill)
+			baseDmg *= GlobalBalance.ScaleSuppression.MechVsHumanDamageMultiplier
+		}
+	}
+
 	// Defense Calculation
 	defense := float64(defender.TargetDefense) * defender.DefenseEfficiency
 

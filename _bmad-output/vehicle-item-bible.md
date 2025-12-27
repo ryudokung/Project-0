@@ -28,9 +28,9 @@ All vehicles are composed of modular slots mapped to a visual silhouette. The **
 ### 2.1 Combat Power (CP)
 The **Combat Power (CP)** is the primary indicator of a vehicle's power. It is calculated dynamically based on the synergy of the vehicle and its equipped parts:
 - **Formula:** `(Total ATK * 2) + (Total DEF * 2) + (Total HP / 10)`
-- **Effective CP (ECP):** `(Vehicle_CP + Exosuit_CP) * Suitability_Mod * Resonance_Sync * (1 - Fatigue_Penalty) * Synergy_Mod`.
+- **Effective CP (ECP):** `(Vehicle_CP + Exosuit_CP) * Sync_Rate * Suitability_Mod * (1 - Fatigue_Penalty) * Synergy_Mod`.
 - **Base Stats:** HP, Attack, Defense, Speed.
-- **Pilot Resonance:** A multiplier based on the Pilot's rank and synchronization.
+- **Sync Rate:** A pilot-bound multiplier (e.g., 0.5 to 1.5) representing the neural connection between pilot and machine.
 - **Equipment Quality:** The rarity and tier of equipped parts.
 - **Void-Touch Status:** A multiplier for assets corrupted by the void.
 - **Set Synergy:** +15% ECP bonus when Exosuit and Vehicle share the same **Series** metadata.

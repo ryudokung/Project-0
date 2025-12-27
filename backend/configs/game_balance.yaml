@@ -1,0 +1,24 @@
+resonance:
+  gain_rate_dealt: 0.1       # Gauge gain per damage dealt
+  gain_rate_taken: 0.2       # Gauge gain per damage taken (1/5)
+  bonus_accuracy_per_level: 2
+  bonus_evasion_per_level: 2
+  resonance_damage_multiplier: 0.5 # Bonus damage multiplier per level when active
+
+progression:
+  base_sync_rate: 0.5        # Starting multiplier for ECP
+  sync_rate_per_level: 0.05  # Increase per sync_level
+
+scale_suppression:
+  human_vs_mech_damage_reduction: 0.1
+  mech_vs_human_damage_multiplier: 3.0
+  resonant_human_vs_mech_damage_multiplier: 1.5
+  resonant_human_deflection_rate: 0.5
+
+base_stats:
+  default_accuracy: 80
+  default_defense_efficiency: 0.5
+  forced_survival_hp: 20      # HP after force eject
+  boss_phase_2_hp: 500        # HP for human boss phase
+  boss_phase_2_attack: 40
+  boss_phase_2_resonance_level: 5

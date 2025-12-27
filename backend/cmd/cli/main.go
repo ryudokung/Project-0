@@ -117,7 +117,13 @@ func main() {
 		}
 
 		// Attacker hits Defender
-		res := combatService.ExecuteAttack(aStats, dStats, dmgType)
+		session := &combat.CombatSession{
+			PlayerStats: aStats,
+			EnemyStats:  dStats,
+		}
+		res := combatService.ExecuteAttack(session, dmgType)
+		aStats = session.PlayerStats
+		dStats = session.EnemyStats
 		
 		fmt.Printf("\n>> ATTACK! Type: %s\n", dmgType)
 		if res.IsMiss {
@@ -128,10 +134,13 @@ func main() {
 				critStr = " CRITICAL!"
 			}
 			fmt.Printf("DAMAGE: %d%s\n", res.FinalDamage, critStr)
-			dStats.HP -= res.FinalDamage
 			if res.AppliedEffect != nil {
 				fmt.Printf("EFFECT APPLIED: %s (%d turns)\n", res.AppliedEffect.Type, res.AppliedEffect.Duration)
 			}
+		}
+
+		for _, l := range session.Log {
+			fmt.Printf("[EVENT] %s\n", l)
 		}
 
 		if dStats.HP <= 0 {
@@ -143,12 +152,22 @@ func main() {
 
 		// Simple Counter Attack (Defender hits Attacker)
 		fmt.Println("\n-- Defender Counters! --")
-		resCounter := combatService.ExecuteAttack(dStats, aStats, combat.Kinetic)
+		counterSession := &combat.CombatSession{
+			PlayerStats: dStats,
+			EnemyStats:  aStats,
+		}
+		resCounter := combatService.ExecuteAttack(counterSession, combat.Kinetic)
+		dStats = counterSession.PlayerStats
+		aStats = counterSession.EnemyStats
+
 		if resCounter.IsMiss {
 			fmt.Println("Counter MISS!")
 		} else {
 			fmt.Printf("Counter DAMAGE: %d\n", resCounter.FinalDamage)
-			aStats.HP -= resCounter.FinalDamage
+		}
+
+		for _, l := range counterSession.Log {
+			fmt.Printf("[EVENT] %s\n", l)
 		}
 
 		if aStats.HP <= 0 {

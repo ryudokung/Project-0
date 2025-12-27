@@ -48,6 +48,7 @@ func (u *gameUseCase) InitializeNewCharacter(userID, charID uuid.UUID) error {
 		ID:          uuid.New(),
 		OwnerID:     userID,
 		CharacterID: &charID,
+		Name:        "Vanguard Scout",
 		VehicleType: vehicle.TypeShip,
 		Class:       vehicle.ClassScout,
 		Rarity:      vehicle.RarityCommon,

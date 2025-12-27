@@ -1,0 +1,50 @@
+expeditions:
+  - id: "iron-awakening"
+    title: "The Iron Awakening"
+    description: "A routine salvage operation in the Sector 7 ruins turns into a desperate fight for survival."
+    type: "handcrafted"
+    difficulty: 1
+    min_level: 1
+    nodes:
+      - id: "start"
+        type: "narrative"
+        title: "Sector 7 Entry"
+        description: "The air is thick with the smell of ozone and rusted metal. Your sensors pick up faint energy signatures ahead."
+        next_nodes: ["salvage-1"]
+        
+      - id: "salvage-1"
+        type: "resource"
+        title: "Abandoned Depot"
+        description: "You find a cache of old tech. It's not much, but it's a start."
+        resource_type: "scrap_metal"
+        amount: 50
+        next_nodes: ["ambush-1"]
+
+      - id: "ambush-1"
+        type: "combat"
+        title: "Syndicate Patrol"
+        description: "A group of Syndicate grunts are picking through the ruins. They don't look friendly."
+        enemy_blueprint: "Syndicate Grunt"
+        enemy_count: 3
+        next_nodes: ["boss-gatekeeper"]
+
+      - id: "boss-gatekeeper"
+        type: "boss"
+        title: "The Gatekeeper"
+        description: "A massive, heavily armored mech blocks the exit. Its weapons are already tracking you."
+        enemy_blueprint: "The Gatekeeper"
+        is_scripted: true
+        script_events:
+          - trigger: "player_hp_low"
+            action: "force_eject"
+            dialogue: "Warning: Hull integrity critical! Ejecting pilot..."
+          - trigger: "boss_phase_2"
+            action: "spawn_human_pilot"
+            dialogue: "You think a machine is all I am? Witness the power of Resonance!"
+        next_nodes: ["extraction"]
+
+      - id: "extraction"
+        type: "narrative"
+        title: "Escape"
+        description: "With the Gatekeeper defeated, the path to the extraction point is clear. You've survived... for now."
+        is_end: true

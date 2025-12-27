@@ -118,7 +118,7 @@ export default function Hangar({ onDeploy, onGacha }: HangarProps) {
                   {backendUser?.active_character?.gender || 'UNKNOWN'}
                 </span>
                 <span className="text-[10px] font-mono text-pink-400 bg-pink-400/10 border border-pink-400/20 px-1.5 py-0.5 rounded">
-                  RANK 1
+                  SYNC 1
                 </span>
               </div>
             </div>
