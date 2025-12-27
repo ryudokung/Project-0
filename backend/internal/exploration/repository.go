@@ -107,16 +107,16 @@ func (r *explorationRepository) UpdateNode(n *Node) error {
 }
 
 func (r *explorationRepository) CreateExpedition(e *Expedition) error {
-	query := `INSERT INTO expeditions (id, user_id, sub_sector_id, planet_location_id, vehicle_id, title, description, goal) 
-	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
-	_, err := r.db.Exec(query, e.ID, e.UserID, e.SubSectorID, e.PlanetLocationID, e.VehicleID, e.Title, e.Description, e.Goal)
+	query := `INSERT INTO expeditions (id, user_id, sub_sector_id, planet_location_id, vehicle_id, title, description, goal, status) 
+	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	_, err := r.db.Exec(query, e.ID, e.UserID, e.SubSectorID, e.PlanetLocationID, e.VehicleID, e.Title, e.Description, e.Goal, e.Status)
 	return err
 }
 
 func (r *explorationRepository) GetExpeditionByID(id uuid.UUID) (*Expedition, error) {
-	query := `SELECT id, user_id, sub_sector_id, planet_location_id, vehicle_id, title, description, goal FROM expeditions WHERE id = $1`
+	query := `SELECT id, user_id, sub_sector_id, planet_location_id, vehicle_id, title, description, goal, status FROM expeditions WHERE id = $1`
 	var e Expedition
-	err := r.db.QueryRow(query, id).Scan(&e.ID, &e.UserID, &e.SubSectorID, &e.PlanetLocationID, &e.VehicleID, &e.Title, &e.Description, &e.Goal)
+	err := r.db.QueryRow(query, id).Scan(&e.ID, &e.UserID, &e.SubSectorID, &e.PlanetLocationID, &e.VehicleID, &e.Title, &e.Description, &e.Goal, &e.Status)
 	if err != nil {
 		return nil, err
 	}
@@ -124,14 +124,14 @@ func (r *explorationRepository) GetExpeditionByID(id uuid.UUID) (*Expedition, er
 }
 
 func (r *explorationRepository) SaveEncounter(e *Encounter, expeditionID uuid.UUID) error {
-	query := `INSERT INTO encounters (id, expedition_id, type, title, description, visual_prompt, enemy_id) 
-	          VALUES ($1, $2, $3, $4, $5, $6, $7)`
-	_, err := r.db.Exec(query, e.ID, expeditionID, e.Type, e.Title, e.Description, e.VisualPrompt, e.EnemyID)
+	query := `INSERT INTO encounters (id, expedition_id, type, title, description, visual_prompt, enemy_id, terrain, detection_threshold) 
+	          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+	_, err := r.db.Exec(query, e.ID, expeditionID, e.Type, e.Title, e.Description, e.VisualPrompt, e.EnemyID, e.Terrain, e.DetectionThreshold)
 	return err
 }
 
 func (r *explorationRepository) GetEncountersByExpeditionID(expeditionID uuid.UUID) ([]Encounter, error) {
-	query := `SELECT id, type, title, description, visual_prompt, enemy_id, created_at FROM encounters WHERE expedition_id = $1 ORDER BY created_at ASC`
+	query := `SELECT id, type, title, description, visual_prompt, enemy_id, terrain, detection_threshold, created_at FROM encounters WHERE expedition_id = $1 ORDER BY created_at ASC`
 	rows, err := r.db.Query(query, expeditionID)
 	if err != nil {
 		return nil, err
@@ -141,7 +141,7 @@ func (r *explorationRepository) GetEncountersByExpeditionID(expeditionID uuid.UU
 	var encounters []Encounter
 	for rows.Next() {
 		var e Encounter
-		if err := rows.Scan(&e.ID, &e.Type, &e.Title, &e.Description, &e.VisualPrompt, &e.EnemyID, &e.CreatedAt); err != nil {
+		if err := rows.Scan(&e.ID, &e.Type, &e.Title, &e.Description, &e.VisualPrompt, &e.EnemyID, &e.Terrain, &e.DetectionThreshold, &e.CreatedAt); err != nil {
 			return nil, err
 		}
 		encounters = append(encounters, e)

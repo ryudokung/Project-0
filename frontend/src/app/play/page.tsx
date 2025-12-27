@@ -169,8 +169,12 @@ export default function PlayPage() {
           setResearchData(result.pilot_stats.research_data);
         }
 
-        setEncounters(result.encounters);
-        setCurrentEncounter(result.encounters[0]);
+        setEncounters(result.encounters || []);
+        if (result.encounters && result.encounters.length > 0) {
+          setCurrentEncounter(result.encounters[0]);
+        } else {
+          setCurrentEncounter(null);
+        }
       } catch (error) {
         console.error('Failed to start exploration:', error);
       } finally {
@@ -194,8 +198,13 @@ export default function PlayPage() {
 
       setCurrentExpeditionId(result.expedition.id);
       setExpeditionTitle(result.expedition.title);
-      setEncounters(result.encounters);
-      setCurrentEncounter(result.encounters[0]);
+      setEncounters(result.encounters || []);
+      
+      if (result.encounters && result.encounters.length > 0) {
+        setCurrentEncounter(result.encounters[0]);
+      } else {
+        setCurrentEncounter(null);
+      }
 
       // Fetch Timeline
       const timeline = await explorationService.getTimeline(result.expedition.id);
@@ -210,8 +219,13 @@ export default function PlayPage() {
         setResearchData(result.pilot_stats.research_data);
       }
 
-      setEncounters(result.encounters);
-      setCurrentEncounter(result.encounters[0]);
+      setEncounters(result.encounters || []);
+      
+      if (result.encounters && result.encounters.length > 0) {
+        setCurrentEncounter(result.encounters[0]);
+      } else {
+        setCurrentEncounter(null);
+      }
     } catch (error) {
       console.error('Failed to start story mission:', error);
       alert('Failed to start story mission: ' + error);
@@ -252,8 +266,12 @@ export default function PlayPage() {
         setFuel(result.pilot_stats.current_fuel);
       }
 
-      setEncounters(result.encounters);
-      setCurrentEncounter(result.encounters[0]);
+      setEncounters(result.encounters || []);
+      if (result.encounters && result.encounters.length > 0) {
+        setCurrentEncounter(result.encounters[0]);
+      } else {
+        setCurrentEncounter(null);
+      }
     } catch (error) {
       console.error('Failed to start planet exploration:', error);
     } finally {

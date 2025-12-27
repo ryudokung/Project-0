@@ -299,11 +299,17 @@ func (s *Service) CreateHandcraftedExpedition(ctx context.Context, userID uuid.U
 		return nil, fmt.Errorf("expedition blueprint %s not found", blueprintID)
 	}
 
+	// Handle uuid.Nil for vehicleID (Pilot Only mode)
+	var vID *uuid.UUID
+	if vehicleID != nil && *vehicleID != uuid.Nil {
+		vID = vehicleID
+	}
+
 	// 1. Create Expedition
 	expedition := &Expedition{
 		ID:          uuid.New(),
 		UserID:      userID,
-		VehicleID:   vehicleID,
+		VehicleID:   vID,
 		Title:       blueprint.Title,
 		Description: blueprint.Description,
 		Goal:        "Complete the mission objectives.",
@@ -326,7 +332,11 @@ func (s *Service) CreateHandcraftedExpedition(ctx context.Context, userID uuid.U
 			BlueprintID:            nb.ID,
 			Name:                   nb.Title,
 			Type:                   NodeType(nodeType),
+			Zone:                   ZoneSurface, // Default for handcrafted
+			Hazard:                 HazardNone,  // Default for handcrafted
+			Terrain:                TerrainIndustrial, // Default for handcrafted
 			EnvironmentDescription: nb.Description,
+			DifficultyMultiplier:   1.0,
 			PositionIndex:          i,
 			IsResolved:             false,
 			NextNodes:              nb.NextNodes,
@@ -344,12 +354,15 @@ func (s *Service) CreateHandcraftedExpedition(ctx context.Context, userID uuid.U
 	}
 
 	// 3. Generate First Encounter
-	if vehicleID != nil {
-		_, err := s.GenerateNewEncounter(ctx, expedition.ID, *vehicleID)
-		if err != nil {
-			// Log error but don't fail start (we can generate it later if needed)
-			fmt.Printf("Warning: failed to generate first encounter for handcrafted mission: %v\n", err)
-		}
+	genVID := uuid.Nil
+	if vID != nil {
+		genVID = *vID
+	}
+	
+	_, err := s.GenerateNewEncounter(ctx, expedition.ID, genVID)
+	if err != nil {
+		// Log error but don't fail start (we can generate it later if needed)
+		fmt.Printf("Warning: failed to generate first encounter for handcrafted mission: %v\n", err)
 	}
 
 	return expedition, nil
