@@ -86,6 +86,10 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 
 ### 2. Game Engine Architecture (Decoupled Systems)
 - **Architecture:** Refactored the frontend into a "Game Engine" pattern using a global **Event Bus** (`EventBus.ts`) and **Singleton Systems** (e.g., `ExplorationSystem.ts`).
+- **YAML Blueprint System (Data-Driven Engine):** Transitioned the backend from hardcoded templates to a YAML-based Blueprint system.
+    - **Single Source of Truth:** All game content (Node types, Strategic Choices, Enemy stats, Rarity tiers) is defined in `backend/blueprints/*.yaml`.
+    - **Dynamic Loading:** The `BlueprintRegistry` loads these files on startup, allowing for rapid content iteration without recompiling the Go binary.
+    - **Engine Consistency:** Ensures that procedural generation and node resolution always use synchronized metadata, preventing "Failed to resolve choice" errors.
 - **Core Components:**
     - **Event Bus (`EventBus.ts`)**: Acts as the central nervous system. Components and systems communicate via asynchronous events, reducing direct dependencies and preventing "prop drilling".
     - **Singleton Systems**: Domain-specific logic (e.g., `ExplorationSystem`, `CombatSystem`) is encapsulated in standalone classes. These systems manage their own internal state and interact with the backend, emitting events when data changes.
@@ -120,6 +124,11 @@ Project-0 is a Crypto Web Game featuring AI-generated seasonal NFTs (Mechs, Tank
 - **Starter Pack Initialization:** New characters are now automatically granted a **Starter Vehicle** and two equipped modules (**Starter Kinetic Arm** and **Starter Plating**) upon creation, ensuring a "Ready-to-Play" experience.
 - **Combat Power (CP) Calculation:** Implemented a standardized CP formula `(Total ATK * 2) + (Total DEF * 2) + (Total HP / 10)` to provide a clear power metric for players.
 - **Modular Equipment:** Expanded the item system to include dedicated slots for both Pilots (Body, Head, Utility, Weapon) and Vehicles (Core, Armor, Weapons, Transformation, Tools).
+
+### 6. Game Engine Architecture (Data-Driven)
+- **YAML Blueprint System:** Transitioned the game engine from hardcoded templates to a data-driven architecture. Game content (Exploration Nodes, Enemies) is now defined in external YAML files (`backend/blueprints/`).
+- **Blueprint Registry:** Implemented a centralized registry in Go that loads and validates YAML data on startup, enabling rapid content iteration without recompiling the backend.
+- **Dynamic Encounter Generation:** The exploration service now consumes blueprints to generate procedural timelines, strategic choices, and combat encounters.
 
 ## Directory Structure
 - `/backend`: Go source code.

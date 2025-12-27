@@ -51,6 +51,8 @@ Hazards are not just visual; they affect stats and trigger AI events:
 - **Void Echoes:** Triggers "Psychological Stress" for the Pilot (reduces Accuracy).
 
 ## 5. Level Design Framework (The "Scene" Template)
+*Implementation Note: This framework is implemented via the **YAML Blueprint System** in `backend/blueprints/nodes.yaml`.*
+
 Every new node added to the game must define:
 1. **ID & Name:** (e.g., `NODE-K7-01: The Frozen Spire`)
 2. **Type:** (Surface / EVA / Orbital)

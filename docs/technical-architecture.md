@@ -35,6 +35,10 @@ The project follows a "Web2.5" onboarding strategy to minimize friction for new 
 
 ### Backend:
 - **Go (Modular Monolith)**: Organized into domain-specific packages (`auth`, `vehicle`, `exploration`, `game`).
+- **YAML Blueprint System**: A data-driven engine that separates game content from logic.
+    - **Registry**: The `game.BlueprintRegistry` loads YAML files from `backend/blueprints/` on startup.
+    - **Content Types**: Currently supports `nodes.yaml` (Exploration nodes and choices) and `enemies.yaml` (NPC stats and classes).
+    - **Extensibility**: Designed to be expanded for `parts.yaml` (Vehicle modules) and `loot.yaml` (Reward tables).
 - **JWT Middleware**: All protected routes require a valid JWT. The middleware extracts the `user_id` and injects it into the request context.
 - **Context Keys**: Shared constants are used for context keys to prevent circular dependencies between packages.
 

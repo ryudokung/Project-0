@@ -5,6 +5,8 @@
 ## 1. Exploration Mechanics: The "Expedition and Encounters" System
 Exploration is governed by the interaction between the Pilot's resources and the AI-generated narrative timeline:
 
+*Implementation Note: The logic for generating these encounters is driven by the **YAML Blueprint System**, allowing for decoupled content management.*
+
 1.  **The Expedition (Narrative Spine):** A sequence of fixed goals (e.g., "Locate the Signal Source").
 2.  **The Encounters (Procedural Events):** Each "Click" or "Move" on the timeline generates an Encounter.
     *   **Generation Logic:** The AI checks the Pilot's current **O2** and **Fuel**.
@@ -12,7 +14,13 @@ Exploration is governed by the interaction between the Pilot's resources and the
     *   **High Resources:** Triggers "Combat Encounters" or "Lore Encounters" to progress the story.
 3.  **Visual DNA Synthesis:** Every Encounter generates a unique visual prompt combining the Vehicle's parts and the current environment, providing a "Visual Reveal" for the player.
 
-## 2. Materials & Resource Economy
+## 2. Data-Driven Engine: The Blueprint System
+To ensure scalability and rapid iteration, the game engine uses a YAML-based Blueprint system to define all game entities:
+- **Node Blueprints (`nodes.yaml`):** Defines the metadata, strategic choices, success chances, and reward pools for every exploration node.
+- **Enemy Blueprints (`enemies.yaml`):** Defines the stats (HP, ATK, DEF, SPD), rarity, and Combat Rating (CR) for all NPC factions.
+- **Future Expansion:** This system will be expanded to cover **Modular Parts** and **Loot Tables**, moving all balance-related data out of the core Go logic.
+
+## 3. Materials & Resource Economy
 
 | Material | Rarity | Primary Source | Primary Use |
 | :--- | :--- | :--- | :--- |
