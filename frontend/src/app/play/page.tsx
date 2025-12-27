@@ -27,7 +27,7 @@ interface BastionModules {
 export default function PlayPage() {
   const { user, isLoading: authLoading } = useAuthSync();
   const [stage, setStage] = useState<GameStage>('BASTION');
-  
+
   // Game State
   const [o2, setO2] = useState(100);
   const [fuel, setFuel] = useState(100);
@@ -38,7 +38,7 @@ export default function PlayPage() {
   const [timelineNodes, setTimelineNodes] = useState<any[]>([]);
   const [currentEncounter, setCurrentEncounter] = useState<any | null>(null);
   const [expeditionTitle, setExpeditionTitle] = useState('THE SILENT SIGNAL');
-  
+
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<any | null>(null);
   const [sectors, setSectors] = useState<Sector[]>([]);
@@ -48,7 +48,7 @@ export default function PlayPage() {
   const [currentExpeditionId, setCurrentExpeditionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  
+
   // Bastion & Inventory
   const [inventory, setInventory] = useState<string[]>(['Basic O2 Tank']);
   const [modules, setModules] = useState<BastionModules>({
@@ -85,7 +85,7 @@ export default function PlayPage() {
           const mappedVehicles = data.map((m: any) => {
             const vehicleClass = m.class || m.model || 'UNKNOWN';
             const vehicleType = m.vehicle_type || (vehicleClass.includes('TANK') ? 'TANK' : vehicleClass.includes('SHIP') ? 'SHIP' : 'VEHICLE');
-            
+
             return {
               id: m.id,
               class: vehicleClass,
@@ -110,8 +110,8 @@ export default function PlayPage() {
   }, [user?.id]);
 
   // Temporary fix for missing upgrades state
-  const upgrades = { 
-    atmosphericEntry: true, 
+  const upgrades = {
+    atmosphericEntry: true,
     quantumGate: false,
     miningDrill: true,
     hackingModule: true
@@ -134,12 +134,12 @@ export default function PlayPage() {
 
   const confirmDeployment = async () => {
     if (!selectedSubSector) return;
-    
+
     if (!selectedVehicle) {
       alert("Please select a vehicle before deploying.");
       return;
     }
-    
+
     if (selectedSubSector.type === 'PLANET' && selectedSubSector.locations) {
       setStage('PLANET_SURFACE');
       setSelectedPlanetLocation(null);
@@ -152,21 +152,19 @@ export default function PlayPage() {
           selectedSubSector.id,
           selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'
         );
-        
+
         setCurrentExpeditionId(result.expedition.id);
         setExpeditionTitle(`${selectedSector?.name} // ${selectedSubSector.name}`);
-        
+
         // Fetch Timeline
         const timeline = await explorationService.getTimeline(result.expedition.id);
         setTimelineNodes(timeline);
 
         setStage('EXPLORATION');
-        
+
         if (result.pilot_stats) {
           setO2(result.pilot_stats.current_o2);
           setFuel(result.pilot_stats.current_fuel);
-          setScrapMetal(result.pilot_stats.scrap_metal);
-          setResearchData(result.pilot_stats.research_data);
           setScrapMetal(result.pilot_stats.scrap_metal);
           setResearchData(result.pilot_stats.research_data);
         }
@@ -181,14 +179,55 @@ export default function PlayPage() {
     }
   };
 
+  const startStoryMission = async (blueprintId: string) => {
+    try {
+      setIsTransitioning(true);
+      if (!user?.id) throw new Error('User not authenticated');
+
+      const result = await explorationService.startExploration(
+        user.id,
+        '00000000-0000-0000-0000-000000000000', // Dummy subsector for story
+        selectedVehicle?.id || '00000000-0000-0000-0000-000000000000',
+        undefined,
+        blueprintId
+      );
+
+      setCurrentExpeditionId(result.expedition.id);
+      setExpeditionTitle(result.expedition.title);
+      setEncounters(result.encounters);
+      setCurrentEncounter(result.encounters[0]);
+
+      // Fetch Timeline
+      const timeline = await explorationService.getTimeline(result.expedition.id);
+      setTimelineNodes(timeline);
+
+      setStage('EXPLORATION');
+
+      if (result.pilot_stats) {
+        setO2(result.pilot_stats.current_o2);
+        setFuel(result.pilot_stats.current_fuel);
+        setScrapMetal(result.pilot_stats.scrap_metal);
+        setResearchData(result.pilot_stats.research_data);
+      }
+
+      setEncounters(result.encounters);
+      setCurrentEncounter(result.encounters[0]);
+    } catch (error) {
+      console.error('Failed to start story mission:', error);
+      alert('Failed to start story mission: ' + error);
+    } finally {
+      setIsTransitioning(false);
+    }
+  };
+
   const confirmPlanetDeployment = async () => {
     if (!selectedPlanetLocation || !selectedSubSector) return;
-    
+
     if (!selectedVehicle) {
       alert("Please select a vehicle before deploying.");
       return;
     }
-    
+
     try {
       setIsTransitioning(true);
       if (!user?.id) throw new Error('User not authenticated');
@@ -198,16 +237,16 @@ export default function PlayPage() {
         selectedVehicle?.id || '00000000-0000-0000-0000-000000000000',
         selectedPlanetLocation.id
       );
-      
+
       setCurrentExpeditionId(result.expedition.id);
       setExpeditionTitle(`${selectedSector?.name} // ${selectedSubSector?.name} // ${selectedPlanetLocation.name}`);
-      
+
       // Fetch Timeline
       const timeline = await explorationService.getTimeline(result.expedition.id);
       setTimelineNodes(timeline);
 
       setStage('EXPLORATION');
-      
+
       if (result.pilot_stats) {
         setO2(result.pilot_stats.current_o2);
         setFuel(result.pilot_stats.current_fuel);
@@ -237,7 +276,7 @@ export default function PlayPage() {
         setFuel(nextEncounterData.pilot_stats.current_fuel);
         setScrapMetal(nextEncounterData.pilot_stats.scrap_metal);
         setResearchData(nextEncounterData.pilot_stats.research_data);
-        
+
         if (nextEncounterData.pilot_stats.current_o2 <= 0) {
           setStage('DEBRIEF');
           return;
@@ -245,7 +284,7 @@ export default function PlayPage() {
       }
 
       const nextEncounter = nextEncounterData.encounter;
-      
+
       // Refresh timeline to reflect resolved status in HUD
       const updatedTimeline = await explorationService.getTimeline(currentExpeditionId);
       setTimelineNodes(updatedTimeline);
@@ -273,13 +312,18 @@ export default function PlayPage() {
       <AnimatePresence mode="wait">
         {stage === 'BASTION' && (
           <motion.div key="bastion" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <Bastion onDeploy={() => setStage('MAP')} onGacha={() => {}} onResearch={() => {}} />
+            <Bastion
+              onDeploy={() => setStage('MAP')}
+              onGacha={() => { }}
+              onResearch={() => { }}
+              onStartStory={() => startStoryMission('iron-awakening')}
+            />
           </motion.div>
         )}
 
         {stage === 'MAP' && (
           <motion.div key="map" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <UniverseMap 
+            <UniverseMap
               sectors={sectors}
               selectedSector={selectedSector}
               onSelectSector={setSelectedSector}
@@ -292,7 +336,7 @@ export default function PlayPage() {
 
         {stage === 'LOCATION_SCAN' && selectedSector && (
           <motion.div key="location-scan" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <LocationScan 
+            <LocationScan
               selectedSector={selectedSector}
               selectedSubSector={selectedSubSector}
               onSelectSubSector={setSelectedSubSector}
@@ -311,7 +355,7 @@ export default function PlayPage() {
 
         {stage === 'PLANET_SURFACE' && selectedSubSector && (
           <motion.div key="planet-surface" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <PlanetSurface 
+            <PlanetSurface
               selectedSubSector={selectedSubSector}
               selectedPlanetLocation={selectedPlanetLocation}
               onSelectPlanetLocation={setSelectedPlanetLocation}
@@ -329,7 +373,7 @@ export default function PlayPage() {
 
         {stage === 'EXPLORATION' && (
           <motion.div key="exploration" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <ExplorationLoop 
+            <ExplorationLoop
               expeditionTitle={expeditionTitle}
               o2={o2}
               fuel={fuel}
@@ -371,7 +415,7 @@ export default function PlayPage() {
 
         {stage === 'COMBAT' && (
           <motion.div key="combat" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-            <CombatStage 
+            <CombatStage
               attackerId={selectedVehicle?.id || '00000000-0000-0000-0000-000000000000'}
               enemyId={activeEnemyId || ''}
               onCombatEnd={async (result) => {
@@ -418,7 +462,7 @@ export default function PlayPage() {
                   <span className="font-bold text-cyan-500">{researchData}</span>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setStage('BASTION')}
                 className="w-full border border-white py-4 font-black uppercase tracking-tighter hover:bg-white hover:text-black transition-all"
               >

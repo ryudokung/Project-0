@@ -12,9 +12,10 @@ interface BastionProps {
   onDeploy: () => void;
   onGacha: () => void;
   onResearch: () => void;
+  onStartStory: () => void;
 }
 
-export default function Bastion({ onDeploy, onGacha, onResearch }: BastionProps) {
+export default function Bastion({ onDeploy, onGacha, onResearch, onStartStory }: BastionProps) {
   const { user: backendUser } = useAuthSync();
   const [bastionState, setBastionState] = useState<BastionState>(bastionSystem.getState());
   const [showInventory, setShowInventory] = useState(false);
@@ -378,6 +379,12 @@ export default function Bastion({ onDeploy, onGacha, onResearch }: BastionProps)
       </AnimatePresence>
 
       <div className="absolute bottom-8 right-8 z-10 flex flex-col gap-4">
+        <button 
+          onClick={onStartStory}
+          className="bg-pink-600 text-white px-6 py-2 font-bold uppercase tracking-tighter hover:bg-pink-500 transition-colors text-center border-2 border-pink-400 shadow-[0_0_15px_rgba(219,39,119,0.5)]"
+        >
+          Story Campaign
+        </button>
         <button 
           onClick={onGacha}
           className="bg-yellow-400 text-black px-6 py-2 font-bold uppercase tracking-tighter hover:bg-yellow-300 transition-colors text-center"

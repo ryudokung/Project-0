@@ -18,9 +18,11 @@ const (
 	NodeStandard  NodeType = "STANDARD"
 	NodeResource  NodeType = "RESOURCE"
 	NodeCombat    NodeType = "COMBAT"
+	NodeBoss      NodeType = "BOSS"
 	NodeAnomaly   NodeType = "ANOMALY"
 	NodeOutpost   NodeType = "OUTPOST"
 	NodeNarrative NodeType = "NARRATIVE"
+	NodeAnchor    NodeType = "ANCHOR"
 )
 
 type ZoneType string
@@ -172,7 +174,7 @@ type PlanetLocation struct {
 type Expedition struct {
 	ID               uuid.UUID  `json:"id"`
 	UserID           uuid.UUID  `json:"user_id"`
-	SubSectorID      uuid.UUID  `json:"sub_sector_id"`
+	SubSectorID      *uuid.UUID `json:"sub_sector_id"`
 	PlanetLocationID *uuid.UUID `json:"planet_location_id"`
 	VehicleID        *uuid.UUID `json:"vehicle_id"`
 	Title            string     `json:"title"`
@@ -239,16 +241,22 @@ func (s *Service) StartExploration(ctx context.Context, userID uuid.UUID, subSec
 		vID = &vehicleID
 	}
 
+	var ssID *uuid.UUID
+	if subSectorID != uuid.Nil {
+		ssID = &subSectorID
+	}
+
 	// 1. Create Expedition
 	expedition := &Expedition{
 		ID:               uuid.New(),
 		UserID:           userID,
-		SubSectorID:      subSectorID,
+		SubSectorID:      ssID,
 		PlanetLocationID: planetLocationID,
 		VehicleID:        vID,
 		Title:            "The Silent Signal",
 		Description:      "Investigating a mysterious signal in the sector.",
 		Goal:             "Locate the source of the signal.",
+		Status:           "ACTIVE",
 	}
 
 	if err := s.repo.CreateExpedition(expedition); err != nil {
@@ -309,12 +317,15 @@ func (s *Service) CreateHandcraftedExpedition(ctx context.Context, userID uuid.U
 	// 2. Create Nodes from Blueprint
 	var nodes []Node
 	for i, nb := range blueprint.Nodes {
+		// Ensure type is uppercase to match constants
+		nodeType := strings.ToUpper(nb.Type)
+
 		node := Node{
 			ID:                     uuid.New(),
 			ExpeditionID:           expedition.ID,
 			BlueprintID:            nb.ID,
 			Name:                   nb.Title,
-			Type:                   NodeType(nb.Type),
+			Type:                   NodeType(nodeType),
 			EnvironmentDescription: nb.Description,
 			PositionIndex:          i,
 			IsResolved:             false,
@@ -330,6 +341,15 @@ func (s *Service) CreateHandcraftedExpedition(ctx context.Context, userID uuid.U
 
 	if err := s.repo.CreateNodes(nodes); err != nil {
 		return nil, err
+	}
+
+	// 3. Generate First Encounter
+	if vehicleID != nil {
+		_, err := s.GenerateNewEncounter(ctx, expedition.ID, *vehicleID)
+		if err != nil {
+			// Log error but don't fail start (we can generate it later if needed)
+			fmt.Printf("Warning: failed to generate first encounter for handcrafted mission: %v\n", err)
+		}
 	}
 
 	return expedition, nil
@@ -1059,6 +1079,9 @@ func (s *Service) GenerateNewEncounter(ctx context.Context, expeditionID uuid.UU
 	case NodeCombat:
 		title = "Hostile Signature Detected"
 		desc = "An unknown unit is approaching with weapons hot."
+	case NodeBoss:
+		title = "CRITICAL THREAT DETECTED"
+		desc = "A massive energy signature has locked onto your position. Prepare for boss engagement."
 	case NodeResource:
 		title = "Resource Cluster"
 		desc = "Scanners indicate a high concentration of valuable materials."
@@ -1074,7 +1097,7 @@ func (s *Service) GenerateNewEncounter(ctx context.Context, expeditionID uuid.UU
 	prompt := s.GenerateVisualPrompt(item, &targetNode)
 
 	var enemyID *uuid.UUID
-	if encounterType == NodeCombat || encounterType == "boss" {
+	if encounterType == NodeCombat || encounterType == NodeBoss {
 		if targetNode.EnemyBlueprint != "" {
 			// Find enemy by name in blueprints
 			for id, b := range s.blueprints.Enemies {

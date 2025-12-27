@@ -254,14 +254,15 @@ export const explorationService = {
     }));
   },
 
-  async startExploration(userId: string, subSectorId: string, vehicleId: string, planetLocationId?: string): Promise<ExplorationStartResponse> {
+  async startExploration(userId: string, subSectorId: string, vehicleId: string, planetLocationId?: string, blueprintId?: string): Promise<ExplorationStartResponse> {
     const response = await fetch(`${API_BASE_URL}/exploration/start`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ 
         sub_sector_id: subSectorId, 
         vehicle_id: vehicleId,
-        planet_location_id: planetLocationId
+        planet_location_id: planetLocationId,
+        blueprint_id: blueprintId
       }),
     });
     if (!response.ok) {
